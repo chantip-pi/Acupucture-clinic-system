@@ -38,9 +38,9 @@ function AddPatient() {
       phoneNumber: formData.phoneNumber,
       birthday: formData.birthday,
       gender: formData.gender,
-      appointmentDate: new Date(formData.appointmentDate).toISOString(),
+      // appointmentDate: new Date(formData.appointmentDate).toISOString(),
       remainingCourse: formData.remainingCourse,
-      firstVistDate: formData.firstVistDate,
+      // firstVistDate: formData.firstVistDate,
     });
 
     if (result.success) {
