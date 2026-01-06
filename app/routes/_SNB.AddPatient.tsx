@@ -21,7 +21,6 @@ function AddPatient() {
     phoneNumber: "",
     birthday: "",
     gender: "",
-    // appointmentDate: "",
     remainingCourse: 0,
     congenitalDisease: "",
     surgeryHistory: "",
@@ -59,17 +58,11 @@ function AddPatient() {
     e.preventDefault();
     setError("");
 
-    // if (!formData.appointmentDate) {
-    //   setError("You need to provide an appointment date.");
-    //   return;
-    // }
-
     const result = await addPatient({
       nameSurname: formData.nameSurname,
       phoneNumber: formData.phoneNumber,
       birthday: formData.birthday,
       gender: formData.gender,
-      // appointmentDate: new Date(formData.appointmentDate).toISOString(),
       remainingCourse: formData.remainingCourse,
       congenitalDisease: formData.congenitalDisease,
       surgeryHistory: formData.surgeryHistory,
@@ -182,17 +175,7 @@ function AddPatient() {
               />
             </FormField>
 
-            {/* <FormField label="Appointment Date & Time">
-              <Input
-                type="datetime-local"
-                id="appointmentDate"
-                name="appointmentDate"
-                value={formData.appointmentDate}
-                onChange={handleChange}
-              />
-            </FormField> */}
-
-            <FormField label="Course Count">
+            <FormField label="Remaining Course">
               <Input
                 type="number"
                 id="remainingCourse"

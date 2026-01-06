@@ -35,7 +35,6 @@ function EditPatient() {
   
 
   const [formData, setFormData] = useState({
-    // patientId: patient?.patientId,
     nameSurname: "",
     phoneNumber: "",
     birthday: "",
@@ -77,9 +76,6 @@ function EditPatient() {
       e.preventDefault();
   
       if (!validateForm()) return;
-  
-      // const isUsernameAvailable = await checkUsernameAvailability();
-      // if (!isUsernameAvailable) return;
   
       console.log("Form data being submitted:", formData);
   
