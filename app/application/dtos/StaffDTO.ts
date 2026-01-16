@@ -11,7 +11,7 @@ export interface CreateStaffDTO {
   birthday: string;
   gender: string;
   email: string;
-  role: string;
+  title: string;
 }
 
 export interface UpdateStaffDTO {
@@ -23,6 +23,6 @@ export interface UpdateStaffDTO {
   birthday: string;
   gender: string;
   email: string;
-  role: string;
+  title: string;
 }
 

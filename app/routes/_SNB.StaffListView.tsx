@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
-import SideNavBar from "app/routes/_SNB";
+import SideNavBar from "./_SNB";
 import { useNavigate } from "@remix-run/react";
 import { format } from "date-fns";
 import {
@@ -39,7 +39,7 @@ const StaffListView: React.FC = () => {
     }
 
     setIsLoggedIn(true);
-    setIsManager(session.role?.toLowerCase() === "manager");
+    setIsManager(session.title?.toLowerCase() === "manager");
     setHasCheckedSession(true);
   }, []);
 
@@ -206,7 +206,7 @@ const StaffListView: React.FC = () => {
                     className="px-4 py-3 text-md text-slate-900"
                     onClick={() => handleClickList(staff.username)}
                   >
-                    {staff.role}
+                    {staff.title}
                   </td>
                   <td
                     className="px-4 py-3 text-md text-slate-900"

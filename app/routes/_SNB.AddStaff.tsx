@@ -22,7 +22,7 @@ function SignUp() {
     phoneNumber: "",
     birthday: "",
     gender: "",
-    role: "",
+    title: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -44,7 +44,7 @@ function SignUp() {
     }
 
     setIsLoggedIn(true);
-    setIsManager(session.role?.toLowerCase() === "manager");
+    setIsManager(session.title?.toLowerCase() === "manager");
     setIsSessionLoaded(true);
   }, []);
 
@@ -144,7 +144,7 @@ function SignUp() {
       phoneNumber: formData.phoneNumber,
       birthday: formData.birthday,
       gender: formData.gender,
-      role: formData.role,
+      title: formData.title,
       email: formData.email,
       password: formData.password,
       username: formData.username,
@@ -224,9 +224,9 @@ function SignUp() {
 
             <FormField label="Role">
               <Select
-                id="role"
-                name="role"
-                value={formData.role}
+                id="title"
+                name="title"
+                value={formData.title}
                 onChange={handleChange}
                 required
               >

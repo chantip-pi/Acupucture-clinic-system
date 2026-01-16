@@ -62,7 +62,7 @@ export class MockDataSource {
         birthday: "1980-05-20",
         gender: "Male",
         email: "dr.lee@clinic.com",
-        role: "Manager",
+        title: "Manager",
       },
       {
         staffId: 2,
@@ -73,7 +73,7 @@ export class MockDataSource {
         birthday: "1990-08-15",
         gender: "Female",
         email: "nurse.joy@clinic.com",
-        role: "Nurse",
+        title: "Nurse",
       },
     ];
 
