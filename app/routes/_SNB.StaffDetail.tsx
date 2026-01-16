@@ -35,7 +35,7 @@ function StaffDetail() {
     }
 
     setIsLoggedIn(true);
-    setIsManager(session.role?.toLowerCase() === "manager");
+    setIsManager(session.title?.toLowerCase() === "manager");
 
     const selectedUsername = getSelectedStaffUsername();
     if (selectedUsername) {
@@ -156,7 +156,7 @@ function StaffDetail() {
                   { label: "Phone Number", value: staff.phoneNumber },
                   { label: "Age", value: age },
                   { label: "Gender", value: staff.gender },
-                  { label: "Role", value: staff.role },
+                  { label: "Role", value: staff.title },
                   { label: "Email", value: staff.email },
                 ]}
               />
