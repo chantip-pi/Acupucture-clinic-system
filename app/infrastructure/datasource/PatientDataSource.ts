@@ -1,8 +1,8 @@
 import { Patient } from "~/domain/entities/Patient";
 
 export class PatientDataSource {
-  // constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/patients") {}
-  constructor(private readonly baseUrl: string = "http://localhost:3000/api/patients") {}
+  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/patients") {}
+  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/patients") {}
 
 
   private async handleResponse<T>(res: Response): Promise<T> {

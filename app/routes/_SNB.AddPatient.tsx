@@ -1,25 +1,55 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useNavigate } from "@remix-run/react";
+import {
+  Button,
+  Card,
+  FormField,
+  Input,
+  SectionHeading,
+  Select,
+} from "~/presentation/designSystem";
 import { useAddPatient } from "~/presentation/hooks/patient/useAddPatient";
+import { getUserSession } from "~/presentation/session/userSession";
+import ErrorPage from "./components/common/ErrorPage";
+import LoadingPage from "./components/common/LoadingPage";
 
 function AddPatient() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     nameSurname: "",
     phoneNumber: "",
     birthday: "",
     gender: "",
-    appointmentDate: "",
     remainingCourse: 0,
-    firstVistDate: new Date().toISOString().slice(0, 10),
+    congenitalDisease: "",
+    surgeryHistory: "",
   });
+
   const { addPatient, loading, error: hookError } = useAddPatient();
   const [error, setError] = useState<string>("");
-  const navigate = useNavigate();
+  const [isSessionLoaded, setIsSessionLoaded] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    const session = getUserSession();
+    if (!session) {
+      setIsLoggedIn(false);
+      setIsSessionLoaded(true);
+      return;
+    }
+  
+    setIsLoggedIn(true);
+    setIsSessionLoaded(true);
+  }, []);
+  
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+
+    setFormData((prev) => ({
+      ...prev,
       [name]: name === "remainingCourse" ? Number(value) : value,
     }));
   };
@@ -28,19 +58,14 @@ function AddPatient() {
     e.preventDefault();
     setError("");
 
-    if (!formData.appointmentDate) {
-      setError("You need to provide an appointment date.");
-      return;
-    }
-
     const result = await addPatient({
       nameSurname: formData.nameSurname,
       phoneNumber: formData.phoneNumber,
       birthday: formData.birthday,
       gender: formData.gender,
-      // appointmentDate: new Date(formData.appointmentDate).toISOString(),
       remainingCourse: formData.remainingCourse,
-      // firstVistDate: formData.firstVistDate,
+      congenitalDisease: formData.congenitalDisease,
+      surgeryHistory: formData.surgeryHistory,
     });
 
     if (result.success) {
@@ -50,119 +75,132 @@ function AddPatient() {
     }
   };
 
-  return (
-    <div className="flex flex-row w-[78svw]">
-      <div className="flex flex-row justify-center items-start w-[75svw] h-screen pt-10 pb-7 ">
-        <div className="p-6 border border-gray-300 h-[90svh] rounded-3xl bg-white shadow-lg w-[40svw]">
-          <div className="flex flex-row justify-between mb-6">
-            <h1 className="text-[#1FA1AF] text-2xl">Add New Patient</h1>
-          </div>
+  if (!isSessionLoaded) {
+    return <LoadingPage />;
+  }
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="nameSurname" className="block mb-1">
-                Name Surname:
-              </label>
-              <input
+  if (!isLoggedIn) {
+    const handleGoBack = () => {
+      window.history.back();
+    };
+
+    return (
+      <div className="page-background" style={{ backgroundColor: "#DCE8E9", width: "100%", minHeight: "100vh", padding: "50px", boxSizing: "border-box", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <ErrorPage
+          message="You don't have access to this page."
+          onRetry={handleGoBack}
+        />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  return (
+    <div className="flex min-h-screen bg-surface-muted">
+      <main className="flex-1 p-8">
+        <Card>
+          <SectionHeading title="Add New Patient" />
+
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+          >
+            <FormField label="Name Surname">
+              <Input
                 type="text"
                 id="nameSurname"
                 name="nameSurname"
                 value={formData.nameSurname}
                 onChange={handleChange}
-                className="w-full py-2 px-3 bg-gray-300 text-md rounded-3xl"
                 required
               />
-            </div>
+            </FormField>
 
-            <div className="mb-4">
-              <label htmlFor="phoneNumber" className="block mb-1">
-                Telephone:
-              </label>
-              <input
+            <FormField label="Phone Number">
+              <Input
                 type="tel"
                 id="phoneNumber"
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
-                className="w-full py-2 px-3 bg-gray-300 text-md rounded-3xl"
                 required
               />
-            </div>
+            </FormField>
 
-            <div className="mb-4">
-              <label htmlFor="birthday" className="block mb-1">
-                Birthday:
-              </label>
-              <input
+            <FormField label="Birthday">
+              <Input
                 type="date"
                 id="birthday"
                 name="birthday"
                 value={formData.birthday}
                 onChange={handleChange}
-                className="w-full py-2 px-3 bg-gray-300 text-md rounded-3xl"
                 required
               />
-            </div>
+            </FormField>
 
-            <div className="mb-4">
-              <label htmlFor="gender" className="block mb-1">
-                Gender:
-              </label>
-              <select
+            <FormField label="Gender">
+              <Select
                 id="gender"
                 name="gender"
                 value={formData.gender}
                 onChange={handleChange}
-                className="w-full py-2 px-3 bg-gray-300 text-md rounded-3xl"
                 required
               >
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
-              </select>
-            </div>
+              </Select>
+            </FormField>
 
-            <div className="mb-4">
-              <label htmlFor="appointmentDate" className="block mb-1">
-                Appointment Date & Time:
-              </label>
-              <input
-                type="datetime-local"
-                id="appointmentDate"
-                name="appointmentDate"
-                value={formData.appointmentDate}
+            <FormField label="Congenital Disease">
+              <Input
+                type="text"
+                id="congenitalDisease"
+                name="congenitalDisease"
+                value={formData.congenitalDisease}
                 onChange={handleChange}
-                className="w-full py-2 px-3 bg-gray-300 text-md rounded-3xl"
               />
-            </div>
+            </FormField>
 
-            <div className="mb-4">
-              <label htmlFor="remainingCourse" className="block mb-1">
-                Course Count:
-              </label>
-              <input
+            <FormField label="Surgery History">
+              <Input
+                type="text"
+                id="surgeryHistory"
+                name="surgeryHistory"
+                value={formData.surgeryHistory}
+                onChange={handleChange}
+              />
+            </FormField>
+
+            <FormField label="Remaining Course">
+              <Input
                 type="number"
                 id="remainingCourse"
                 name="remainingCourse"
                 value={formData.remainingCourse}
                 onChange={handleChange}
-                className="w-full py-2 px-3 bg-gray-300 text-md rounded-3xl"
+                min={0}
                 required
               />
+            </FormField>
+
+            {(error || hookError) && (
+              <p className="text-md text-red-600 sm:col-span-2">
+                {error || hookError}
+              </p>
+            )}
+
+            <div className="sm:col-span-2 flex justify-end">
+              <Button type="submit" variant="primary" disabled={loading}>
+                {loading ? "Saving..." : "Save"}
+              </Button>
             </div>
-
-            {(error || hookError) && <p className="text-red-500">{error || hookError}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-36 py-2 bg-[#1FA1AF] text-white font-bold rounded-lg disabled:opacity-50"
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
           </form>
-        </div>
-      </div>
+        </Card>
+      </main>
     </div>
   );
 }

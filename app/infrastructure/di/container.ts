@@ -15,6 +15,7 @@ import { GetStaffListUseCase } from "~/application/use-cases/staff/GetStaffListU
 import { GetStaffByUsernameUseCase } from "~/application/use-cases/staff/GetStaffByUsernameUseCase";
 import { UpdateStaffUseCase } from "~/application/use-cases/staff/UpdateStaffUseCase";
 import { DeleteStaffUseCase } from "~/application/use-cases/staff/DeleteStaffUseCase";
+import { DeletePatientUseCase } from "~/application/use-cases/patient/DeletePatientUseCase";
 import { PatientDataSource } from "../datasource/PatientDataSource";
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
@@ -32,6 +33,7 @@ export const addPatientUseCase = new AddPatientUseCase(patientRepository);
 export const getPatientListUseCase = new GetPatientListUseCase(patientRepository);
 export const getPatientByIdUseCase = new GetPatientByIdUseCase(patientRepository);
 export const updatePatientUseCase = new UpdatePatientUseCase(patientRepository);
+export const deletePatientUsecase = new DeletePatientUseCase(patientRepository);
 
 
 export const loginUseCase = new LoginUseCase(staffRepository);

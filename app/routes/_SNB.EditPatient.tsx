@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState, FormEvent } from "react";
 import { useNavigate } from "@remix-run/react";
-import SideNavBar from "./_SNB";
 import {
   Button,
   Card,
@@ -9,98 +8,174 @@ import {
   SectionHeading,
   Select,
 } from "~/presentation/designSystem";
+import { Patient } from "~/domain/entities/Patient";
 import { useGetPatientById } from "~/presentation/hooks/patient/useGetPatientById";
 import { useUpdatePatient } from "~/presentation/hooks/patient/useUpdatePatient";
-import { Patient } from "~/domain/entities/Patient";
+import { useDeletePatient } from "~/presentation/hooks/patient/useDeletePatient";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
-
-
+import ConfirmDialog from "./components/common/ConfirmDialog";
 
 function EditPatient() {
   const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
   const patientId = useMemo(() => {
-    const storedPatientID = sessionStorage.getItem("currentPatientID");
-    if (!storedPatientID) return null;
-    const id = storedPatientID.replace(/^"|"$/g, "");
-    return id === "Guest" ? null : parseInt(id, 10);
+    const stored = sessionStorage.getItem("currentPatientID");
+    if (!stored) return null;
+    const id = stored.replace(/^"|"$/g, "");
+    return id === "Guest" ? null : Number(id);
   }, []);
 
-  const { patient: patientData, loading, error } = useGetPatientById(patientId);
-  const { updatePatient, loading: updating, error: updateError } = useUpdatePatient();
-  const [formData, setFormData] = useState<Partial<Patient>>({});
-  const [localError, setLocalError] = useState<string | null>(null);
+  const { patient, loading, error } = useGetPatientById(patientId);
+  const { updatePatient, loading: updateLoading, error: updateError } =
+    useUpdatePatient();
+  const { deletePatient, loading: deleteLoading, error: deleteError } = useDeletePatient();
+  
+
+  const [formData, setFormData] = useState({
+    nameSurname: "",
+    phoneNumber: "",
+    birthday: "",
+    gender: "",
+    remainingCourse: 0,
+    congenitalDisease: "",
+    surgeryHistory: "",
+  });
 
   useEffect(() => {
-  if (patientData) {
-    setFormData(patientData);
-  }
-}, [patientData]);
+    if (patient && patient.patientId) {
+      const formattedBirthday = patient.birthday.split("T")[0];
+
+      setFormData({
+        nameSurname: patient.nameSurname,
+        phoneNumber: patient.phoneNumber,
+        birthday: patient.birthday.split("T")[0],
+        gender: patient.gender,
+        remainingCourse: patient.remainingCourse,
+        congenitalDisease: patient.congenitalDisease || "",
+        surgeryHistory: patient.surgeryHistory || "",
+      });
+    }
+  }, [patient]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    const newValue = name === "remainingCourse" ? parseInt(value, 10) : value;
 
-    
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === "remainingCourse" ? Number(value) : value,
+    }));
   };
 
-  const handleSave = async () => {
-    setLocalError(null);
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+  
+      if (!validateForm()) return;
+  
+      console.log("Form data being submitted:", formData);
+  
+      submitToApi();
+    };
+  
+    const submitToApi = async () => {
+      try {
+        const dto = {
+          patientId: patient!.patientId,
+          ...formData,
+        };
+        const result = await updatePatient(dto);
+        if (result.success) {
+          console.log("Data successfully saved");
+          navigate("/patientList");
+        } else {
+          setFormError(result.error || "Failed to save patient data.");
+        }
+      } catch (err) {
+        setFormError("Error submitting data. Please try again.");
+        console.error("Request error:", err);
+      }
+    };
+  
+    const validateForm = () => {
+      const { phoneNumber, birthday } = formData;
+      const telRegex = /^\d{10}$/;  
+  
+      if (!telRegex.test(phoneNumber)) {
+        setFormError("Telephone number must be 10 digits.");
+        return false;
+      }
+  
+      const birthDate = new Date(birthday);
+      const today = new Date();
+      if (birthDate > today) {
+        setFormError("Birthday cannot be in the future.");
+        return false;
+      }
+  
+      return true;
+    };
 
-    const result = await updatePatient({
-      patientId: formData.patientId || 0,
-      nameSurname: formData.nameSurname || "",
-      phoneNumber: formData.phoneNumber || "",
-      birthday: formData.birthday || "",
-      gender: formData.gender || "",
-      remainingCourse: formData.remainingCourse || 0,
-    });
-
-    if (result.success) {
-      navigate("/patientDetail");
-    } else {
-      setLocalError(result.error || "Failed to save data.");
+  const handleDeletePatient = async () => {
+    try {
+      await deletePatient(patient!.patientId);
+      navigate("/patientList");
+    } catch (err) {
+      setFormError("Error deleting patient. Please try again.");
     }
   };
 
-  if (loading) {
-    return <LoadingPage />;
-  }
-
-  if (error) {
-    return (
-      <ErrorPage message={error} onRetry={() => window.location.reload()} />
-    );
-  }
-  if (!patientData) {
-    return (
-      <ErrorPage message={"No patient data found"} onRetry={() => window.location.reload()} />
-    );
-  };
+  if (loading) return <LoadingPage />;
+  if (error)
+    return <ErrorPage message={error} onRetry={() => location.reload()} />;
+  if (!patient)
+    return <ErrorPage message="No patient found." />;
 
   return (
     <div className="flex min-h-screen bg-surface-muted">
-  
       <main className="flex-1 p-8">
-        <Card className="max-w-3xl">
-          <SectionHeading title="Edit Patient" />
+        <Card>
+          <div className="flex items-center justify-between">
+            <SectionHeading title="Edit Patient" />
+            <div className="flex items-center gap-3">
+              <span className="text-brand text-lg font-semibold">
+                {formData.nameSurname}
+              </span>
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                disabled={updateLoading || deleteLoading}
+                onClick={() => setShowDialog(true)}
+              >
+                 Delete
+              </Button>
+            </div>
+          </div>
+
+          <ConfirmDialog
+            isOpen={showDialog}
+            title={`Delete ${formData.nameSurname}`}
+            message="Do you really want to delete this patient?"
+            cancelText="Cancel"
+            isLoading={updateLoading}
+            onConfirm={handleDeletePatient}
+            onCancel={() => setShowDialog(false)}
+          />
 
           <form
+            onSubmit={handleSubmit}
             className="grid grid-cols-1 gap-4 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
           >
-
-            <FormField label="Name">
+            <FormField label="Name Surname">
               <Input
                 type="text"
-                id="nameSurname"
                 name="nameSurname"
-                value={formData.nameSurname || ""}
+                value={formData.nameSurname}
                 onChange={handleChange}
                 required
               />
@@ -108,10 +183,8 @@ function EditPatient() {
 
             <FormField label="Phone Number">
               <Input
-                type="tel"
-                id="phoneNumber"
                 name="phoneNumber"
-                value={formData.phoneNumber || ""}
+                value={formData.phoneNumber}
                 onChange={handleChange}
                 required
               />
@@ -120,13 +193,8 @@ function EditPatient() {
             <FormField label="Birthday">
               <Input
                 type="date"
-                id="birthday"
                 name="birthday"
-                value={
-                  formData.birthday
-                    ? new Date(formData.birthday).toISOString().split("T")[0]
-                    : ""
-                }
+                value={formData.birthday}
                 onChange={handleChange}
                 required
               />
@@ -134,9 +202,8 @@ function EditPatient() {
 
             <FormField label="Gender">
               <Select
-                id="gender"
                 name="gender"
-                value={formData.gender || ""}
+                value={formData.gender}
                 onChange={handleChange}
                 required
               >
@@ -146,25 +213,47 @@ function EditPatient() {
               </Select>
             </FormField>
 
+            <FormField label="Congenital Disease">
+              <Input
+                type="text"
+                name="congenitalDisease"
+                value={formData.congenitalDisease}
+                onChange={handleChange}
+              />
+            </FormField>
+
+            <FormField label="Surgery History">
+              <Input
+                type="text"
+                name="surgeryHistory"
+                value={formData.surgeryHistory}
+                onChange={handleChange}
+              />
+            </FormField>
+
             <FormField label="Remaining Course">
               <Input
                 type="number"
-                id="remainingCourse"
                 name="remainingCourse"
-                value={formData.remainingCourse || ""}
+                value={formData.remainingCourse}
                 onChange={handleChange}
                 required
               />
             </FormField>
 
+            {(formError || updateError) && (
+              <p className="text-md text-red-600 sm:col-span-2">
+                {formError || updateError}
+              </p>
+            )}
+
             <div className="sm:col-span-2 flex justify-end">
               <Button
-                onClick={handleSave}
-                type="button"
-                disabled={updating}
+                type="submit"
                 variant="primary"
+                disabled={updateLoading}
               >
-                Save
+                {updateLoading ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>
