@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, FormEvent } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCalendarPlus } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "@remix-run/react";
@@ -17,6 +17,10 @@ import { Appointment } from "~/domain/entities/Appointment";
 import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
+import AddAppointmentDialog from "./components/common/AddAppointmentDialog";
+import { useGetDoctorList } from "~/presentation/hooks/staff/useGetDoctorList";
+import { useGetPatientList } from "~/presentation/hooks/patient/useGetPatientList";
+import { useCreateAppointment } from "~/presentation/hooks/appointment/useCreateAppointment";
 
 const AppointmentList: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +30,19 @@ const AppointmentList: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [specificDate, setSpecificDate] = useState<Date | null>(null);
   const [monthFilter, setMonthFilter] = useState<Date | null>(null);
+  const [showDialog, setShowDialog] = useState(false);
 
+  // Form state
+  const [selectedPatient, setSelectedPatient] = useState<number | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [reason, setReason] = useState<string>("");
+  const [formError, setFormError] = useState<string>("");
+
+  const { doctors } = useGetDoctorList();
+  const { patients } = useGetPatientList();
+  const { createAppointment, loading: createAppointmentLoading, error: createAppointmentError } = useCreateAppointment();
+  
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -38,34 +54,91 @@ const AppointmentList: React.FC = () => {
   const handleDateFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setDateFilter(e.target.value);
     if (e.target.value !== "specific" && e.target.value !== "month") {
-      setSpecificDate(null); // Clear specific date when switching to other filters
-      setMonthFilter(null); // Clear month filter when switching to other filters
+      setSpecificDate(null);
+      setMonthFilter(null);
     }
   };
 
   const handleSpecificDateChange = (date: Date | null) => {
     setSpecificDate(date);
     if (date) {
-      setDateFilter("specific"); // Automatically switch to specific date filter
-      setMonthFilter(null); // Clear month filter
+      setDateFilter("specific");
+      setMonthFilter(null);
     }
   };
 
   const handleMonthFilterChange = (date: Date | null) => {
     setMonthFilter(date);
     if (date) {
-      setDateFilter("month"); // Automatically switch to month filter
-      setSpecificDate(null); // Clear specific date
+      setDateFilter("month");
+      setSpecificDate(null);
     }
   };
 
   const handleAppointmentDetail = (appointmentId: number) => {
     sessionStorage.setItem("currentAppointmentID", JSON.stringify(appointmentId));
-    navigate("/appointmentDetail");
+    // navigate("/appointmentDetail");
   };
 
   const handleAddAppointment = () => {
-    navigate("/addAppointment");
+    setShowDialog(true);
+    // Reset form
+    setSelectedPatient(null);
+    setSelectedDoctor(null);
+    setSelectedDate(null);
+    setReason("");
+    setFormError("");
+  };
+
+  const handleCloseDialog = () => {
+    setShowDialog(false);
+    setSelectedPatient(null);
+    setSelectedDoctor(null);
+    setSelectedDate(null);
+    setReason("");
+    setFormError("");
+  };
+
+  const handleSubmitAppointment = async () => {
+    setFormError("");
+
+    // Validation
+    if (!selectedPatient) {
+      setFormError("Please select a patient");
+      return;
+    }
+    if (!selectedDoctor) {
+      setFormError("Please select a doctor");
+      return;
+    }
+    if (!selectedDate) {
+      setFormError("Please select an appointment date");
+      return;
+    }
+    if (!reason.trim()) {
+      setFormError("Please provide a reason for the appointment");
+      return;
+    }
+
+    const patient = patients.find(p => p.patientId === selectedPatient);
+    const doctor = doctors.find(d => d.staffId === selectedDoctor);
+
+    const result = await createAppointment({
+      appointmentDateTime: selectedDate.toISOString(),
+      patientId: selectedPatient,
+      doctorId: selectedDoctor,
+      reason: reason,
+      status: "scheduled",
+      patientName: patient?.nameSurname || "",
+      doctorName: doctor?.nameSurname || "",
+    });
+
+    if (result.success) {
+      handleCloseDialog();
+      window.location.reload(); // Refresh the appointment list
+    } else {
+      setFormError(result.error || "Failed to create appointment");
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -86,11 +159,11 @@ const AppointmentList: React.FC = () => {
 
   const filterByDate = (appointment: Appointment) => {
     if (dateFilter === "all") return true;
-    
+
     const appointmentDate = new Date(appointment.appointmentDateTime);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     switch (dateFilter) {
       case "today":
         const todayEnd = new Date(today);
@@ -102,11 +175,11 @@ const AppointmentList: React.FC = () => {
         return appointmentDate < today;
       case "specific":
         if (!specificDate) return true;
-        const selectedDate = new Date(specificDate);
-        selectedDate.setHours(0, 0, 0, 0);
-        const selectedDateEnd = new Date(selectedDate);
+        const selectedDateFilter = new Date(specificDate);
+        selectedDateFilter.setHours(0, 0, 0, 0);
+        const selectedDateEnd = new Date(selectedDateFilter);
         selectedDateEnd.setHours(23, 59, 59, 999);
-        return appointmentDate >= selectedDate && appointmentDate <= selectedDateEnd;
+        return appointmentDate >= selectedDateFilter && appointmentDate <= selectedDateEnd;
       case "month":
         if (!monthFilter) return true;
         const selectedMonth = new Date(monthFilter);
@@ -121,19 +194,53 @@ const AppointmentList: React.FC = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    return appointmentList.filter((appointment) => {
-      const matchesSearch = 
+    const now = new Date();
+    
+    // First filter the appointments
+    const filtered = appointmentList.filter((appointment) => {
+      const matchesSearch =
         appointment.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.doctorName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         appointment.appointmentId?.toString().includes(searchTerm);
-      
-      const matchesStatus = 
-        statusFilter === "all" || 
+
+      const matchesStatus =
+        statusFilter === "all" ||
         appointment.status?.toLowerCase() === statusFilter.toLowerCase();
-      
+
       const matchesDate = filterByDate(appointment);
 
       return matchesSearch && matchesStatus && matchesDate;
+    });
+
+    // Then sort by status priority, then by appointment date
+    return filtered.sort((a, b) => {
+      // Status priority: scheduled (1) > completed (2) > cancelled/canceled (3) > others (4)
+      const getStatusPriority = (status: string | undefined): number => {
+        const statusLower = status?.toLowerCase() || '';
+        if (statusLower === 'scheduled') return 1;
+        if (statusLower === 'completed') return 2;
+        if (statusLower === 'cancelled' || statusLower === 'canceled') return 3;
+        return 4;
+      };
+
+      const statusA = getStatusPriority(a.status);
+      const statusB = getStatusPriority(b.status);
+
+      // First sort by status priority
+      if (statusA !== statusB) {
+        return statusA - statusB;
+      }
+
+      // If same status, sort by appointment date (closest to now first)
+      const dateA = new Date(a.appointmentDateTime).getTime();
+      const dateB = new Date(b.appointmentDateTime).getTime();
+      const nowTime = now.getTime();
+
+      // Calculate absolute difference from now
+      const diffA = Math.abs(dateA - nowTime);
+      const diffB = Math.abs(dateB - nowTime);
+
+      return diffA - diffB;
     });
   }, [appointmentList, searchTerm, statusFilter, dateFilter, specificDate, monthFilter]);
 
@@ -155,8 +262,24 @@ const AppointmentList: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-surface-muted">
-      
       <main className="flex-1 p-8">
+        <AddAppointmentDialog 
+          isOpen={showDialog} 
+          doctors={doctors.map(doctor => ({ id: doctor.staffId, nameSurname: doctor.nameSurname }))}
+          patients={patients.map(patient => ({ id: patient.patientId, nameSurname: patient.nameSurname }))}
+          selectedPatient={selectedPatient}
+          selectedDoctor={selectedDoctor}
+          selectedDate={selectedDate}
+          reason={reason}
+          formError={formError}
+          onPatientChange={setSelectedPatient}
+          onDoctorChange={setSelectedDoctor}
+          onDateChange={setSelectedDate}
+          onReasonChange={setReason}
+          onAddAppointment={handleSubmitAppointment}
+          onClose={handleCloseDialog}
+          isLoading={createAppointmentLoading}
+        />
         <Card>
           <div className="flex items-center justify-between mb-6">
             <SectionHeading title="Appointment List" />
@@ -281,7 +404,7 @@ const AppointmentList: React.FC = () => {
                   {appointment.patientName}
                 </td>
                 <td className="px-4 py-3 text-md text-slate-900">
-                  {DateTimeHelper.formatDateTime(appointment.appointmentDateTime,'EEEE, d MMMM yyyy HH:mm')}
+                  {DateTimeHelper.formatDateTime(appointment.appointmentDateTime, 'EEEE, d MMMM yyyy HH:mm')}
                 </td>
                 <td className="px-4 py-3 text-md text-slate-900">
                   {appointment.doctorName}

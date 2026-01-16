@@ -33,6 +33,7 @@ import { StaffRepository } from "../repositories/StaffRepository";
 import { AppointmentRepository } from "../repositories/AppointmentRepository";
 import { GetAppointmentByDoctorIdUseCase } from "~/application/use-cases/appointment/GetAppointmentByDoctorIdUseCase";
 import { GetAppointmentListUseCase } from "~/application/use-cases/appointment/GetAppointmentListUseCase";
+import { CreateAppointmentUseCase } from "~/application/use-cases/appointment/CreateAppointmentUseCase";
 
 
 // Initialize repositories based on datasource configuration
@@ -65,4 +66,5 @@ export const deleteStaffUsecase = new DeleteStaffUseCase(staffRepository);
 
 export const getAppointmentListUseCase = new GetAppointmentListUseCase(appointmentRepository);
 export const getAppointmentByDoctorIdUseCase = new GetAppointmentByDoctorIdUseCase(appointmentRepository);
+export const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepository);
 

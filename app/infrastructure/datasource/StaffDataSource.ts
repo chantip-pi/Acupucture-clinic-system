@@ -1,4 +1,5 @@
 import { Staff } from "~/domain/entities/Staff";
+import { StaffNameDTO } from "~/application/dtos/StaffDTO";
 
 export class StaffDataSource {
   constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/staff") {}
@@ -70,6 +71,21 @@ export class StaffDataSource {
     });
     if (!res.ok)
       throw new Error(`Delete failed: ${res.status} ${res.statusText}`);
+  }
+
+  async getDoctors(): Promise<StaffNameDTO[]> {
+    const res = await fetch(`${this.baseUrl}/doctors`, {
+      method: "GET",
+    });
+    return this.handleResponse<StaffNameDTO[]>(res);
+  }
+
+  async getNurses(): Promise<StaffNameDTO[]> {
+    // Backend route: GET /api/staff/nurses
+    const res = await fetch(`${this.baseUrl}/nurses`, {
+      method: "GET",
+    });
+    return this.handleResponse<StaffNameDTO[]>(res);
   }
 }
 

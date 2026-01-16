@@ -1,5 +1,4 @@
 export interface CreateAppointmentDTO {
-    appointmentId: number;
     patientId: number;
     doctorId: number;
     appointmentDateTime: string;
@@ -10,7 +9,6 @@ export interface CreateAppointmentDTO {
   }
   
   export interface UpdateAppointmentDTO {
-    appointmentId: number;
     patientId: number;
     doctorId: number;
     appointmentDateTime: string;
