@@ -17,6 +17,7 @@ import PatientDetail from './_SNB.PatientDetail';
 import LogIn from './LogIn';
 import AddStaff from './_SNB.AddStaff';
 import AcupunctureSelect from './_SNB.AcupunctureSelect';
+import AcupunctureCreate from './_SNB.AcupunctureCreate';
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/logIn" element={<LogIn/>}/>
         <Route path="/addStaff" element={<AddStaff/>}/>
         <Route path="/acupunctureSelect" element={<AcupunctureSelect/>}/>
+        <Route path="/acupunctureCreate" element={<AcupunctureCreate/>}/>
       </Routes>
     </Router>
   );

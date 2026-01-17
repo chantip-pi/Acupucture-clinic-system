@@ -3,15 +3,15 @@ import {
   PageShell,
 } from "~/presentation/designSystem";
 
-import AcupunctureCard from "./components/AcupunctureCard";
+import AcupunctureMarker from "./components/AcupunctureMarker";
 
-function AcupunctureSelect() {
+function AcupunctureCreate() {
 
   return (
     <PageShell className="p-8">
-      <AcupunctureCard />
+      <AcupunctureMarker />
     </PageShell>
   );
 }
 
-export default AcupunctureSelect;
+export default AcupunctureCreate;
