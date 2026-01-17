@@ -1,20 +1,16 @@
 import React from "react";
-import { useNavigate } from "@remix-run/react";
 import {
   PageShell,
-  SectionHeading,
-  Button,
 } from "~/presentation/designSystem";
 
-import AcupunctureCard from "./components/AcupunctureCard";
+import AcupunctureMarker from "./components/AcupunctureMarker";
 
 function AcupunctureSelect() {
-  const navigate = useNavigate();
 
   return (
     <PageShell className="p-8">
       {/* Main content */}
-      <AcupunctureCard />
+      <AcupunctureMarker />
     </PageShell>
   );
 }
