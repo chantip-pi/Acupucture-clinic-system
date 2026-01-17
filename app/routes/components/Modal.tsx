@@ -1,7 +1,12 @@
 import React, { useEffect, ReactNode } from "react";
-import ReactDOM from "react-dom";
-import { CSSTransition } from "react-transition-group";
-import "./Modal.css";
+import {
+  Modal as DesignSystemModal,
+  ModalHeader,
+  ModalTitle,
+  ModalBody,
+  ModalFooter,
+  Button,
+} from "~/presentation/designSystem";
 
 interface ModalProps {
   show: boolean;
@@ -33,40 +38,23 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, [onClose]);
 
-  const portalRoot =
-    typeof document !== "undefined"
-      ? document.getElementById("modal-root")
-      : null;
-
-  if (!portalRoot) return null;
-
-  return ReactDOM.createPortal(
-    <CSSTransition
-      in={show}
-      unmountOnExit
-      timeout={{ enter: 300, exit: 300 }}
-      classNames="modal"
-    >
-      <div className="modal" onClick={onClose}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-header">
-            <h4 className="modal-title">{title}</h4>
-          </div>
-
-          <div className="modal-body">{children}</div>
-
-          <div className="modal-footer">
-            <button onClick={onAdd} className="button">
-              {addButtonText}
-            </button>
-            <button onClick={onClose} className="button">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </CSSTransition>,
-    portalRoot
+  return (
+    <DesignSystemModal isOpen={show} onClose={onClose}>
+      <ModalHeader>
+        <ModalTitle>{title}</ModalTitle>
+      </ModalHeader>
+      
+      <ModalBody>{children}</ModalBody>
+      
+      <ModalFooter>
+        <Button variant="primary" onClick={onAdd}>
+          {addButtonText}
+        </Button>
+        <Button variant="secondary" onClick={onClose}>
+          Close
+        </Button>
+      </ModalFooter>
+    </DesignSystemModal>
   );
 };
 

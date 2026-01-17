@@ -98,7 +98,6 @@ const AcupunctureMarker: React.FC = () => {
     setUploadingImage(true);
 
     try {
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append("image", file);
 
@@ -341,24 +340,24 @@ const AcupunctureMarker: React.FC = () => {
               setNewMarkerPoint(null);
             }}
           >
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
-              <input
-                type="text"
-                value={acupointCode}
-                onChange={(e) => setAcupointCode(e.target.value)}
-                placeholder="Acupuncture Code"
-                style={{ width: "100%", padding: "8px" }}
-              />
+            <div className="flex flex-col gap-3">
+              <FormField label="Acupuncture Code">
+                <Input
+                  type="text"
+                  value={acupointCode}
+                  onChange={(e) => setAcupointCode(e.target.value)}
+                  placeholder="Acupuncture Code"
+                />
+              </FormField>
 
-              <input
-                type="text"
-                value={acupointName}
-                onChange={(e) => setAcupointName(e.target.value)}
-                placeholder="Acupuncture Name"
-                style={{ width: "100%", padding: "8px" }}
-              />
+              <FormField label="Acupuncture Name">
+                <Input
+                  type="text"
+                  value={acupointName}
+                  onChange={(e) => setAcupointName(e.target.value)}
+                  placeholder="Acupuncture Name"
+                />
+              </FormField>
             </div>
           </Modal>
 
@@ -413,7 +412,7 @@ const AcupunctureMarker: React.FC = () => {
                 <div>
                   <Button
                     type="button"
-                    variant="primary"
+                    variant="secondary"
                     onClick={handleImageReupload}
                   >
                     Reupload Image

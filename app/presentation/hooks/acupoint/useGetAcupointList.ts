@@ -7,17 +7,19 @@ export function useGetAcupointList(acupointCodes: string[] | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
     useEffect(() => {
-    if (!acupointCodes || acupointCodes.length === 0) {
-      setError("No acupoint codes provided");
-      setLoading(false);
-      return;
-    }
     const fetchAcupoints = async () => {
       setLoading(true);
       setError(null);
         try {
         const data = await getAcupointListUseCase.execute();
-        setAcupoints(data);
+        if (acupointCodes && acupointCodes.length > 0) {
+          const filtered = data.filter((point) =>
+            acupointCodes.includes(point.acupointCode)
+          );
+          setAcupoints(filtered);
+        } else {
+          setAcupoints(data);
+        }
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to load acupoint data";
