@@ -40,7 +40,7 @@ function EditStaff() {
     }
 
     setIsLoggedIn(true);
-    setIsManager(session.role?.toLowerCase() === "manager");
+    setIsManager(session.title?.toLowerCase() === "manager");
     
     const username = getSelectedStaffUsername();
     setSelectedUsername(username);
@@ -62,7 +62,7 @@ function EditStaff() {
     phoneNumber: "",
     birthday: "",
     gender: "",
-    role: "",
+    title: "",
     email: "",
   });
 
@@ -77,7 +77,7 @@ function EditStaff() {
         phoneNumber: staff.phoneNumber,
         birthday: formattedBirthday,
         gender: staff.gender,
-        role: staff.role,
+        title: staff.title,
         email: staff.email,
       });
     }
@@ -350,9 +350,9 @@ function EditStaff() {
 
             <FormField label="Role">
               <Select
-                id="role"
-                name="role"
-                value={formData.role}
+                id="title"
+                name="title"
+                value={formData.title}
                 onChange={handleChange}
                 required
               >
