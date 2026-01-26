@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { deletePatientUsecase } from "~/infrastructure/di/container";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useDeletePatient() {
   const [loading, setLoading] = useState(false);
@@ -13,10 +14,9 @@ export function useDeletePatient() {
       await deletePatientUsecase.execute(patientId);
       return { success: true };
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to delete patient";
-      setError(message);
-      return { success: false, error: message };
+      const errorMessage = BackendErrorService.getErrorMessage(err);
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }

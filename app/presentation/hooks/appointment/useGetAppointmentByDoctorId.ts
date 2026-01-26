@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAppointmentByDoctorIdUseCase } from "~/infrastructure/di/container";
 import { Appointment } from "~/domain/entities/Appointment";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetAppointmentById(id: number | null) {
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -26,7 +27,8 @@ export function useGetAppointmentById(id: number | null) {
           setError("No data found for this appointment ID.");
         }
       } catch (err) {
-        setError("Failed to load appointment data");
+        const errorMessage = BackendErrorService.getErrorMessage(err);
+        setError(errorMessage);
         console.error(err);
       } finally {
         setLoading(false);

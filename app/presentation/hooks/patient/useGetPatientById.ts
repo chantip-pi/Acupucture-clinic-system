@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getPatientByIdUseCase } from "~/infrastructure/di/container";
 import { Patient } from "~/domain/entities/Patient";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetPatientById(id: number | null) {
   const [patient, setPatient] = useState<Patient | null>(null);
@@ -26,7 +27,8 @@ export function useGetPatientById(id: number | null) {
           setError("No data found for this patient ID.");
         }
       } catch (err) {
-        setError("Failed to load patient data");
+        const errorMessage = BackendErrorService.getErrorMessage(err);
+        setError(errorMessage);
         console.error(err);
       } finally {
         setLoading(false);

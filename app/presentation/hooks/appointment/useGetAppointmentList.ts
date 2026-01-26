@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAppointmentListUseCase } from "~/infrastructure/di/container";
 import { Appointment } from "~/domain/entities/Appointment";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetAppointmentList() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -16,7 +17,8 @@ export function useGetAppointmentList() {
         const data = await getAppointmentListUseCase.execute();
         setAppointments(data);
       } catch (err) {
-        setError("Failed to load appointment data");
+        const errorMessage = BackendErrorService.getErrorMessage(err);
+        setError(errorMessage);
         console.error(err);
       } finally {
         setLoading(false);

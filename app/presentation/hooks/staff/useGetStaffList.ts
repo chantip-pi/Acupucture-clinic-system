@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getStaffListUseCase } from "~/infrastructure/di/container";
 import { Staff } from "~/domain/entities/Staff";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetStaffList() {
   const [staffList, setStaffList] = useState<Staff[]>([]);
@@ -16,7 +17,8 @@ export function useGetStaffList() {
         const data = await getStaffListUseCase.execute();
         setStaffList(data);
       } catch (err) {
-        setError("Failed to load staff data");
+        const errorMessage = BackendErrorService.getErrorMessage(err);
+        setError(errorMessage);
         console.error(err);
       } finally {
         setLoading(false);

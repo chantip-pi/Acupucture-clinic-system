@@ -1,5 +1,6 @@
 import { Staff } from "~/domain/entities/Staff";
 import { StaffNameDTO } from "~/application/dtos/StaffDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export class StaffDataSource {
   constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/staff") {}
@@ -8,10 +9,7 @@ export class StaffDataSource {
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} ${text}`
-      );
+      await BackendErrorService.handleErrorResponse(res);
     }
     return (await res.json()) as T;
   }
@@ -69,8 +67,9 @@ export class StaffDataSource {
     const res = await fetch(`${this.baseUrl}/${staffId}`, {
       method: "DELETE",
     });
-    if (!res.ok)
-      throw new Error(`Delete failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      await BackendErrorService.handleErrorResponse(res);
+    }
   }
 
   async getDoctors(): Promise<StaffNameDTO[]> {

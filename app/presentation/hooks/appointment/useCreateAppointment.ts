@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createAppointmentUseCase } from "~/infrastructure/di/container";
 import { CreateAppointmentDTO } from "~/application/dtos/AppointmentDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useCreateAppointment() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export function useCreateAppointment() {
       await createAppointmentUseCase.execute(dto);
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to create appointment";
+      const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

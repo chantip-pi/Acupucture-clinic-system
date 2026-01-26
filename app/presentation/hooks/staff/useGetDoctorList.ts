@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { staffDatasource } from "~/infrastructure/datasource/StaffDataSource";
 import { StaffNameDTO } from "~/application/dtos/StaffDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetDoctorList() {
   const [doctors, setDoctors] = useState<StaffNameDTO[]>([]);
@@ -16,7 +17,8 @@ export function useGetDoctorList() {
         const data = await staffDatasource.getDoctors();
         setDoctors(data);
       } catch (err) {
-        setError("Failed to load doctors");
+        const errorMessage = BackendErrorService.getErrorMessage(err);
+        setError(errorMessage);
         console.error(err);
       } finally {
         setLoading(false);
