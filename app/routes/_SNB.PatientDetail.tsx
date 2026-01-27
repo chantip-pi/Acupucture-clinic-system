@@ -15,6 +15,7 @@ import EditAppointmentDialog from "./components/appointment/EditAppointmentDialo
 import { useCancelAppointment } from "~/presentation/hooks/appointment/useCancelAppointment";
 import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdateAppointment";
 import ConfirmDialog from "./components/common/ConfirmDialog";
+import { safeSessionGet, safeSessionSet } from "~/presentation/session/storageUtils";
 
 function PatientDetail() {
 
@@ -22,8 +23,9 @@ function PatientDetail() {
   const navigate = useNavigate();
 
   const patientId = useMemo(() => {
-    const storedPatientID = sessionStorage.getItem("currentPatientID");
+    const storedPatientID = safeSessionGet("currentPatientID");
     if (!storedPatientID) return null;
+  
     const id = storedPatientID.replace(/^"|"$/g, "");
     return id === "Guest" ? null : parseInt(id, 10);
   }, []);
@@ -99,7 +101,7 @@ function PatientDetail() {
   };
 
   const handleEdit = (patientId: number) => {
-    sessionStorage.setItem("currentPatientID", JSON.stringify(patientId));
+    safeSessionSet("currentPatientID", JSON.stringify(patientId));
     navigate("/editPatient");
   };
 
