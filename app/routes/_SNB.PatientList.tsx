@@ -17,6 +17,7 @@ import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import { DateOfBirth } from "~/domain/value-objects/DateOfBirth";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
+import { safeSessionSet } from "~/presentation/session/storageUtils";
 
 const PatientList: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const PatientList: React.FC = () => {
   };
 
   const handlePatientDetail = (patientId: number) => {
-    sessionStorage.setItem("currentPatientID", JSON.stringify(patientId));
+    safeSessionSet("currentPatientID", JSON.stringify(patientId));
     navigate("/patientDetail");
   };
 
