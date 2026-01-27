@@ -10,8 +10,8 @@ import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons/faPenToSquare";
-import AppointmentTable from "./components/AppointmentTable";
-import EditAppointmentDialog from "./components/common/EditAppointmentDialog";
+import AppointmentTable from "./components/appointment/AppointmentTable";
+import EditAppointmentDialog from "./components/appointment/EditAppointmentDialog";
 import { useCancelAppointment } from "~/presentation/hooks/appointment/useCancelAppointment";
 import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdateAppointment";
 import ConfirmDialog from "./components/common/ConfirmDialog";
@@ -231,31 +231,25 @@ function PatientDetail() {
           </div>
 
           <div className="mt-4">
-            <InfoList
-              items={[
-                { label: "Name Surname", value: patientData.nameSurname || "N/A" },
-                { label: "Phone Number", value: patientData.phoneNumber || "N/A" },
-                { label: "Gender", value: patientData.gender || "N/A" },
-                { label: "Congenital Disease", value: patientData.congenitalDisease || "N/A" },
-                {
-                  label: "Age",
-                  value: patientData
-                    ? DateTimeHelper.calculateAge(patientData.birthday)
-                    : "N/A",
-                },
-                { label: "Surgery History", value: patientData.surgeryHistory || "N/A" },
-                {
-                  label: "Remaining Course",
-                  value: String(patientData.remainingCourse || "0"),
-                },
-                {
-                  label: "Upcoming Appointment",
-                  value: DateTimeHelper.formatDateTime(patientData.birthday)
-
-                },
-                
-              ]}
-            />
+          <InfoList
+  items={[
+    { label: "Name Surname", value: patientData.nameSurname ?? "N/A" },
+    { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
+    { label: "Gender", value: patientData.gender ?? "N/A" },
+    { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
+    {
+      label: "Age",
+      value: patientData
+        ? DateTimeHelper.calculateAge(patientData.birthday)
+        : "N/A",
+    },
+    { label: "Surgery History", value: patientData.surgeryHistory ?? "N/A" },
+    {
+      label: "Remaining Course",
+      value: String(patientData.remainingCourse ?? "0"),
+    },
+  ]}
+/>
           </div>
         </Card>
 

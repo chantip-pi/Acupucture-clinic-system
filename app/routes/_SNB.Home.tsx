@@ -10,15 +10,15 @@ import { useGetAppointmentList } from "~/presentation/hooks/appointment/useGetAp
 import { Appointment } from "~/domain/entities/Appointment";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
-import AddAppointmentDialog from "./components/common/AddAppointmentDialog";
-import EditAppointmentDialog from "./components/common/EditAppointmentDialog";
+import AddAppointmentDialog from "./components/appointment/AddAppointmentDialog";
+import EditAppointmentDialog from "./components/appointment/EditAppointmentDialog";
 import { useGetDoctorList } from "~/presentation/hooks/staff/useGetDoctorList";
 import { useGetPatientList } from "~/presentation/hooks/patient/useGetPatientList";
 import { useCreateAppointment } from "~/presentation/hooks/appointment/useCreateAppointment";
 import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdateAppointment";
 import { useCancelAppointment } from "~/presentation/hooks/appointment/useCancelAppointment";
 import ConfirmDialog from "./components/common/ConfirmDialog";
-import AppointmentTable from "./components/AppointmentTable";
+import AppointmentTable from "./components/appointment/AppointmentTable";
 
 
 

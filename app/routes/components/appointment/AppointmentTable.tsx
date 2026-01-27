@@ -29,8 +29,6 @@ const statusBadge = (status: Status) => {
   }
 };
 
-
-
 const AppointmentTable: React.FC<AppointmentTableProps> = ({
   appointments,
   onEdit,
@@ -43,7 +41,8 @@ const AppointmentTable: React.FC<AppointmentTableProps> = ({
       <Table
         headers={[
           "Patient Name",
-          "Date & Time",
+          "Date",
+          "Time",
           "Doctor Name",
           "Reason",
           "Status",
@@ -69,7 +68,13 @@ const AppointmentTable: React.FC<AppointmentTableProps> = ({
               <td className="px-4 py-3 text-md text-slate-900">
                 {DateTimeHelper.formatDateTime(
                   appointment.appointmentDateTime,
-                  "EEEE, d MMMM yyyy HH:mm",
+                  "EEE, d MMM yyyy",
+                )}
+              </td>
+              <td className="px-4 py-3 text-md text-slate-900">
+                {DateTimeHelper.formatDateTime(
+                  appointment.appointmentDateTime,
+                  "HH:mm",
                 )}
               </td>
               <td className="px-4 py-3 text-md text-slate-900">
@@ -110,4 +115,3 @@ const AppointmentTable: React.FC<AppointmentTableProps> = ({
 };
 
 export default AppointmentTable;
-
