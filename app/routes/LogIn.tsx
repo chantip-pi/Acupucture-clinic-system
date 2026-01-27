@@ -31,14 +31,11 @@ function LogIn() {
     const session = await login({ username, password });
 
     if (!session) {
-      // `useLogin` already sets a human-friendly error message.
       setFormError("Invalid username or password.");
       return;
     }
 
-    // Login successful: go to home page
-    // TODO: navigate toe /home when getTodayAppointment is implemented
-    navigate("/staffListView");
+    navigate("/home");
   };
 
   return (

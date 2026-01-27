@@ -1,60 +1,220 @@
 import { useNavigate } from "@remix-run/react";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import SideNavBar from "./_SNB";
-import {
-  Button,
-  Card,
-  InfoList,
-  SectionHeading,
-} from "~/presentation/designSystem";
+import { Button, Card, InfoList, SectionHeading } from "~/presentation/designSystem";
 import { useGetPatientById } from "~/presentation/hooks/patient/useGetPatientById";
-import { Patient } from "~/domain/entities/Patient";
+import { useGetAppointmentListByPatientId } from "~/presentation/hooks/appointment/useGetAppointmentListByPatientId";
+import { Appointment } from "~/domain/entities/Appointment";
 import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons/faPenToSquare";
+import AppointmentTable from "./components/appointment/AppointmentTable";
+import EditAppointmentDialog from "./components/appointment/EditAppointmentDialog";
+import { useCancelAppointment } from "~/presentation/hooks/appointment/useCancelAppointment";
+import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdateAppointment";
+import ConfirmDialog from "./components/common/ConfirmDialog";
+import { safeSessionGet, safeSessionSet } from "~/presentation/session/storageUtils";
 
 function PatientDetail() {
+
+
   const navigate = useNavigate();
+
   const patientId = useMemo(() => {
-    const storedPatientID = sessionStorage.getItem("currentPatientID");
+    const storedPatientID = safeSessionGet("currentPatientID");
     if (!storedPatientID) return null;
+  
     const id = storedPatientID.replace(/^"|"$/g, "");
     return id === "Guest" ? null : parseInt(id, 10);
   }, []);
-
+  
+  const { updateAppointment, loading: updateAppointmentLoading, error: updateAppointmentError } = useUpdateAppointment();
+  const { cancelAppointment, loading: cancelAppointmentLoading, error: cancelAppointmentError} = useCancelAppointment();
   const { patient: patientData, loading, error } = useGetPatientById(patientId);
+  const { appointments, loading: appointmentLoading , error: appointmentError} = useGetAppointmentListByPatientId(patientId);
 
-  const handleEdit = (patientId: number) => {
-    sessionStorage.setItem("currentPatientID", JSON.stringify(patientId));
-    navigate("/editPatient");
-  };
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);  
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [editDate, setEditDate] = useState<Date | null>(null);
+  const [editReason, setEditReason] = useState<string>("");
+  const [formError, setFormError] = useState<string>("");
 
-  const handleTreatmentSelect = (patientId: number) => {
-    sessionStorage.setItem("currentPatientID", JSON.stringify(patientId));
-    navigate("/select-treatment");
-  };
+  
+  const filteredAppointments = useMemo(() => {
+    if (!appointments) return [];
+    const now = new Date();
 
-  if (loading) {
+    // Then sort by status priority, then by appointment date
+    return appointments.sort((a, b) => {
+      // Status priority: scheduled (1) > completed (2) > cancelled/canceled (3) > others (4)
+      const getStatusPriority = (status: string | undefined): number => {
+        const statusLower = status?.toLowerCase() || '';
+        if (statusLower === 'scheduled') return 1;
+        if (statusLower === 'completed') return 2;
+        if (statusLower === 'cancelled' || statusLower === 'canceled') return 3;
+        return 4;
+      };
+
+      const statusA = getStatusPriority(a.status);
+      const statusB = getStatusPriority(b.status);
+
+      // First sort by status priority
+      if (statusA !== statusB) {
+        return statusA - statusB;
+      }
+
+      // If same status, sort by appointment date (closest to now first)
+      const dateA = new Date(a.appointmentDateTime).getTime();
+      const dateB = new Date(b.appointmentDateTime).getTime();
+      const nowTime = now.getTime();
+
+      // Calculate absolute difference from now
+      const diffA = Math.abs(dateA - nowTime);
+      const diffB = Math.abs(dateB - nowTime);
+
+      return diffA - diffB;
+    });
+  }, [appointments,]);
+
+  if (loading || appointmentLoading) {
     return <LoadingPage />;
   }
 
   if (error) {
-    return (
-      <ErrorPage message={error} onRetry={() => window.location.reload()} />
-    );
+    return <ErrorPage message={error} onRetry={() => window.location.reload()} />;
   }
+  
+  
   if (!patientData) {
     return (
       <ErrorPage message={"No patient data found"} onRetry={() => window.location.reload()} />
     );
   };
 
+  if (!appointments) {
+    return (
+      <ErrorPage message={"No appointmet data found"} onRetry={() => window.location.reload()} />
+    );
+  };
+
+  const handleEdit = (patientId: number) => {
+    safeSessionSet("currentPatientID", JSON.stringify(patientId));
+    navigate("/editPatient");
+  };
+
+
+  const handleUpdateAppointment = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setEditDate(new Date(appointment.appointmentDateTime));
+    setEditReason(appointment.reason || "");
+    setFormError("");
+    setShowEditDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setShowEditDialog(false);
+    setSelectedAppointment(null);
+    setEditDate(null);
+    setEditReason("");
+    setFormError("");
+  };
+
+  const handleSubmitUpdateAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    setFormError("");
+
+    // Validation
+    if (!editDate) {
+      setFormError("Please select an appointment date");
+      return;
+    }
+    if (!editReason.trim()) {
+      setFormError("Please provide a reason for the appointment");
+      return;
+    }
+
+    const appointmentDate = editDate.toISOString();
+
+    const result = await updateAppointment({
+      appointmentId: selectedAppointment.appointmentId,
+      appointmentDateTime: appointmentDate,
+      patientId: selectedAppointment.patientId,
+      doctorId: selectedAppointment.doctorId,
+      reason: editReason.trim(),
+      status: selectedAppointment.status,
+      patientName: selectedAppointment.patientName,
+      doctorName: selectedAppointment.doctorName,
+    });
+
+    if (result.success) {
+      handleCloseDialog();
+      window.location.reload(); // Refresh the appointment list
+    } else {
+      setFormError(result.error || "Failed to update appointment");
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    setFormError("");
+
+    const result = await cancelAppointment({
+      appointmentId: selectedAppointment.appointmentId,
+      appointmentDateTime: selectedAppointment.appointmentDateTime,
+      patientId: selectedAppointment.patientId,
+      doctorId: selectedAppointment.doctorId,
+      reason: selectedAppointment.reason,
+      status: "canceled",
+      patientName: selectedAppointment.patientName,
+      doctorName: selectedAppointment.doctorName,
+    });
+
+    if (result.success) {
+      handleCloseDialog();
+      window.location.reload(); // Refresh the appointment list
+    } else {
+      setFormError(result.error || "Failed to cancel appointment");
+    }
+  };
+
+  
+
+  
   return (
     <div className="flex min-h-screen bg-surface-muted">
 
-      <main className="flex-1 p-8">
+<EditAppointmentDialog
+          isOpen={showEditDialog}
+          onEditAppointment={handleSubmitUpdateAppointment}
+          onCancelAppointment={() => setShowConfirmDialog(true)}
+          onClose={handleCloseDialog}
+          selectedPatientName={selectedAppointment?.patientName || ""}
+          selectedDoctorName={selectedAppointment?.doctorName || ""}
+          selectedDate={editDate}
+          reason={editReason}
+          formError={formError}
+          onDateChange={setEditDate}
+          onReasonChange={setEditReason}
+          isLoading={updateAppointmentLoading}
+        />
+
+<ConfirmDialog
+            isOpen={showConfirmDialog}
+            title={"Cancel Appointment"}
+            message="Do you really want to cancel this appointment?"
+            cancelText="No"
+            confirmText="Yes"
+            isLoading={updateAppointmentLoading}
+            onConfirm={handleCancelAppointment}
+            onCancel={() => setShowConfirmDialog(false)}
+          />
+
+      <main className="flex-1 p-8 space-y-8">
         <Card>
           <div className="flex items-center justify-between">
             <SectionHeading title="Patient Detail" />
@@ -73,32 +233,37 @@ function PatientDetail() {
           </div>
 
           <div className="mt-4">
-            <InfoList
-              items={[
-                { label: "Name Surname", value: patientData.nameSurname || "N/A" },
-                { label: "Phone Number", value: patientData.phoneNumber || "N/A" },
-                { label: "Gender", value: patientData.gender || "N/A" },
-                { label: "Congenital Disease", value: patientData.congenitalDisease || "N/A" },
-                {
-                  label: "Age",
-                  value: patientData
-                    ? DateTimeHelper.calculateAge(patientData.birthday)
-                    : "N/A",
-                },
-                { label: "Surgery History", value: patientData.surgeryHistory || "N/A" },
-                {
-                  label: "Remaining Course",
-                  value: String(patientData.remainingCourse || "0"),
-                },
-                {
-                  label: "Upcoming Appointment",
-                  value: DateTimeHelper.formatDateTime(patientData.birthday)
+          <InfoList
+  items={[
+    { label: "Name Surname", value: patientData.nameSurname ?? "N/A" },
+    { label: "Gender", value: patientData.gender ?? "N/A" },
+    {
+      label: "Age",
+      value: patientData
+        ? DateTimeHelper.calculateAge(patientData.birthday)
+        : "N/A",
+    },
+    { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
 
-                },
-                
-              ]}
-            />
+    { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
+    { label: "Surgery History", value: patientData.surgeryHistory ?? "N/A" },
+    {
+      label: "Remaining Course",
+      value: String(patientData.remainingCourse ?? "0"),
+    },
+  ]}
+/>
           </div>
+        </Card>
+
+        <Card>
+        <SectionHeading title="Appointment History" />
+        <AppointmentTable
+          appointments={filteredAppointments}
+          onEdit={handleUpdateAppointment}
+          allowEditStatuses={["scheduled"]}
+          emptyMessage="No appointments found."
+        />
         </Card>
       </main>
     </div>

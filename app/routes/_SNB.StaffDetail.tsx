@@ -153,10 +153,10 @@ function StaffDetail() {
                 items={[
                   { label: "Username", value: staff.username },
                   { label: "Name Surname", value: staff.nameSurname },
-                  { label: "Phone Number", value: staff.phoneNumber },
                   { label: "Age", value: age },
                   { label: "Gender", value: staff.gender },
                   { label: "Role", value: staff.title },
+                  { label: "Phone Number", value: staff.phoneNumber },
                   { label: "Email", value: staff.email },
                 ]}
               />

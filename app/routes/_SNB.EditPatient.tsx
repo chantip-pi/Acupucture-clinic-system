@@ -15,6 +15,7 @@ import { useDeletePatient } from "~/presentation/hooks/patient/useDeletePatient"
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import ConfirmDialog from "./components/common/ConfirmDialog";
+import { safeSessionGet } from "~/presentation/session/storageUtils";
 
 function EditPatient() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ function EditPatient() {
   const [formError, setFormError] = useState<string | null>(null);
 
   const patientId = useMemo(() => {
-    const stored = sessionStorage.getItem("currentPatientID");
+    const stored = safeSessionGet("currentPatientID");
     if (!stored) return null;
     const id = stored.replace(/^"|"$/g, "");
     return id === "Guest" ? null : Number(id);

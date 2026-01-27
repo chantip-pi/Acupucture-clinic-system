@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { addPatientUseCase } from "~/infrastructure/di/container";
 import { CreatePatientDTO } from "~/application/dtos/PatientDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useAddPatient() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export function useAddPatient() {
       await addPatientUseCase.execute(dto);
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to add patient";
+      const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

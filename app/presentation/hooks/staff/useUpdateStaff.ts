@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { updateStaffUseCase } from "~/infrastructure/di/container";
 import { UpdateStaffDTO } from "~/application/dtos/StaffDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useUpdateStaff() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export function useUpdateStaff() {
       await updateStaffUseCase.execute(dto);
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to update staff";
+      const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

@@ -1,4 +1,4 @@
-
+// ===== Domain Interfaces =====
 import { IPatientRepository } from "~/domain/repositories/IPatientRepository";
 import { IStaffRepository } from "~/domain/repositories/IStaffRepository";
 import { IAcupointRepository } from "~/domain/repositories/IAcupointRepository";
@@ -6,17 +6,60 @@ import { IAcupointLocationRepository } from "~/domain/repositories/IAcupointLoca
 import { IAcupunctureRepository } from "~/domain/repositories/IAcupunctureRepository";
 import { IIllnessRepository } from "~/domain/repositories/IIllnessRepository";
 import { IMeridianRepository } from "~/domain/repositories/IMeridianRepository";
+import { IAppointmentRepository } from "~/domain/repositories/IAppointmentRepository";
 
-//repositories
-import { PatientRepository } from "../repositories/PatientRepository";
-import { StaffRepository } from "../repositories/StaffRepository";
-import { AcupointRepository } from "../repositories/AcupointRepository";
-import { AcupointLocationRepository } from "../repositories/AcupointLocationRepository";
-import { AcupunctureRepository } from "../repositories/AcupunctureRepository";
-import { IllnessRepository } from "../repositories/IllnessRepository";
-import { MeridianRepository } from "../repositories/MeridianRepository";
+// ===== Application Use Cases =====
+// Patient
+import { AddPatientUseCase } from "~/application/use-cases/patient/AddPatientUseCase";
+import { GetPatientListUseCase } from "~/application/use-cases/patient/GetPatientListUseCase";
+import { GetPatientByIdUseCase } from "~/application/use-cases/patient/GetPatientByIdUseCase";
+import { UpdatePatientUseCase } from "~/application/use-cases/patient/UpdatePatientUseCase";
+import { DeletePatientUseCase } from "~/application/use-cases/patient/DeletePatientUseCase";
 
-//datasources
+// Staff
+import { AddStaffUseCase } from "~/application/use-cases/staff/AddStaffUseCase";
+import { LoginUseCase } from "~/application/use-cases/staff/LoginUseCase";
+import { GetStaffListUseCase } from "~/application/use-cases/staff/GetStaffListUseCase";
+import { GetStaffByUsernameUseCase } from "~/application/use-cases/staff/GetStaffByUsernameUseCase";
+import { UpdateStaffUseCase } from "~/application/use-cases/staff/UpdateStaffUseCase";
+import { DeleteStaffUseCase } from "~/application/use-cases/staff/DeleteStaffUseCase";
+
+// Acupoint
+import { AddAcupointUseCase } from "~/application/use-cases/acupoint/AddAcupointUseCase";
+import { GetAcupointListUseCase } from "~/application/use-cases/acupoint/GetAcupointListUseCase";
+import { GetAcupointByCodeUseCase } from "~/application/use-cases/acupoint/GetAcupointByCodeUseCase";
+import { UpdateAcupointUseCase } from "~/application/use-cases/acupoint/UpdateAcupointUseCase";
+import { DeleteAcupointUseCase } from "~/application/use-cases/acupoint/DeleteAcupointUseCase";
+
+// Acupoint Location
+import { AddAcupointLocationUseCase } from "~/application/use-cases/acupointLocation/AddAcupointLocationUseCase";
+import { GetAcupointLocationListUseCase } from "~/application/use-cases/acupointLocation/GetAcupointLocationListUseCase";
+import { GetAcupointLocationByIdUseCase } from "~/application/use-cases/acupointLocation/GetAcupointLocationByIdUseCase";
+import { UpdateAcupointLocationUseCase } from "~/application/use-cases/acupointLocation/UpdateAcupointLocationUseCase";
+import { DeleteAcupointLocationUseCase } from "~/application/use-cases/acupointLocation/DeleteAcupointLocationUseCase";
+
+// Acupuncture
+import { AddAcupunctureUseCase } from "~/application/use-cases/acupuncture/AddAcupunctureUseCase";
+import { GetAcupunctureListUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureListUseCase";
+import { GetAcupunctureByIdUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureByIdUseCase";
+import { UpdateAcupunctureUseCase } from "~/application/use-cases/acupuncture/UpdateAcupunctureUseCase";
+import { DeleteAcupunctureUseCase } from "~/application/use-cases/acupuncture/DeleteAcupunctureUseCase";
+
+// Illness
+import { AddIllnessUseCase } from "~/application/use-cases/illness/AddIllnessUseCase";
+import { GetIllnessListUseCase } from "~/application/use-cases/illness/GetIllnessListUseCase";
+import { GetIllnessByIdUseCase } from "~/application/use-cases/illness/GetIllnessByIdUseCase";
+import { UpdateIllnessUseCase } from "~/application/use-cases/illness/UpdateIllnessUseCase";
+import { DeleteIllnessUseCase } from "~/application/use-cases/illness/DeleteIllnessUseCase";
+
+// Meridian
+import { AddMeridianUseCase } from "~/application/use-cases/meridian/AddMeridianUseCase";
+import { GetMeridianListUseCase } from "~/application/use-cases/meridian/GetMeridianListUseCase";
+import { GetMeridianByIdUseCase } from "~/application/use-cases/meridian/GetMeridianByIdUseCase";
+import { UpdateMeridianUseCase } from "~/application/use-cases/meridian/UpdateMeridianUseCase";
+import { DeleteMeridianUseCase } from "~/application/use-cases/meridian/DeleteMeridianUseCase";
+
+// ===== Data Sources =====
 import { MockDataSource } from "../datasource/MockDataSource";
 import { PatientDataSource } from "../datasource/PatientDataSource";
 import { StaffDataSource } from "../datasource/StaffDataSource";
@@ -25,61 +68,27 @@ import { AcupointLocationDataSource } from "../datasource/AcupointLocationDataSo
 import { AcupunctureDataSource } from "../datasource/AcupunctureDataSource";
 import { IllnessDataSource } from "../datasource/IllnessDataSource";
 import { MeridianDataSource } from "../datasource/MeridianDataSource";
+import { AppointmentDataSource } from "../datasource/AppointmentDatasource";
 
-//patient use cases
-import { AddPatientUseCase } from "~/application/use-cases/patient/AddPatientUseCase";
-import { GetPatientListUseCase } from "~/application/use-cases/patient/GetPatientListUseCase";
-import { GetPatientByIdUseCase } from "~/application/use-cases/patient/GetPatientByIdUseCase";
-import { UpdatePatientUseCase } from "~/application/use-cases/patient/UpdatePatientUseCase";
-import { DeletePatientUseCase } from "~/application/use-cases/patient/DeletePatientUseCase";
-
-//staff use cases
-import { AddStaffUseCase } from "~/application/use-cases/staff/AddStaffUseCase";
-import { LoginUseCase } from "~/application/use-cases/staff/LoginUseCase";
-import { GetStaffListUseCase } from "~/application/use-cases/staff/GetStaffListUseCase";
-import { GetStaffByUsernameUseCase } from "~/application/use-cases/staff/GetStaffByUsernameUseCase";
-import { UpdateStaffUseCase } from "~/application/use-cases/staff/UpdateStaffUseCase";
-import { DeleteStaffUseCase } from "~/application/use-cases/staff/DeleteStaffUseCase";
-
-//acupoint use cases
-import { AddAcupointUseCase } from "~/application/use-cases/acupoint/AddAcupointUseCase";
-import { GetAcupointListUseCase } from "~/application/use-cases/acupoint/GetAcupointListUseCase";
-import { GetAcupointByCodeUseCase } from "~/application/use-cases/acupoint/GetAcupointByCodeUseCase";
-import { UpdateAcupointUseCase } from "~/application/use-cases/acupoint/UpdateAcupointUseCase";
-import { DeleteAcupointUseCase } from "~/application/use-cases/acupoint/DeleteAcupointUseCase";
-
-//acupoint location use cases
-import { AddAcupointLocationUseCase } from "~/application/use-cases/acupointLocation/AddAcupointLocationUseCase";
-import { GetAcupointLocationListUseCase } from "~/application/use-cases/acupointLocation/GetAcupointLocationListUseCase";
-import { GetAcupointLocationByIdUseCase } from "~/application/use-cases/acupointLocation/GetAcupointLocationByIdUseCase";
-import { UpdateAcupointLocationUseCase } from "~/application/use-cases/acupointLocation/UpdateAcupointLocationUseCase";
-import { DeleteAcupointLocationUseCase } from "~/application/use-cases/acupointLocation/DeleteAcupointLocationUseCase";
-
-//acupuncture use cases
-import { AddAcupunctureUseCase } from "~/application/use-cases/acupuncture/AddAcupunctureUseCase";
-import { GetAcupunctureListUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureListUseCase";
-import { GetAcupunctureByIdUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureByIdUseCase";
-import { UpdateAcupunctureUseCase } from "~/application/use-cases/acupuncture/UpdateAcupunctureUseCase";
-import { DeleteAcupunctureUseCase } from "~/application/use-cases/acupuncture/DeleteAcupunctureUseCase";
-
-//illness use cases
-import { AddIllnessUseCase } from "~/application/use-cases/illness/AddIllnessUseCase";
-import { GetIllnessListUseCase } from "~/application/use-cases/illness/GetIllnessListUseCase";
-import { GetIllnessByIdUseCase } from "~/application/use-cases/illness/GetIllnessByIdUseCase";
-import { UpdateIllnessUseCase } from "~/application/use-cases/illness/UpdateIllnessUseCase";
-import { DeleteIllnessUseCase } from "~/application/use-cases/illness/DeleteIllnessUseCase";
-
-//meridian use cases
-import { AddMeridianUseCase } from "~/application/use-cases/meridian/AddMeridianUseCase";
-import { GetMeridianListUseCase } from "~/application/use-cases/meridian/GetMeridianListUseCase";
-import { GetMeridianByIdUseCase } from "~/application/use-cases/meridian/GetMeridianByIdUseCase";
-import { UpdateMeridianUseCase } from "~/application/use-cases/meridian/UpdateMeridianUseCase";
-import { DeleteMeridianUseCase } from "~/application/use-cases/meridian/DeleteMeridianUseCase";
-
+// ===== Repositories (Infrastructure) =====
+import { PatientRepository } from "../repositories/PatientRepository";
+import { StaffRepository } from "../repositories/StaffRepository";
+import { AppointmentRepository } from "../repositories/AppointmentRepository";
+import { GetAppointmentListUseCase } from "~/application/use-cases/appointment/GetAppointmentListUseCase";
+import { CreateAppointmentUseCase } from "~/application/use-cases/appointment/CreateAppointmentUseCase";
+import { GetAppointmentListByPatientIdUseCase } from "~/application/use-cases/appointment/GetAppointmentListByPatientId"; 
+import { UpdateAppointmentUseCase } from "~/application/use-cases/appointment/UpdateAppointmentUseCase"; 
+import { CancelAppointmentUseCase } from "~/application/use-cases/appointment/CancelAppointmentUseCase"; 
+import { AcupointRepository } from "../repositories/AcupointRepository";
+import { AcupointLocationRepository } from "../repositories/AcupointLocationRepository";
+import { AcupunctureRepository } from "../repositories/AcupunctureRepository";
+import { IllnessRepository } from "../repositories/IllnessRepository";
+import { MeridianRepository } from "../repositories/MeridianRepository";
 
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
 let staffRepository: IStaffRepository;
+let appointmentRepository: IAppointmentRepository;
 let acupointRepository: IAcupointRepository;
 let acupointLocationRepository: IAcupointLocationRepository;
 let acupunctureRepository: IAcupunctureRepository;
@@ -104,6 +113,10 @@ acupointLocationRepository = new AcupointLocationRepository(acupointLocationData
 acupunctureRepository = new AcupunctureRepository(acupunctureDataSource);
 illnessRepository = new IllnessRepository(illnessDataSource);
 meridianRepository = new MeridianRepository(meridianDataSource);
+const appointmentDatasource = new AppointmentDataSource();
+patientRepository = new PatientRepository(patientDatasource);
+staffRepository = new StaffRepository(staffDataSource);
+appointmentRepository = new AppointmentRepository(appointmentDatasource);
 
 // Patient Use Cases
 export const addPatientUseCase = new AddPatientUseCase(patientRepository);
@@ -154,4 +167,9 @@ export const getMeridianListUseCase = new GetMeridianListUseCase(meridianReposit
 export const getMeridianByIdUseCase = new GetMeridianByIdUseCase(meridianRepository);
 export const updateMeridianUseCase = new UpdateMeridianUseCase(meridianRepository);
 export const deleteMeridianUsecase = new DeleteMeridianUseCase(meridianRepository);
+export const getAppointmentListUseCase = new GetAppointmentListUseCase(appointmentRepository);
+export const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepository);
+export const getAppointmentListByPatientIdUseCase = new GetAppointmentListByPatientIdUseCase(appointmentRepository);
+export const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepository);
+export const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepository);
 

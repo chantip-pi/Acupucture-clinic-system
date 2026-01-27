@@ -159,10 +159,10 @@ const StaffListView: React.FC = () => {
               headers={[
                 "Username",
                 "Name",
-                "Phone Number",
                 "Age",
                 "Gender",
                 "Role",
+                "Phone Number",
                 "Email",
                 ...(isManager ? [""] : []),
               ]}
@@ -188,12 +188,6 @@ const StaffListView: React.FC = () => {
                     className="px-4 py-3 text-md text-slate-900"
                     onClick={() => handleClickList(staff.username)}
                   >
-                    {staff.phoneNumber}
-                  </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
                     {DateTimeHelper.calculateAge(staff.birthday)}
                   </td>
                   <td
@@ -207,6 +201,12 @@ const StaffListView: React.FC = () => {
                     onClick={() => handleClickList(staff.username)}
                   >
                     {staff.title}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-md text-slate-900"
+                    onClick={() => handleClickList(staff.username)}
+                  >
+                    {staff.phoneNumber}
                   </td>
                   <td
                     className="px-4 py-3 text-md text-slate-900"
