@@ -26,3 +26,9 @@ export interface UpdateStaffDTO {
   title: string;
 }
 
+// DTO for staff name projection (used for doctor/nurse lists)
+export interface StaffNameDTO {
+  staffId: number;
+  nameSurname: string;
+}
+

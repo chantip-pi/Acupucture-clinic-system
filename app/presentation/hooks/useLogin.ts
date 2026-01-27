@@ -3,6 +3,7 @@ import { loginUseCase } from "~/infrastructure/di/container";
 import { LoginDTO } from "~/application/dtos/StaffDTO";
 import { Staff } from "~/domain/entities/Staff";
 import { setUserSession, UserSession } from "~/presentation/session/userSession";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useLogin() {
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,7 @@ export function useLogin() {
       const { password, ...sessionData } = staff;
       return sessionData;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to login. Please try again.";
+      const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);
       return null;
     } finally {
