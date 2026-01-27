@@ -2,8 +2,8 @@ import { Appointment } from "~/domain/entities/Appointment";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export class AppointmentDataSource {
-  // constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/appointments") {}
-  constructor(private readonly baseUrl: string = "http://localhost:3000/api/appointments") {}
+  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/appointments") {}
+  //constructor(private readonly baseUrl: string = "http://localhost:3000/api/appointments") {}
 
 
   private async handleResponse<T>(res: Response): Promise<T> {
