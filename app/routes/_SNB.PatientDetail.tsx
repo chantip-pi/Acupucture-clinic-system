@@ -236,15 +236,16 @@ function PatientDetail() {
           <InfoList
   items={[
     { label: "Name Surname", value: patientData.nameSurname ?? "N/A" },
-    { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
     { label: "Gender", value: patientData.gender ?? "N/A" },
-    { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
     {
       label: "Age",
       value: patientData
         ? DateTimeHelper.calculateAge(patientData.birthday)
         : "N/A",
     },
+    { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
+
+    { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
     { label: "Surgery History", value: patientData.surgeryHistory ?? "N/A" },
     {
       label: "Remaining Course",
