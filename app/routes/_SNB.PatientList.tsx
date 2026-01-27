@@ -32,9 +32,6 @@ const PatientList: React.FC = () => {
     navigate("/patientDetail");
   };
 
-  const handleSelectTreatment = () => {
-    navigate("/treatmentSelect");
-  };
 
   const handleAddPatient = () => {
     navigate("/addPatient");
@@ -98,11 +95,9 @@ const PatientList: React.FC = () => {
             headers={[
               // "Patient ID",
               "Name Surname",
-              "Phone Number",
               "Age",
               "Gender",
-              "Upcoming Appointment",
-              // "Remaining Course",
+              "Phone Number",
               "",
             ]}
           >
@@ -114,30 +109,19 @@ const PatientList: React.FC = () => {
               >
                 {/* <td className="px-4 py-3 text-md text-slate-900">{patient.patientId}</td> */}
                 <td className="px-4 py-3 text-md text-slate-900">{patient.nameSurname}</td>
-                <td className="px-4 py-3 text-md text-slate-900">{patient.phoneNumber}</td>
                 <td className="px-4 py-3 text-md text-slate-900">
                   {DateTimeHelper.calculateAge(patient.birthday)}
                 </td>
                 <td className="px-4 py-3 text-md text-slate-900">{patient.gender}</td>
-               
-                <td className="px-4 py-3 text-md text-slate-900">
-                   {/* TODO: replace with upcoming appointment datetime */}
-                  {DateTimeHelper.formatDateTime(patient.birthday)
-                    }
-                </td>
-                {/* <td className="px-4 py-3 text-md text-slate-900">{patient.remainingCourse}</td> */}
+                <td className="px-4 py-3 text-md text-slate-900">{patient.phoneNumber}</td>
                 <td className="px-4 py-3">
                   {/* TODO: ทำให้ปุ่มหายไปถ้าคนไข้มี appointment อยู่แล้ว */}
                   <Button
                     size="sm"
                     variant="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      {/* TODO: replace with pop up for creating appointment */}
-                      handleSelectTreatment();
-                    }}
+                    onClick={() => handlePatientDetail(patient.patientId)}
                   >
-                    Add Appointment
+                    View Details
                   </Button>
                 </td>
               </tr>

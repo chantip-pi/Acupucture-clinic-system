@@ -31,10 +31,11 @@ import { AppointmentDataSource } from "../datasource/AppointmentDatasource";
 import { PatientRepository } from "../repositories/PatientRepository";
 import { StaffRepository } from "../repositories/StaffRepository";
 import { AppointmentRepository } from "../repositories/AppointmentRepository";
-import { GetAppointmentByDoctorIdUseCase } from "~/application/use-cases/appointment/GetAppointmentByDoctorIdUseCase";
 import { GetAppointmentListUseCase } from "~/application/use-cases/appointment/GetAppointmentListUseCase";
 import { CreateAppointmentUseCase } from "~/application/use-cases/appointment/CreateAppointmentUseCase";
-
+import { GetAppointmentListByPatientIdUseCase } from "~/application/use-cases/appointment/GetAppointmentListByPatientId"; 
+import { UpdateAppointmentUseCase } from "~/application/use-cases/appointment/UpdateAppointmentUseCase"; 
+import { CancelAppointmentUseCase } from "~/application/use-cases/appointment/CancelAppointmentUseCase"; 
 
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
@@ -65,6 +66,8 @@ export const updateStaffUseCase = new UpdateStaffUseCase(staffRepository);
 export const deleteStaffUsecase = new DeleteStaffUseCase(staffRepository);
 
 export const getAppointmentListUseCase = new GetAppointmentListUseCase(appointmentRepository);
-export const getAppointmentByDoctorIdUseCase = new GetAppointmentByDoctorIdUseCase(appointmentRepository);
 export const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepository);
+export const getAppointmentListByPatientIdUseCase = new GetAppointmentListByPatientIdUseCase(appointmentRepository);
+export const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepository);
+export const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepository);
 

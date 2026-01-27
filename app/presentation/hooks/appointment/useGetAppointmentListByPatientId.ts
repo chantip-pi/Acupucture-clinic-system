@@ -1,30 +1,30 @@
 import { useState, useEffect } from "react";
-import { getAppointmentByDoctorIdUseCase } from "~/infrastructure/di/container";
+import { getAppointmentListByPatientIdUseCase } from "~/infrastructure/di/container";
 import { Appointment } from "~/domain/entities/Appointment";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
-export function useGetAppointmentById(id: number | null) {
-  const [appointment, setAppointment] = useState<Appointment | null>(null);
+export function useGetAppointmentListByPatientId(id: number | null) {
+  const [appointments, setAppointments] = useState<Appointment[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) {
-      setError("No appointment ID provided");
+      setError("No patient ID provided");
       setLoading(false);
       return;
     }
 
-    const fetchAppointment = async () => {
+    const fetchAppointments = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const data = await getAppointmentByDoctorIdUseCase.execute(id);
+        const data = await getAppointmentListByPatientIdUseCase.execute(id);
         if (data) {
-          setAppointment(data);
+          setAppointments(data);
         } else {
-          setError("No data found for this appointment ID.");
+          setError("No data found for this patient ID.");
         }
       } catch (err) {
         const errorMessage = BackendErrorService.getErrorMessage(err);
@@ -35,9 +35,9 @@ export function useGetAppointmentById(id: number | null) {
       }
     };
 
-    fetchAppointment();
+    fetchAppointments();
   }, [id]);
 
-  return { appointment, loading, error };
+  return { appointments, loading, error };
 }
 

@@ -18,21 +18,13 @@ export class AppointmentDataSource {
     return this.handleResponse<Appointment[]>(res);
   }
 
-  async getByDoctorId(doctorId: number): Promise<Appointment | null> {
-    // Backend route: GET /api/appointment/id/:appointmentId
-    const res = await fetch(`${this.baseUrl}/doctor/${doctorId}`, {
-      method: "GET",
-    });
-    if (res.status === 404) return null;
-    return this.handleResponse<Appointment>(res);
-  }
 
-  async getByPatientId(patientId: number): Promise<Appointment | null> {
+  async getListByPatientId(patientId: number): Promise<Appointment[] | null> {
     const res = await fetch(`${this.baseUrl}/patient/${patientId}`, {
       method: "GET",
     });
     if (res.status === 404) return null;
-    return this.handleResponse<Appointment>(res);
+    return this.handleResponse<Appointment[]>(res);
   }
 
 
@@ -52,6 +44,17 @@ export class AppointmentDataSource {
       body: JSON.stringify(appointment),
     });
     return this.handleResponse<Appointment>(res);
+  }
+
+  async cancel(appointmentId: number): Promise<Appointment> {
+    const res = await fetch(`${this.baseUrl}/${appointmentId}`, {
+      method: "PUT",
+    });
+    if (!res.ok) {
+      await BackendErrorService.handleErrorResponse(res);
+    }
+    return this.handleResponse<Appointment>(res);
+
   }
 
 }

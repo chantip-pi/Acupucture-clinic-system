@@ -5,22 +5,22 @@ import { useNavigate } from "@remix-run/react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import {
-  Button,
-  Card,
-  Input,
-  SectionHeading,
-  Table,
-} from "~/presentation/designSystem";
+import { Button, Card, Input, SectionHeading } from "~/presentation/designSystem";
 import { useGetAppointmentList } from "~/presentation/hooks/appointment/useGetAppointmentList";
 import { Appointment } from "~/domain/entities/Appointment";
-import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import AddAppointmentDialog from "./components/common/AddAppointmentDialog";
+import EditAppointmentDialog from "./components/common/EditAppointmentDialog";
 import { useGetDoctorList } from "~/presentation/hooks/staff/useGetDoctorList";
 import { useGetPatientList } from "~/presentation/hooks/patient/useGetPatientList";
 import { useCreateAppointment } from "~/presentation/hooks/appointment/useCreateAppointment";
+import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdateAppointment";
+import { useCancelAppointment } from "~/presentation/hooks/appointment/useCancelAppointment";
+import ConfirmDialog from "./components/common/ConfirmDialog";
+import AppointmentTable from "./components/AppointmentTable";
+
+
 
 const AppointmentList: React.FC = () => {
   const navigate = useNavigate();
@@ -30,7 +30,10 @@ const AppointmentList: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [specificDate, setSpecificDate] = useState<Date | null>(null);
   const [monthFilter, setMonthFilter] = useState<Date | null>(null);
-  const [showDialog, setShowDialog] = useState(false);
+
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Form state
   const [selectedPatient, setSelectedPatient] = useState<number | null>(null);
@@ -42,7 +45,13 @@ const AppointmentList: React.FC = () => {
   const { doctors } = useGetDoctorList();
   const { patients } = useGetPatientList();
   const { createAppointment, loading: createAppointmentLoading, error: createAppointmentError } = useCreateAppointment();
-  
+  const { updateAppointment, loading: updateAppointmentLoading, error: updateAppointmentError } = useUpdateAppointment();
+  const { cancelAppointment, loading: cancelAppointmentLoading, error: cancelAppointmentError} = useCancelAppointment();
+
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [editDate, setEditDate] = useState<Date | null>(null);
+  const [editReason, setEditReason] = useState<string>("");
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
@@ -75,13 +84,76 @@ const AppointmentList: React.FC = () => {
     }
   };
 
-  const handleAppointmentDetail = (appointmentId: number) => {
-    sessionStorage.setItem("currentAppointmentID", JSON.stringify(appointmentId));
-    // navigate("/appointmentDetail");
+  const handleUpdateAppointment = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setEditDate(new Date(appointment.appointmentDateTime));
+    setEditReason(appointment.reason || "");
+    setFormError("");
+    setShowEditDialog(true);
+  };
+
+  const handleSubmitUpdateAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    setFormError("");
+
+    // Validation
+    if (!editDate) {
+      setFormError("Please select an appointment date");
+      return;
+    }
+    if (!editReason.trim()) {
+      setFormError("Please provide a reason for the appointment");
+      return;
+    }
+
+    const appointmentDate = editDate.toISOString();
+
+    const result = await updateAppointment({
+      appointmentId: selectedAppointment.appointmentId,
+      appointmentDateTime: appointmentDate,
+      patientId: selectedAppointment.patientId,
+      doctorId: selectedAppointment.doctorId,
+      reason: editReason.trim(),
+      status: selectedAppointment.status,
+      patientName: selectedAppointment.patientName,
+      doctorName: selectedAppointment.doctorName,
+    });
+
+    if (result.success) {
+      handleCloseDialog();
+      window.location.reload(); // Refresh the appointment list
+    } else {
+      setFormError(result.error || "Failed to update appointment");
+    }
+  };
+
+  const handleCancelAppointment = async () => {
+    if (!selectedAppointment) return;
+
+    setFormError("");
+
+    const result = await cancelAppointment({
+      appointmentId: selectedAppointment.appointmentId,
+      appointmentDateTime: selectedAppointment.appointmentDateTime,
+      patientId: selectedAppointment.patientId,
+      doctorId: selectedAppointment.doctorId,
+      reason: selectedAppointment.reason,
+      status: "canceled",
+      patientName: selectedAppointment.patientName,
+      doctorName: selectedAppointment.doctorName,
+    });
+
+    if (result.success) {
+      handleCloseDialog();
+      window.location.reload(); // Refresh the appointment list
+    } else {
+      setFormError(result.error || "Failed to cancel appointment");
+    }
   };
 
   const handleAddAppointment = () => {
-    setShowDialog(true);
+    setShowAddDialog(true);
     // Reset form
     setSelectedPatient(null);
     setSelectedDoctor(null);
@@ -91,11 +163,15 @@ const AppointmentList: React.FC = () => {
   };
 
   const handleCloseDialog = () => {
-    setShowDialog(false);
+    setShowAddDialog(false);
+    setShowEditDialog(false);
     setSelectedPatient(null);
     setSelectedDoctor(null);
     setSelectedDate(null);
     setReason("");
+    setSelectedAppointment(null);
+    setEditDate(null);
+    setEditReason("");
     setFormError("");
   };
 
@@ -141,22 +217,6 @@ const AppointmentList: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "scheduled":
-      case "confirmed":
-        return "text-blue-600 bg-blue-50 px-2 py-1 rounded";
-      case "completed":
-        return "text-green-600 bg-green-50 px-2 py-1 rounded";
-      case "canceled":
-        return "text-red-600 bg-red-50 px-2 py-1 rounded";
-      case "no-show":
-        return "text-gray-600 bg-gray-50 px-2 py-1 rounded";
-      default:
-        return "text-slate-600 bg-slate-50 px-2 py-1 rounded";
-    }
-  };
-
   const filterByDate = (appointment: Appointment) => {
     if (dateFilter === "all") return true;
 
@@ -195,7 +255,7 @@ const AppointmentList: React.FC = () => {
 
   const filteredAppointments = useMemo(() => {
     const now = new Date();
-    
+
     // First filter the appointments
     const filtered = appointmentList.filter((appointment) => {
       const matchesSearch =
@@ -263,8 +323,8 @@ const AppointmentList: React.FC = () => {
   return (
     <div className="flex min-h-screen bg-surface-muted">
       <main className="flex-1 p-8">
-        <AddAppointmentDialog 
-          isOpen={showDialog} 
+        <AddAppointmentDialog
+          isOpen={showAddDialog}
           doctors={doctors.map(doctor => ({ id: doctor.staffId, nameSurname: doctor.nameSurname }))}
           patients={patients.map(patient => ({ id: patient.patientId, nameSurname: patient.nameSurname }))}
           selectedPatient={selectedPatient}
@@ -280,6 +340,32 @@ const AppointmentList: React.FC = () => {
           onClose={handleCloseDialog}
           isLoading={createAppointmentLoading}
         />
+
+        <EditAppointmentDialog
+          isOpen={showEditDialog}
+          onEditAppointment={handleSubmitUpdateAppointment}
+          onCancelAppointment={() => setShowConfirmDialog(true)}
+          onClose={handleCloseDialog}
+          selectedPatientName={selectedAppointment?.patientName || ""}
+          selectedDoctorName={selectedAppointment?.doctorName || ""}
+          selectedDate={editDate}
+          reason={editReason}
+          formError={formError}
+          onDateChange={setEditDate}
+          onReasonChange={setEditReason}
+          isLoading={updateAppointmentLoading}
+        />
+
+<ConfirmDialog
+            isOpen={showConfirmDialog}
+            title={"Cancel Appointment"}
+            message="Do you really want to cancel this appointment?"
+            cancelText="No"
+            confirmText="Yes"
+            isLoading={updateAppointmentLoading}
+            onConfirm={handleCancelAppointment}
+            onCancel={() => setShowConfirmDialog(false)}
+          />
         <Card>
           <div className="flex items-center justify-between mb-6">
             <SectionHeading title="Appointment List" />
@@ -321,7 +407,7 @@ const AppointmentList: React.FC = () => {
                 <option value="all">All Status</option>
                 <option value="scheduled">Scheduled</option>
                 <option value="completed">Completed</option>
-                <option value="canceled">Cancelled</option>
+                <option value="canceled">Canceled</option>
               </select>
             </div>
 
@@ -384,60 +470,12 @@ const AppointmentList: React.FC = () => {
             Showing {filteredAppointments.length} of {appointmentList.length} appointments
           </div>
 
-          <Table
-            headers={[
-              "Patient Name",
-              "Date & Time",
-              "Doctor Name",
-              "Reason",
-              "Status",
-              "",
-            ]}
-          >
-            {filteredAppointments.map((appointment: Appointment) => (
-              <tr
-                key={appointment.appointmentId}
-                className="cursor-pointer hover:bg-slate-50"
-                onClick={() => handleAppointmentDetail(appointment.appointmentId)}
-              >
-                <td className="px-4 py-3 text-md text-slate-900 font-medium">
-                  {appointment.patientName}
-                </td>
-                <td className="px-4 py-3 text-md text-slate-900">
-                  {DateTimeHelper.formatDateTime(appointment.appointmentDateTime, 'EEEE, d MMMM yyyy HH:mm')}
-                </td>
-                <td className="px-4 py-3 text-md text-slate-900">
-                  {appointment.doctorName}
-                </td>
-                <td className="px-4 py-3 text-md text-slate-700">
-                  {appointment.reason || "-"}
-                </td>
-                <td className="px-4 py-3 text-md">
-                  <span className={getStatusColor(appointment.status)}>
-                    {appointment.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAppointmentDetail(appointment.appointmentId);
-                    }}
-                  >
-                    View Details
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </Table>
-
-          {filteredAppointments.length === 0 && (
-            <div className="text-center py-8 text-slate-500">
-              No appointments found matching your filters
-            </div>
-          )}
+          <AppointmentTable
+            appointments={filteredAppointments}
+            onEdit={handleUpdateAppointment}
+            allowEditStatuses={["scheduled"]}
+            emptyMessage="No appointments found matching your filters"
+          />
         </Card>
       </main>
     </div>

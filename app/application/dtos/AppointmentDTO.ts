@@ -11,6 +11,7 @@ export interface CreateAppointmentDTO {
   export interface UpdateAppointmentDTO {
     patientId: number;
     doctorId: number;
+    appointmentId: number;
     appointmentDateTime: string;
     patientName: string;
     doctorName: string;

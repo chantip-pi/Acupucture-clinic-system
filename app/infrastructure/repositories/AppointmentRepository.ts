@@ -12,12 +12,8 @@ export class AppointmentRepository implements IAppointmentRepository {
   }
 
 
-  async getByPatientId(id: number): Promise<Appointment | null> {
-    return this.dataSource.getByPatientId(id);
-  }
-
-  async getByDoctorId(id: number): Promise<Appointment | null> {
-    return this.dataSource.getByDoctorId(id);
+  async getListByPatientId(id: number): Promise<Appointment[] | null> {
+    return this.dataSource.getListByPatientId(id);
   }
 
 
@@ -26,6 +22,10 @@ export class AppointmentRepository implements IAppointmentRepository {
   }
 
   async update(appointment: Appointment): Promise<Appointment> {
+    return this.dataSource.update(appointment);
+  }
+
+  async cancel(appointment: Appointment): Promise<Appointment> {
     return this.dataSource.update(appointment);
   }
 

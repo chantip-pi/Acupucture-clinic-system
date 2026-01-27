@@ -3,6 +3,7 @@ import { staffDatasource } from "~/infrastructure/datasource/StaffDataSource";
 import { StaffNameDTO } from "~/application/dtos/StaffDTO";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
+
 export function useGetNurseList() {
   const [nurses, setNurses] = useState<StaffNameDTO[]>([]);
   const [loading, setLoading] = useState(true);
