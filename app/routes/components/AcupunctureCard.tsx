@@ -5,6 +5,7 @@ import type { Meridian } from "~/domain/entities/Meridian";
 type ViewSide = string;
 
 interface AcupuncturePoint {
+  acupunctureId: number;
   acupointCode: string;
   acupointName: string;
   x: number; // pointLeft as percentage

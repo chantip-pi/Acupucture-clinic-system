@@ -15,10 +15,13 @@ import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGe
 import { Acupoint } from "~/domain/entities/Acupoint";
 import { AcupointLocation } from "~/domain/entities/AcupointLocation";
 import { Meridian } from "~/domain/entities/Meridian";
+import { Acupuncture } from "~/domain/entities/Acupuncture";
+import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 
 type ViewSide = string;
 
 interface AcupuncturePoint {
+  acupunctureId: number;
   acupointCode: string;
   acupointName: string;
   x: number; // pointLeft as percentage
@@ -47,6 +50,7 @@ function AcupunctureSelect() {
     useGetAcupointLocationList();
   const { meridians, loading: meridiansLoading } = useGetMeridianList();
   const { regions, loading: regionsLoading } = useGetMeridianRegion();
+  const { acupunctures, loading: acupuncturesLoading } = useGetAcupunctureList();
 
   const getRegionName = (regionObj: any): string | null => {
     if (typeof regionObj === "string") return regionObj;
@@ -76,6 +80,14 @@ function AcupunctureSelect() {
     });
     return map;
   }, [meridians]);
+
+  const acupunctureMap = useMemo(() => {
+    const map = new Map<number, Acupuncture>();
+    acupunctures.forEach((acupuncture) => {
+      map.set(acupuncture.acupunctureId, acupuncture);
+    });
+    return map;
+  }, [acupunctures]);
 
   const meridiansByRegionSide = useMemo(() => {
     const map = new Map<string, Meridian[]>();
@@ -107,8 +119,22 @@ function AcupunctureSelect() {
       }
 
       const acupoint = acupointMap.get(location.acupointCode);
+
       if (acupoint) {
+        // Find the acupuncture record matching this acupoint code and meridian ID
+        let acupunctureId = 0;
+        for (const acupuncture of acupunctures) {
+          if (
+            acupuncture.acupointCode === location.acupointCode &&
+            acupuncture.meridianId === location.meridianId
+          ) {
+            acupunctureId = acupuncture.acupunctureId;
+            break;
+          }
+        }
+
         meridianMapForRegion.get(location.meridianId)!.push({
+          acupunctureId: acupunctureId,
           acupointCode: acupoint.acupointCode,
           acupointName: acupoint.acupointName,
           x: location.pointLeft,
@@ -121,7 +147,7 @@ function AcupunctureSelect() {
     });
 
     return map;
-  }, [acupointLocations, acupointMap, meridianMap]);
+  }, [acupointLocations, acupointMap, meridianMap, acupunctures]);
 
   const [selectedRegions, setSelectedRegions] = useState<string[]>(() => {
     if (regions && regions.length > 0) {
@@ -226,11 +252,12 @@ function AcupunctureSelect() {
   const handleSave = async () => {
     const saveData = {
       selectedPoints: selectedPoints.map((point) => ({
-        acupointCode: point.acupointCode,
-        meridianId: point.meridianId,
-        locationId: point.locationId,
-        region: point.region,
-        side: point.side,
+        acupunctureId: point.acupunctureId,
+        // acupointCode: point.acupointCode,
+        // meridianId: point.meridianId,
+        // locationId: point.locationId,
+        // region: point.region,
+        // side: point.side,
       })),
       timestamp: new Date().toISOString(),
     };
