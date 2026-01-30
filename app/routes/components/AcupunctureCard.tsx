@@ -43,7 +43,7 @@ const defaultViews: Record<ViewSide, boolean> = {
 };
 
 function AcupunctureCard() {
-  const { acupoints, loading: acupointsLoading } = useGetAcupointList(null);
+  const { acupoints, loading: acupointsLoading } = useGetAcupointList();
   const { acupointLocations, loading: locationsLoading } = useGetAcupointLocationList();
   const { meridians, loading: meridiansLoading } = useGetMeridianList();
 

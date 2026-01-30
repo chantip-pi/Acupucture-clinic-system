@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getMeridianByIdUseCase } from "~/infrastructure/di/container";
 import { Meridian } from "~/domain/entities/Meridian";
 
-export function useGetMeridianById(meridianId: number | null) {
+export function useGetMeridianById(meridianId?: number) {
   const [meridian, setMeridian] = useState<Meridian | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

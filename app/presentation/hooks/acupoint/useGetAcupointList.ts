@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getAcupointListUseCase } from "~/infrastructure/di/container";
 import { Acupoint } from "~/domain/entities/Acupoint";
 
-export function useGetAcupointList(acupointCodes: string[] | null) {
+export function useGetAcupointList(acupointCodes: string[] = []) {
   const [acupoints, setAcupoints] = useState<Acupoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

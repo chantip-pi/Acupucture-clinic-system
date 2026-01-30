@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getIllnessByIdUseCase } from "~/infrastructure/di/container";
 import { Illness } from "~/domain/entities/Illness";
 
-export function useGetIllnessById(illnessId: number | null) {
+export function useGetIllnessById(illnessId?: number) {
   const [illness, setIllness] = useState<Illness | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

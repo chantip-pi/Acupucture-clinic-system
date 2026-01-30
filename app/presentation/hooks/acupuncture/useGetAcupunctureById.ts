@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getAcupunctureByIdUseCase } from "~/infrastructure/di/container";
 import { Acupuncture } from "~/domain/entities/Acupuncture";
 
-export function useGetAcupunctureById(acupunctureId: number | null) {
+export function useGetAcupunctureById(acupunctureId?: number) {
   const [acupuncture, setAcupuncture] = useState<Acupuncture | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { getAcupointByCodeUseCase } from "~/infrastructure/di/container";
 import { Acupoint } from "~/domain/entities/Acupoint";
 
-export function useGetAcupointByCode(acupointCode: string | null) {
+export function useGetAcupointByCode(acupointCode?: string ) {
   const [acupoint, setAcupoint] = useState<Acupoint | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
