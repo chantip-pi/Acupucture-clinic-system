@@ -13,6 +13,14 @@ export class MeridianRepository implements IMeridianRepository {
     return this.dataSource.getById(id);
   }
 
+  async getAvailableRegions(): Promise<string[]> {
+      return this.dataSource.getAvailableRegions();
+  }
+
+  async getSidesByRegion(region: string[]): Promise<Record<string, string[]>> {
+      return this.dataSource.getSidesByRegion(region);
+  }
+
   async create(meridian: Meridian): Promise<Meridian> {
     return this.dataSource.create(meridian);
   }

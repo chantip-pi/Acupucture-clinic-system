@@ -30,6 +30,20 @@ export class MeridianDataSource {
     return this.handleResponse<Meridian>(res);
   }
 
+  async getAvailableRegions(): Promise<string[]> {
+    const res = await fetch(`${this.baseUrl}/regions`, {
+      method: "GET",
+    });
+    return this.handleResponse<string[]>(res);
+  }
+
+  async getSidesByRegion(region: string[]):Promise<Record<string, string[]>> {
+    const res = await fetch(`${this.baseUrl}/regions/{${region}}`, {
+      method: "GET",
+    });
+    return this.handleResponse<Promise<Record<string, string[]>>>(res);
+  }
+
   async create(meridian: Omit<Meridian, "meridianId">): Promise<Meridian> {
     const res = await fetch(this.baseUrl, {
       method: "POST",

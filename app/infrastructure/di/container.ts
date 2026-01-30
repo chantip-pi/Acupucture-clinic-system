@@ -58,6 +58,8 @@ import { GetMeridianListUseCase } from "~/application/use-cases/meridian/GetMeri
 import { GetMeridianByIdUseCase } from "~/application/use-cases/meridian/GetMeridianByIdUseCase";
 import { UpdateMeridianUseCase } from "~/application/use-cases/meridian/UpdateMeridianUseCase";
 import { DeleteMeridianUseCase } from "~/application/use-cases/meridian/DeleteMeridianUseCase";
+import { GetMeridianRegionUseCase } from "~/application/use-cases/meridian/GetMeridianRegionUseCase";
+import { GetMeridianSideByRegionUseCase } from "~/application/use-cases/meridian/GetMeridianSideByRegionUseCase";
 
 // ===== Data Sources =====
 import { MockDataSource } from "../datasource/MockDataSource";
@@ -165,6 +167,8 @@ export const deleteIllnessUsecase = new DeleteIllnessUseCase(illnessRepository);
 export const addMeridianUseCase = new AddMeridianUseCase(meridianRepository);
 export const getMeridianListUseCase = new GetMeridianListUseCase(meridianRepository);
 export const getMeridianByIdUseCase = new GetMeridianByIdUseCase(meridianRepository);
+export const getMeridianRegionUseCase = new GetMeridianRegionUseCase(meridianRepository);
+export const getMeridianSideByRegionUseCase = new GetMeridianSideByRegionUseCase(meridianRepository);
 export const updateMeridianUseCase = new UpdateMeridianUseCase(meridianRepository);
 export const deleteMeridianUsecase = new DeleteMeridianUseCase(meridianRepository);
 export const getAppointmentListUseCase = new GetAppointmentListUseCase(appointmentRepository);
