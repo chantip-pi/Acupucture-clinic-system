@@ -1,0 +1,27 @@
+import { IMeridianRepository } from "~/domain/repositories/IMeridianRepository";
+import { Meridian } from "~/domain/entities/Meridian";
+import { MeridianDataSource } from "~/infrastructure/datasource/MeridianDataSource";
+
+export class MeridianRepository implements IMeridianRepository {
+  constructor(private readonly dataSource: MeridianDataSource) {}
+
+  async getAll(): Promise<Meridian[]> {
+    return this.dataSource.getAll();
+  }
+  
+  async getById(id: number): Promise<Meridian | null> {
+    return this.dataSource.getById(id);
+  }
+
+  async create(meridian: Meridian): Promise<Meridian> {
+    return this.dataSource.create(meridian);
+  }
+
+  async update(meridian: Meridian): Promise<Meridian> {
+    return this.dataSource.update(meridian);
+  }
+
+  async delete(id: number): Promise<void> {
+    return this.dataSource.delete(id);
+  }
+}
