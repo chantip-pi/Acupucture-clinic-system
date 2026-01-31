@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getAcupointLocationByIdUseCase } from "~/infrastructure/di/container";
 import { AcupointLocation } from "~/domain/entities/AcupointLocation";
 
-export function useGetAcupointLocationById(acupointLocationId: number | null) {
+export function useGetAcupointLocationById(acupointLocationId?: number) {
   const [acupointLocation, setAcupointLocation] = useState<AcupointLocation | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
