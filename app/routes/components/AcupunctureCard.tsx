@@ -49,10 +49,9 @@ function AcupunctureCard({
   onMeridianToggle,
 }: AcupunctureCardProps) {
   const isPointSelected = (
-    acupointCode: string,
-    meridianId: number,
+    acupunctureId: number,
   ): boolean => {
-    const pointKey = `${bodyPart}-${side}-${meridianId}-${acupointCode}`;
+    const pointKey = `${bodyPart}-${side}-${acupunctureId}`;
     return selectedPoints.some((p) => p.key === pointKey);
   };
   return (
@@ -77,8 +76,7 @@ function AcupunctureCard({
               <div className="absolute inset-0">
                 {visiblePoints.map((point) => {
                   const selected = isPointSelected(
-                    point.acupointCode,
-                    point.meridianId,
+                    point.acupunctureId,
                   );
 
                   return (

@@ -7,16 +7,16 @@ import {
   Table,
 } from "~/presentation/designSystem";
 import AcupunctureCard from "./components/AcupunctureCard";
+import MultiSelectDropdown from "./components/MultiSelectDropdown";
 import { useGetAcupointList } from "~/presentation/hooks/acupoint/useGetAcupointList";
 import { useGetAcupointLocationList } from "~/presentation/hooks/acupointLocation/useGetAcupointLocationList";
 import { useGetMeridianRegion } from "~/presentation/hooks/meridian/useGetMeridianRegion";
 import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
 import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGetMeridianSidesByRegion";
 import { Acupoint } from "~/domain/entities/Acupoint";
-import { AcupointLocation } from "~/domain/entities/AcupointLocation";
 import { Meridian } from "~/domain/entities/Meridian";
-import { Acupuncture } from "~/domain/entities/Acupuncture";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
+import { useAddMedicalRecordAcupuncture } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useAddMedicalRecordAcupuncture";
 
 type ViewSide = string;
 
@@ -37,13 +37,6 @@ interface SelectedPoint extends AcupuncturePoint {
   key: string;
 }
 
-const defaultViews: Record<ViewSide, boolean> = {
-  front: false,
-  back: false,
-  left: false,
-  right: false,
-};
-
 function AcupunctureSelect() {
   const { acupoints, loading: acupointsLoading } = useGetAcupointList(null);
   const { acupointLocations, loading: locationsLoading } =
@@ -51,6 +44,7 @@ function AcupunctureSelect() {
   const { meridians, loading: meridiansLoading } = useGetMeridianList();
   const { regions, loading: regionsLoading } = useGetMeridianRegion();
   const { acupunctures, loading: acupuncturesLoading } = useGetAcupunctureList();
+  const { addMedicalRecordAcupuncture, loading: medicalRecordAcupunctureLoading, error: medicalRecordAcupuncture } = useAddMedicalRecordAcupuncture();
 
   const getRegionName = (regionObj: any): string | null => {
     if (typeof regionObj === "string") return regionObj;
@@ -63,7 +57,7 @@ function AcupunctureSelect() {
   };
 
   const loading =
-    acupointsLoading || locationsLoading || meridiansLoading || regionsLoading;
+    acupointsLoading || locationsLoading || meridiansLoading || regionsLoading || acupuncturesLoading;
 
   const acupointMap = useMemo(() => {
     const map = new Map<string, Acupoint>();
@@ -82,9 +76,10 @@ function AcupunctureSelect() {
   }, [meridians]);
 
   const acupunctureMap = useMemo(() => {
-    const map = new Map<number, Acupuncture>();
+    const map = new Map<string, number>();
     acupunctures.forEach((acupuncture) => {
-      map.set(acupuncture.acupunctureId, acupuncture);
+      const key = `${acupuncture.acupointCode}-${acupuncture.meridianId}`;
+      map.set(key, acupuncture.acupunctureId);
     });
     return map;
   }, [acupunctures]);
@@ -121,17 +116,9 @@ function AcupunctureSelect() {
       const acupoint = acupointMap.get(location.acupointCode);
 
       if (acupoint) {
-        // Find the acupuncture record matching this acupoint code and meridian ID
-        let acupunctureId = 0;
-        for (const acupuncture of acupunctures) {
-          if (
-            acupuncture.acupointCode === location.acupointCode &&
-            acupuncture.meridianId === location.meridianId
-          ) {
-            acupunctureId = acupuncture.acupunctureId;
-            break;
-          }
-        }
+        // Get acupunctureId from the acupuncture map using the composite key
+        const acupunctureKey = `${location.acupointCode}-${location.meridianId}`;
+        const acupunctureId = acupunctureMap.get(acupunctureKey) || 0;
 
         meridianMapForRegion.get(location.meridianId)!.push({
           acupunctureId: acupunctureId,
@@ -147,25 +134,9 @@ function AcupunctureSelect() {
     });
 
     return map;
-  }, [acupointLocations, acupointMap, meridianMap, acupunctures]);
+  }, [acupointLocations, acupointMap, meridianMap, acupunctureMap]);
 
-  const [selectedRegions, setSelectedRegions] = useState<string[]>(() => {
-    if (regions && regions.length > 0) {
-      const firstRegion = regions[0];
-      const regionName = getRegionName(firstRegion);
-      return regionName ? [regionName] : [];
-    }
-    return [];
-  });
-
-  useEffect(() => {
-    if (regions && regions.length > 0 && selectedRegions.length === 0) {
-      const first = getRegionName(regions[0]);
-      if (first) {
-        setSelectedRegions([first]);
-      }
-    }
-  }, [regions]);
+  const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
 
   const [selectedPoints, setSelectedPoints] = useState<SelectedPoint[]>([]);
 
@@ -231,7 +202,7 @@ function AcupunctureSelect() {
     region: string,
     side: string,
   ) => {
-    const pointKey = `${region}-${side}-${point.meridianId}-${point.acupointCode}`;
+    const pointKey = `${region}-${side}-${point.acupunctureId}`;
     const existingIndex = selectedPoints.findIndex((p) => p.key === pointKey);
 
     if (existingIndex >= 0) {
@@ -253,24 +224,24 @@ function AcupunctureSelect() {
     const saveData = {
       selectedPoints: selectedPoints.map((point) => ({
         acupunctureId: point.acupunctureId,
-        // acupointCode: point.acupointCode,
-        // meridianId: point.meridianId,
-        // locationId: point.locationId,
-        // region: point.region,
-        // side: point.side,
       })),
       timestamp: new Date().toISOString(),
     };
 
     console.log("Saving points:", saveData);
-    // TODO: Implement database save
-    // await fetch('/api/medical-record-acupuncture', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(saveData)
-    // });
-
-    alert(`Saved ${selectedPoints.length} acupuncture points to database`);
+    try {
+      for (const point of selectedPoints) {
+        await addMedicalRecordAcupuncture({
+          recordId: 1, // Replace with actual recordId
+          acupunctureId: point.acupunctureId,
+        });
+      }
+      alert(`Saved ${selectedPoints.length} acupuncture points to database`);
+    } catch (error) {
+      console.error("Error saving acupuncture points:", error);
+      alert("Failed to save acupuncture points. Please try again.");
+      return;
+    }
   };
 
   const getVisiblePointsForRegionSide = (
@@ -364,30 +335,15 @@ function AcupunctureSelect() {
           description="Choose body part for acupuncture"
         />
 
-        {/* Region selector */}
-        <div className="mb-6 flex flex-wrap gap-3">
-          {regions.map((regionObj, index) => {
-            const regionName = getRegionName(regionObj);
-
-            if (!regionName) {
-              console.warn("Invalid region object:", regionObj);
-              return null;
-            }
-
-            return (
-              <Button
-                key={`${regionName}-${index}`}
-                variant={
-                  selectedRegions.includes(regionName) ? "primary" : "secondary"
-                }
-                onClick={() => toggleRegion(regionName)}
-              >
-                {regionName && typeof regionName === "string"
-                  ? regionName.charAt(0).toUpperCase() + regionName.slice(1)
-                  : ""}
-              </Button>
-            );
-          })}
+        {/* Region multi-select dropdown */}
+        <div className="mb-6">
+          <MultiSelectDropdown
+            choices={regions}
+            selectedChoices={selectedRegions}
+            onToggleChoice={toggleRegion}
+            getChoiceName={getRegionName}
+            dropdownPlaceholder="body parts"
+          />
         </div>
 
         {/* Selected regions */}
