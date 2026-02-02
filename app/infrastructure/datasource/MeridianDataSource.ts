@@ -23,7 +23,7 @@ export class MeridianDataSource {
   }
 
   async getById(meridianId: number): Promise<Meridian | null> {
-    const res = await fetch(`${this.baseUrl}/${meridianId}`, {
+    const res = await fetch(`${this.baseUrl}/meridian/${meridianId}`, {
       method: "GET",
     });
     if (res.status === 404) return null;
