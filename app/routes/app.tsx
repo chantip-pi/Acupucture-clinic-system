@@ -10,7 +10,7 @@ import EditPatient from './_SNB.EditPatient';
 import PatientDetail from './_SNB.PatientDetail';
 import LogIn from './LogIn';
 import AddStaff from './_SNB.AddStaff';
-
+import CreateMedicalRecord from './_SNB.CreateMedicalRecord'
 function App() {
   return (
     <Router>
@@ -25,6 +25,7 @@ function App() {
         <Route path="/patientDetail" element={<PatientDetail />} />
         <Route path="/logIn" element={<LogIn/>}/>
         <Route path="/addStaff" element={<AddStaff/>}/>
+        <Route path="/createMedicalRecord" element={<CreateMedicalRecord/>}/>
       </Routes>
     </Router>
   );
