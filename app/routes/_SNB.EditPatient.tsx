@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, FormEvent } from "react";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Button,
   Card,
@@ -15,19 +15,14 @@ import { useDeletePatient } from "~/presentation/hooks/patient/useDeletePatient"
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import ConfirmDialog from "./components/common/ConfirmDialog";
-import { safeSessionGet } from "~/presentation/session/storageUtils";
 
 function EditPatient() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDialog, setShowDialog] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const patientId = useMemo(() => {
-    const stored = safeSessionGet("currentPatientID");
-    if (!stored) return null;
-    const id = stored.replace(/^"|"$/g, "");
-    return id === "Guest" ? null : Number(id);
-  }, []);
+  const { patientId } = (location.state as { patientId?: number } | null) || {};
 
   const { patient, loading, error } = useGetPatientById(patientId);
   const { updatePatient, loading: updateLoading, error: updateError } =

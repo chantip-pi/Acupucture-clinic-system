@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 import SideNavBar from "./_SNB";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
   Button,
@@ -15,7 +15,6 @@ import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import { useGetStaffList } from "~/presentation/hooks/staff/useGetStaffList";
 import { Staff } from "~/domain/entities/Staff";
 import { getUserSession } from "~/presentation/session/userSession";
-import { setSelectedStaffUsername } from "~/presentation/session/staffSelectionSession";
 import ErrorPage from "~/routes/components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import { DateOfBirth } from "~/domain/value-objects/DateOfBirth";
@@ -81,8 +80,9 @@ const StaffListView: React.FC = () => {
   };
 
   const handleClickList = (username: string) => {
-    setSelectedStaffUsername(username);
-    navigate("/staffDetail");
+    navigate("/staffDetail", {
+      state: { username },
+    });
   };
   // If we haven't checked the session yet, show loading
   if (!hasCheckedSession) {
