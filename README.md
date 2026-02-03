@@ -90,7 +90,7 @@ type UserSession = {
   birthday: string;
   gender: string;
   email: string;
-  role: string; // "Manager", "Doctor", "Nurse", "Staff"
+  role: string; // "Manager", "Doctor","Staff"
   // password is excluded
 }
 ```
@@ -109,7 +109,7 @@ The application implements role-based access control with the following roles:
 #### Roles
 - **Manager**: Full access to all features including staff management
 - **Doctor**: Limited access (view-only for staff management)
-- **Nurse**: Limited access (view-only for staff management)
+- **Staff**: Limited access (view-only for staff management)
 - **Staff**: Limited access (view-only for staff management)
 
 #### Access Control Implementation
@@ -266,7 +266,7 @@ const handleLogOut = () => {
    - Access all routes including `/editStaff`, `/addStaff`
    - Can add/edit/delete staff members
 
-2. **Login as Non-Manager** (Doctor/Nurse/Staff):
+2. **Login as Non-Manager** (Doctor/Staff/Staff):
    - Can view `/staffListView` but cannot add/edit
    - Direct access to `/editStaff` or `/addStaff` shows error page
    - Error page includes "Go Back" button

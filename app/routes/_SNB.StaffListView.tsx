@@ -12,7 +12,7 @@ import {
   Table,
 } from "~/presentation/designSystem";
 import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
-import { useGetStaffList } from "~/presentation/hooks/staff/useGetStaffList";
+import { useGetStaffDoctorList } from "~/presentation/hooks/staff/useGetStaffDoctorList";
 import { Staff } from "~/domain/entities/Staff";
 import { getUserSession } from "~/presentation/session/userSession";
 import ErrorPage from "~/routes/components/common/ErrorPage";
@@ -20,7 +20,7 @@ import LoadingPage from "./components/common/LoadingPage";
 import { DateOfBirth } from "~/domain/value-objects/DateOfBirth";
 
 const StaffListView: React.FC = () => {
-  const { staffList, loading, error } = useGetStaffList();
+  const { staffList, loading, error } = useGetStaffDoctorList();
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isManager, setIsManager] = useState<boolean>(false);
