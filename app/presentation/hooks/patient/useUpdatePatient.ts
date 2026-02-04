@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { updatePatientUseCase } from "~/infrastructure/di/container";
 import { UpdatePatientDTO } from "~/application/dtos/PatientDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useUpdatePatient() {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ export function useUpdatePatient() {
       await updatePatientUseCase.execute(dto);
       return { success: true };
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to update patient";
+      const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

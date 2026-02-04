@@ -8,16 +8,16 @@ import {
 } from "~/presentation/designSystem";
 import { useGetStaffByUsername } from "~/presentation/hooks/staff/useGetStaffByUsername";
 import { getUserSession } from "~/presentation/session/userSession";
-import { getSelectedStaffUsername, setSelectedStaffUsername } from "~/presentation/session/staffSelectionSession";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
 import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons/faPenToSquare";
 
 function StaffDetail() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [username, setUsername] = useState<string | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [isSessionLoaded, setIsSessionLoaded] = useState<boolean>(false);
@@ -35,9 +35,10 @@ function StaffDetail() {
     }
 
     setIsLoggedIn(true);
-    setIsManager(session.role?.toLowerCase() === "manager");
+    setIsManager(session.title?.toLowerCase() === "manager");
 
-    const selectedUsername = getSelectedStaffUsername();
+    const state = location.state as { username?: string } | null;
+    const selectedUsername = state?.username;
     if (selectedUsername) {
       setUsername(selectedUsername);
     } else {
@@ -117,8 +118,9 @@ function StaffDetail() {
 
   const handleEditStaff = (username: string) => {
     ensureManager(() => {
-      setSelectedStaffUsername(username);
-      navigate("/editStaff");
+      navigate("/editStaff", {
+        state: { username },
+      });
     });
   };
 
@@ -153,10 +155,10 @@ function StaffDetail() {
                 items={[
                   { label: "Username", value: staff.username },
                   { label: "Name Surname", value: staff.nameSurname },
-                  { label: "Phone Number", value: staff.phoneNumber },
                   { label: "Age", value: age },
                   { label: "Gender", value: staff.gender },
-                  { label: "Role", value: staff.role },
+                  { label: "Role", value: staff.title },
+                  { label: "Phone Number", value: staff.phoneNumber },
                   { label: "Email", value: staff.email },
                 ]}
               />

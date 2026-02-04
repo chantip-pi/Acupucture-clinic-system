@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useLocation } from "react-router-dom";
 import React, { useEffect, useState, FormEvent } from "react";
 import SideNavBar from "./_SNB";
 import {
@@ -17,14 +17,14 @@ import { useUpdateStaff } from "~/presentation/hooks/staff/useUpdateStaff";
 import { useDeleteStaff } from "~/presentation/hooks/staff/useDeleteStaff";
 
 import { Staff } from "~/domain/entities/Staff";
-import { getSelectedStaffUsername } from "~/presentation/session/staffSelectionSession";
 import { getStaffByUsernameUseCase } from "~/infrastructure/di/container";
 import { getUserSession } from "~/presentation/session/userSession";
 
 function EditStaff() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Load selected username on the client after hydration to avoid SSR/CSR mismatch
+  // Load selected username based on navigation state after hydration
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [isManager, setIsManager] = useState<boolean>(false);
@@ -40,9 +40,10 @@ function EditStaff() {
     }
 
     setIsLoggedIn(true);
-    setIsManager(session.role?.toLowerCase() === "manager");
+    setIsManager(session.title?.toLowerCase() === "manager");
     
-    const username = getSelectedStaffUsername();
+    const state = location.state as { username?: string } | null;
+    const username = state?.username ?? session.username;
     setSelectedUsername(username);
     setIsSessionLoaded(true);
   }, []);
@@ -62,7 +63,7 @@ function EditStaff() {
     phoneNumber: "",
     birthday: "",
     gender: "",
-    role: "",
+    title: "",
     email: "",
   });
 
@@ -77,7 +78,7 @@ function EditStaff() {
         phoneNumber: staff.phoneNumber,
         birthday: formattedBirthday,
         gender: staff.gender,
-        role: staff.role,
+        title: staff.title,
         email: staff.email,
       });
     }
@@ -350,9 +351,9 @@ function EditStaff() {
 
             <FormField label="Role">
               <Select
-                id="role"
-                name="role"
-                value={formData.role}
+                id="title"
+                name="title"
+                value={formData.title}
                 onChange={handleChange}
                 required
               >

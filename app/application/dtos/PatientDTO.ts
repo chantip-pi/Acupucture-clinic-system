@@ -4,6 +4,8 @@ export interface CreatePatientDTO {
   birthday: string;
   gender: string;
   remainingCourse: number;
+  congenitalDisease: string;
+  surgeryHistory: string;
 }
 
 export interface UpdatePatientDTO {
@@ -13,5 +15,7 @@ export interface UpdatePatientDTO {
   birthday: string;
   gender: string;
   remainingCourse: number;
+  congenitalDisease: string;
+  surgeryHistory: string;
 }
 

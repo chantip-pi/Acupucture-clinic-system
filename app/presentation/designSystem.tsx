@@ -203,13 +203,22 @@ export function FormField({
   message?: React.ReactNode;
 }) {
   return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-slate-800">{label}</span>
-      {children}
-      {message && <p className="text-xs text-red-600">{message}</p>}
+    <label className="block space-y-2">
+      <span className="text-base font-semibold text-slate-800">
+        {label}
+      </span>
+
+      <div className="mt-1">{children}</div>
+
+      {message && (
+        <p className="text-sm text-red-600 leading-relaxed">
+          {message}
+        </p>
+      )}
     </label>
   );
 }
+
 
 export function Badge({
   children,
@@ -284,21 +293,25 @@ export function InfoList({
   items: { label: string; value: React.ReactNode }[];
 }) {
   return (
-    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       {items.map((item) => (
         <div
           key={item.label}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-3"
+          className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm"
         >
-          <dt className="text-xs uppercase tracking-wide text-slate-500">
+          <dt className="text-sm font-medium tracking-wide text-slate-500">
             {item.label}
           </dt>
-          <dd className="mt-1 text-sm text-slate-900">{item.value}</dd>
+
+          <dd className="mt-2 text-lg font-semibold text-slate-900">
+            {item.value}
+          </dd>
         </div>
       ))}
     </dl>
   );
 }
+
 
 export function InlineLink({
   children,

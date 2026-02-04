@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { deleteStaffUsecase } from "~/infrastructure/di/container";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useDeleteStaff() {
   const [loading, setLoading] = useState(false);
@@ -13,10 +14,9 @@ export function useDeleteStaff() {
       await deleteStaffUsecase.execute(staffId);
       return { success: true };
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to delete staff";
-      setError(message);
-      return { success: false, error: message };
+      const errorMessage = BackendErrorService.getErrorMessage(err);
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }

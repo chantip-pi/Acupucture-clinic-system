@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { addStaffUseCase } from "~/infrastructure/di/container";
 import { CreateStaffDTO } from "~/application/dtos/StaffDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
 import bcrypt from "bcryptjs";
 
 export function useAddStaff() {
@@ -21,8 +22,7 @@ export function useAddStaff() {
       });
       return { success: true };
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to add Staff";
+      const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {

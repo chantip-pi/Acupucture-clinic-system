@@ -1,31 +1,34 @@
 import { useState, useEffect } from "react";
-import { getStaffListUseCase } from "~/infrastructure/di/container";
-import { Staff } from "~/domain/entities/Staff";
+import { staffDatasource } from "~/infrastructure/datasource/StaffDataSource";
+import { StaffNameDTO } from "~/application/dtos/StaffDTO";
+import { BackendErrorService } from "~/domain/services/ErrorService";
+
 
 export function useGetStaffList() {
-  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [staffs, setStaffs] = useState<StaffNameDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStaff = async () => {
+    const fetchStaffs = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const data = await getStaffListUseCase.execute();
-        setStaffList(data);
+        const data = await staffDatasource.getStaffs();
+        setStaffs(data);
       } catch (err) {
-        setError("Failed to load staff data");
+        const errorMessage = BackendErrorService.getErrorMessage(err);
+        setError(errorMessage);
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStaff();
+    fetchStaffs();
   }, []);
 
-  return { staffList, loading, error };
+  return { staffs, loading, error };
 }
 
