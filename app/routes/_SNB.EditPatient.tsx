@@ -24,7 +24,7 @@ function EditPatient() {
 
   const { patientId } = (location.state as { patientId?: number } | null) || {};
 
-  const { patient, loading, error } = useGetPatientById(patientId);
+  const { patient, loading, error } = useGetPatientById(patientId || null);
   const { updatePatient, loading: updateLoading, error: updateError } =
     useUpdatePatient();
   const { deletePatient, loading: deleteLoading, error: deleteError } = useDeletePatient();
@@ -127,7 +127,7 @@ function EditPatient() {
 
   if (loading) return <LoadingPage />;
   if (error)
-    return <ErrorPage message={error} onRetry={() => location.reload()} />;
+    return <ErrorPage message={error} onRetry={() => window.location.reload()} />;
   if (!patient)
     return <ErrorPage message="No patient found." />;
 
