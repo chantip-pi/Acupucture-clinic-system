@@ -189,6 +189,8 @@ function PatientDetail() {
     doctorId: number;
     patientId: number;
     dateTime: string;
+    patientName: string;
+    doctorName: string;
   }) => {
     navigate("/createMedicalRecord", {
       state: {
@@ -196,6 +198,8 @@ function PatientDetail() {
         doctorId: recordData.doctorId,
         patientId: recordData.patientId,
         dateTime: recordData.dateTime,
+        patientName: recordData.patientName,
+        doctorName: recordData.doctorName
       },
     });
   };
@@ -243,7 +247,7 @@ function PatientDetail() {
 
           <Button
             size="sm"
-            variant="primary"
+            variant="secondary"
             onClick={() => navigate("/patientList")}
 
           >

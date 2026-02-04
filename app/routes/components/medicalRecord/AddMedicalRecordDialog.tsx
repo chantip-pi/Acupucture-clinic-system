@@ -20,6 +20,7 @@ import {
 } from "~/components/ui/popover";
 import { Appointment } from "~/domain/entities/Appointment";
 import { useGetDoctorList } from "~/presentation/hooks/staff/useGetDoctorList";
+import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 
 
 interface AddMedicalRecordDialogProps {
@@ -29,6 +30,8 @@ interface AddMedicalRecordDialogProps {
     doctorId: number;
     patientId: number;
     dateTime: string;
+    patientName: string;
+    doctorName: string;
   }) => void;
   onClose: () => void;
   appointments?: Appointment[];
@@ -92,16 +95,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
   const selectedAppointment = scheduledAppointments.find(apt => apt.appointmentId === selectedAppointmentId);
   const selectedDoctorName = doctorList.find(d => d.staffId === selectedDoctor)?.nameSurname || "";
 
-  const formatDateTime = (date: Date) => {
-    return new Date(date).toLocaleString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-  };
+
 
   const handleStartMedicalRecord = () => {
     if (!selectedDoctor || !selectedDate) return;
@@ -112,6 +106,8 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
       doctorId: selectedDoctor,
       patientId: patient.id,
       dateTime: selectedDate.toISOString(),
+      patientName: patient.nameSurname,
+      doctorName: selectedDoctorName
     });
   };
 
@@ -212,7 +208,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
                               <div className="space-y-1">
                                 <div className="font-medium">{selectedAppointment.patientName}</div>
                                 <div className="text-xs text-gray-500">
-                                  {formatDateTime(new Date(selectedAppointment.appointmentDateTime))}
+                                  {DateTimeHelper.formatDateTime(new Date(selectedAppointment.appointmentDateTime))}
                                 </div>
                               </div>
                             ) : (
@@ -231,7 +227,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
                               {scheduledAppointments.map((appointment) => (
                                 <CommandItem
                                   key={appointment.appointmentId}
-                                  value={`${appointment.patientName} ${appointment.doctorName} ${formatDateTime(new Date(appointment.appointmentDateTime))}`}
+                                  value={`${appointment.patientName} ${appointment.doctorName} ${DateTimeHelper.formatDateTime(new Date(appointment.appointmentDateTime))}`}
                                   onSelect={() => {
                                     setSelectedAppointmentId(appointment.appointmentId);
                                     setAppointmentOpen(false);
@@ -243,7 +239,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
                                     <div className="text-xs text-gray-500 mt-1 space-y-0.5">
                                       <div className="flex items-center gap-1">
                                         <Calendar className="w-3 h-3" />
-                                        {formatDateTime(new Date(appointment.appointmentDateTime))}
+                                        {DateTimeHelper.formatDateTime(new Date(appointment.appointmentDateTime))}
                                       </div>
                                       <div className="flex items-center gap-1">
                                         <Stethoscope className="w-3 h-3" />
@@ -397,7 +393,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
                   <Calendar className="w-3 h-3" />
                   <span className="text-xs">Scheduled:</span>
                   <span className="font-medium text-slate-900">
-                    {formatDateTime(new Date(selectedAppointment.appointmentDateTime))}
+                    {DateTimeHelper.formatDateTime(new Date(selectedAppointment.appointmentDateTime))}
                   </span>
                 </div>
 
