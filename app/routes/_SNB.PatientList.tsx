@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import SideNavBar from "./_SNB";
 import {
@@ -17,7 +17,6 @@ import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import { DateOfBirth } from "~/domain/value-objects/DateOfBirth";
 import ErrorPage from "./components/common/ErrorPage";
 import LoadingPage from "./components/common/LoadingPage";
-import { safeSessionSet } from "~/presentation/session/storageUtils";
 
 const PatientList: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +28,9 @@ const PatientList: React.FC = () => {
   };
 
   const handlePatientDetail = (patientId: number) => {
-    safeSessionSet("currentPatientID", JSON.stringify(patientId));
-    navigate("/patientDetail");
+    navigate("/patientDetail", {
+      state: { patientId },
+    });
   };
 
 

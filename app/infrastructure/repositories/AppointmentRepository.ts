@@ -16,6 +16,10 @@ export class AppointmentRepository implements IAppointmentRepository {
     return this.dataSource.getListByPatientId(id);
   }
 
+  async getById(id: number): Promise<Appointment | null> {
+    return this.dataSource.getById(id);
+  }
+
 
   async create(appointment: Omit<Appointment, "appointmentId">): Promise<Appointment> {
     return this.dataSource.create(appointment);

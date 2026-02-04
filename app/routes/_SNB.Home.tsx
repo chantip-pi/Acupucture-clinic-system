@@ -437,7 +437,7 @@ const AppointmentList: React.FC = () => {
                 <DatePicker
                   selected={specificDate}
                   onChange={handleSpecificDateChange}
-                  dateFormat="dd/MM/yyyy"
+                  dateFormat="EEE, d MMM yyyy"
                   className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm text-slate-900 focus:border-brand focus:ring-2 focus:ring-brand/40 focus:outline-none"
                   placeholderText="Select a date"
                   isClearable

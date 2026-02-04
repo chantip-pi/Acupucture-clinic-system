@@ -2,6 +2,7 @@
 import { IPatientRepository } from "~/domain/repositories/IPatientRepository";
 import { IStaffRepository } from "~/domain/repositories/IStaffRepository";
 import { IAppointmentRepository } from "~/domain/repositories/IAppointmentRepository";
+import { IMedicalRecordRepository } from "~/domain/repositories/IMedicalRecordRepository";
 
 // ===== Application Use Cases =====
 // Patient
@@ -34,21 +35,35 @@ import { AppointmentRepository } from "../repositories/AppointmentRepository";
 import { GetAppointmentListUseCase } from "~/application/use-cases/appointment/GetAppointmentListUseCase";
 import { CreateAppointmentUseCase } from "~/application/use-cases/appointment/CreateAppointmentUseCase";
 import { GetAppointmentListByPatientIdUseCase } from "~/application/use-cases/appointment/GetAppointmentListByPatientId"; 
+import { GetAppointmentByIdUseCase } from "~/application/use-cases/appointment/GetAppointmentByIdUseCase"; 
 import { UpdateAppointmentUseCase } from "~/application/use-cases/appointment/UpdateAppointmentUseCase"; 
 import { CancelAppointmentUseCase } from "~/application/use-cases/appointment/CancelAppointmentUseCase"; 
+import { MedicalRecordDataSource } from "../datasource/MedicalRecordDatasource";
+import { MedicalRecordRepository } from "../repositories/MedicalRecordRepository";
+
+// Medical Record
+import { CreateMedicalRecordUseCase } from "~/application/use-cases/medicalRecord/CreateMedicalRecordUseCase";
+import { GetMedicalRecordListUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordListUseCase";
+import { GetMedicalRecordByIdUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordByIdUseCase";
+import { GetMedicalRecordListByPatientIdUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordListByPatientIdUseCase";
+import { UpdateMedicalRecordUseCase } from "~/application/use-cases/medicalRecord/UpdateMedicalRecordUseCase";
+import { GetAssignedStaffUseCase } from "~/application/use-cases/medicalRecord/GetAssignedStaffUseCase";
 
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
 let staffRepository: IStaffRepository;
 let appointmentRepository: IAppointmentRepository;
+let medicalRecordRepository: IMedicalRecordRepository;
 
 const mockDataSource = MockDataSource.getInstance();
 const staffDataSource = new StaffDataSource();
 const patientDatasource = new PatientDataSource();
 const appointmentDatasource = new AppointmentDataSource();
+const medicalRecordDatasource = new MedicalRecordDataSource();
 patientRepository = new PatientRepository(patientDatasource);
 staffRepository = new StaffRepository(staffDataSource);
 appointmentRepository = new AppointmentRepository(appointmentDatasource);
+medicalRecordRepository = new MedicalRecordRepository(medicalRecordDatasource);
 
 // Use Cases
 export const addPatientUseCase = new AddPatientUseCase(patientRepository);
@@ -70,4 +85,12 @@ export const createAppointmentUseCase = new CreateAppointmentUseCase(appointment
 export const getAppointmentListByPatientIdUseCase = new GetAppointmentListByPatientIdUseCase(appointmentRepository);
 export const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepository);
 export const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepository);
+export const getAppointmentByIdUseCase = new GetAppointmentByIdUseCase(appointmentRepository);
+
+export const createMedicalRecordUseCase = new CreateMedicalRecordUseCase(medicalRecordRepository);
+export const getMedicalRecordListUseCase = new GetMedicalRecordListUseCase(medicalRecordRepository);
+export const getMedicalRecordByIdUseCase = new GetMedicalRecordByIdUseCase(medicalRecordRepository);
+export const getMedicalRecordListByPatientIdUseCase = new GetMedicalRecordListByPatientIdUseCase(medicalRecordRepository);
+export const updateMedicalRecordUseCase = new UpdateMedicalRecordUseCase(medicalRecordRepository);
+export const getAssignedStaffUseCase = new GetAssignedStaffUseCase(medicalRecordRepository);
 
