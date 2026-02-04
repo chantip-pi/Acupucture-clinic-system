@@ -5,7 +5,7 @@ import { BackendErrorService } from "~/domain/services/ErrorService";
 
 
 export function useGetStaffList() {
-  const [Staffs, setStaffs] = useState<StaffNameDTO[]>([]);
+  const [staffs, setStaffs] = useState<StaffNameDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,6 +29,6 @@ export function useGetStaffList() {
     fetchStaffs();
   }, []);
 
-  return { Staffs, loading, error };
+  return { staffs, loading, error };
 }
 

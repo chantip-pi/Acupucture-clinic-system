@@ -34,6 +34,7 @@ import { AppointmentRepository } from "../repositories/AppointmentRepository";
 import { GetAppointmentListUseCase } from "~/application/use-cases/appointment/GetAppointmentListUseCase";
 import { CreateAppointmentUseCase } from "~/application/use-cases/appointment/CreateAppointmentUseCase";
 import { GetAppointmentListByPatientIdUseCase } from "~/application/use-cases/appointment/GetAppointmentListByPatientId"; 
+import { GetAppointmentByIdUseCase } from "~/application/use-cases/appointment/GetAppointmentByIdUseCase"; 
 import { UpdateAppointmentUseCase } from "~/application/use-cases/appointment/UpdateAppointmentUseCase"; 
 import { CancelAppointmentUseCase } from "~/application/use-cases/appointment/CancelAppointmentUseCase"; 
 
@@ -70,4 +71,5 @@ export const createAppointmentUseCase = new CreateAppointmentUseCase(appointment
 export const getAppointmentListByPatientIdUseCase = new GetAppointmentListByPatientIdUseCase(appointmentRepository);
 export const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepository);
 export const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepository);
+export const getAppointmentByIdUseCase = new GetAppointmentByIdUseCase(appointmentRepository);
 
