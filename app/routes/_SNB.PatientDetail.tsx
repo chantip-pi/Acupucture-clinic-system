@@ -17,6 +17,8 @@ import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdate
 import ConfirmDialog from "./components/common/ConfirmDialog";
 import AddMedicalRecordDialog from "./components/medicalRecord/AddMedicalRecordDialog";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import MedicalRecordTable from "./components/medicalRecord/MedicalRecordTable";
+import { useGetMedicalRecordListByPatientId } from "~/presentation/hooks/medicalRecord/useGetMedicalRecordListByPatientId";
 
 function PatientDetail() {
 
@@ -32,6 +34,7 @@ function PatientDetail() {
   const { cancelAppointment, loading: cancelAppointmentLoading, error: cancelAppointmentError } = useCancelAppointment();
   const { patient: patientData, loading, error } = useGetPatientById(resolvedPatientId);
   const { appointments, loading: appointmentLoading, error: appointmentError } = useGetAppointmentListByPatientId(resolvedPatientId);
+  const { medicalRecords } = useGetMedicalRecordListByPatientId(resolvedPatientId);
 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -308,23 +311,26 @@ function PatientDetail() {
           />
         </Card>
 
-        <Card>
-          <div className="flex items-center justify-between">
-            <SectionHeading title="Medical Records" />
-            <div className="flex items-center gap-3">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowAddMedicalRecordDialog(true)}
-              >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
-                  <FontAwesomeIcon icon={faPenToSquare} />
-                </span>
-                Add Medical Record
-              </Button>
-            </div>
-          </div>
-        </Card>
+       <Card>
+  <div className="flex items-center justify-between mb-4">
+    <SectionHeading title="Medical Records" />
+    <Button
+      variant="secondary"
+      size="sm"
+      onClick={() => setShowAddMedicalRecordDialog(true)}
+    >
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+        <FontAwesomeIcon icon={faPenToSquare} />
+      </span>
+      Add Medical Record
+    </Button>
+  </div>
+  
+  <MedicalRecordTable 
+    medicalRecords={medicalRecords} 
+    onEdit={() => navigate("/patientList")} 
+  />
+</Card>
       </main>
     </div>
   );

@@ -9,6 +9,7 @@ import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MultiStaffSelect from "./components/medicalRecord/MultiStaffSelect";
+import { useCreateMedicalRecord } from "~/presentation/hooks/medicalRecord/useCreateMedicalRecord";
 
 
 const CreateMedicalRecord = () => {
@@ -16,6 +17,7 @@ const CreateMedicalRecord = () => {
   const navigate = useNavigate();
   const [staffOpen, setStaffOpen] = useState(false);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
+  const [error, setError] = useState<string>("");
 
 
   if (!state) {
@@ -57,9 +59,9 @@ const CreateMedicalRecord = () => {
     patientName: string;
   };
 
-  const { staffs: staffList, loading } = useGetStaffList();
+  const { staffs: staffList } = useGetStaffList();
   const { appointment } = useGetAppointmentById(appointmentId ?? null);
-  // const { createMedicalRecord, loading, error: hookError } = useCreateMedicalRecord();
+  const { createMedicalRecord, loading, error: hookError } = useCreateMedicalRecord();
 
 
   const [formData, setFormData] = useState({
@@ -101,6 +103,23 @@ const CreateMedicalRecord = () => {
 
   const submitToApi = async () => {
 
+    const result = await createMedicalRecord({
+      appointmentId: formData.appointmentId || null,
+      doctorId: formData.doctorId,
+      patientId: formData.patientId,
+      dateTime: formData.dateTime,
+      diagnosis: formData.diagnosis,
+      symptoms: formData.symptoms,
+      prescriptions: formData.symptoms,
+      remarks: formData.remarks,
+      assignees: selectedStaffIds,
+    });
+
+    if (result.success) {
+      navigate("/patientList");
+    } else {
+      setError(result.error || "Failed to add patient");
+    }
   };
   return (
     <div className="p-8">
@@ -140,6 +159,21 @@ const CreateMedicalRecord = () => {
                   {DateTimeHelper.formatDateTime(new Date(appointment.appointmentDateTime))}
                 </span>
               </div>
+
+              <div className="pt-3  border-slate-200 flex items-center gap-2 text-sm">
+              <FontAwesomeIcon
+                icon={faUser}
+                className="h-4 w-4 text-slate-900"
+              />
+
+              <span className="text-slate-600">
+                Doctor:
+              </span>
+
+              <span className="font-semibold text-slate-900">
+                {appointment.doctorName}
+              </span>
+            </div>
 
               <div className="pt-2 border-t border-slate-200">
                 <div className="text-sm text-slate-500 mb-1">Reason</div>
@@ -201,7 +235,7 @@ const CreateMedicalRecord = () => {
             <textarea
               name="diagnosis"
               value={formData.diagnosis}
-              onChange={() => handleChange}
+              onChange={handleChange}
               required
               rows={3}
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm
@@ -215,7 +249,7 @@ const CreateMedicalRecord = () => {
 
               name="symptoms"
               value={formData.symptoms}
-              onChange={() => handleChange}
+              onChange={handleChange}
               required
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm
              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
@@ -227,7 +261,7 @@ const CreateMedicalRecord = () => {
 
               name="prescriptions"
               value={formData.prescriptions}
-              onChange={() => handleChange}
+              onChange={handleChange}
               required
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm
              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
@@ -239,20 +273,26 @@ const CreateMedicalRecord = () => {
 
               name="remarks"
               value={formData.remarks}
-              onChange={() => handleChange}
+              onChange={handleChange}
               required
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm
              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
             />
           </FormField>
 
+          {(error || hookError) && (
+              <p className="text-md text-red-600 sm:col-span-2">
+                {error || hookError}
+              </p>
+            )}
+
           <div className="sm:col-span-2 flex justify-end">
             <Button
               type="submit"
               variant="primary"
-            //   disabled={loading}
+              disabled={loading}
             >
-              { /*  {loading ? "Saving..." : "Save"} */}
+             {loading ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

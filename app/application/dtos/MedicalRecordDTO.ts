@@ -1,14 +1,13 @@
 export interface CreateMedicalRecordDTO {
     patientId: number;
     doctorId: number;
-    appointmentId: number;
-    patientName: string;
-    doctorName: string;
+    appointmentId: number | null;
     dateTime: string;
     symptoms: string;
     diagnosis: string;
     prescriptions: string;
     remarks: string;
+    assignees: number[];
   }
   
   export interface UpdateMedicalRecordDTO {
@@ -16,14 +15,12 @@ export interface CreateMedicalRecordDTO {
     patientId: number;
     doctorId: number;
     appointmentId: number;
-    patientName: string;
-    doctorName: string;
     dateTime: string;
     symptoms: string;
     diagnosis: string;
     prescriptions: string;
     remarks: string;
-    assignees: string[];
+    assignees: number[];
   }
   
   

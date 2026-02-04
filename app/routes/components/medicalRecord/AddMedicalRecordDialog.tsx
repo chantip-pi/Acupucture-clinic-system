@@ -21,6 +21,7 @@ import {
 import { Appointment } from "~/domain/entities/Appointment";
 import { useGetDoctorList } from "~/presentation/hooks/staff/useGetDoctorList";
 import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 
 interface AddMedicalRecordDialogProps {
@@ -121,7 +122,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-xl shadow-lg w-[30vw] relative max-h-[90vh] overflow-y-auto">
+      <div className="bg-white p-6 rounded-xl shadow-lg w-[50vw] relative max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -362,6 +363,7 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
               onChange={(date) => setSelectedDate(date)}
               showTimeSelect
               timeFormat="HH:mm"
+              timeIntervals={30}
               dateFormat="EEE, d MMM yyyy, HH:mm"
               className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 focus:border-[#2F919C] focus:ring-2 focus:ring-[#2F919C]/20 focus:outline-none"
               placeholderText="Select date and time"
@@ -374,6 +376,8 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
               minTime={minTime}
               maxTime={maxTime}
               disabled={isLoading}
+              withPortal
+              portalId="medical-record-date-picker"
             />
             {!isManualMode && selectedAppointment && (
               <p className="mt-1 text-xs text-gray-500">
@@ -395,6 +399,21 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
                     {DateTimeHelper.formatDateTime(new Date(selectedAppointment.appointmentDateTime))}
                   </span>
                 </div>
+
+                <div className="pt-3  border-slate-200 flex items-center gap-2 text-sm">
+              <FontAwesomeIcon
+                icon={faUser}
+                className="h-4 w-4 text-slate-900"
+              />
+
+              <span className="text-slate-600">
+                Doctor:
+              </span>
+
+              <span className="font-semibold text-slate-900">
+                {selectedAppointment.doctorName}
+              </span>
+            </div>
 
                 <div className="pt-2 border-t border-slate-200">
                   <div className="text-xs text-slate-500 mb-1">Reason</div>
