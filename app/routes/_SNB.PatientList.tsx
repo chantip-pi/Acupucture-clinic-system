@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "@remix-run/react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import SideNavBar from "./_SNB";
 import {
@@ -28,8 +28,9 @@ const PatientList: React.FC = () => {
   };
 
   const handlePatientDetail = (patientId: number) => {
-    sessionStorage.setItem("currentPatientID", JSON.stringify(patientId));
-    navigate("/patientDetail");
+    navigate("/patientDetail", {
+      state: { patientId },
+    });
   };
 
 

@@ -97,7 +97,7 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
               showTimeSelect
               timeFormat="HH:mm"
               timeIntervals={30}
-              dateFormat="dd/MM/yyyy HH:mm"
+              dateFormat="EEE, d MMM yyyy, HH:mm"
               className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 focus:border-[#2F919C] focus:ring-2 focus:ring-[#2F919C]/20 focus:outline-none"
               placeholderText="Select date and time"
               isClearable

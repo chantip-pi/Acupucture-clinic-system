@@ -1,34 +1,33 @@
-import { useState, useEffect } from "react";
-import { staffDatasource } from "~/infrastructure/datasource/StaffDataSource";
+import { useEffect, useState } from "react";
+import { getAssignedStaffUseCase } from "~/infrastructure/di/container";
 import { StaffNameDTO } from "~/application/dtos/StaffDTO";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
-
-export function useGetStaffList() {
+export function useGetAssignedStaff(medicalRecordId: number | null) {
   const [staffs, setStaffs] = useState<StaffNameDTO[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStaffs = async () => {
+    if (medicalRecordId === null) return;
+
+    const fetchAssignedStaff = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const data = await staffDatasource.getStaffs();
-        setStaffs(data);
+        const data = await getAssignedStaffUseCase.execute(medicalRecordId);
+        setStaffs(data ?? []);
       } catch (err) {
         const errorMessage = BackendErrorService.getErrorMessage(err);
         setError(errorMessage);
-        console.error(err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStaffs();
-  }, []);
+    fetchAssignedStaff();
+  }, [medicalRecordId]);
 
   return { staffs, loading, error };
 }
-

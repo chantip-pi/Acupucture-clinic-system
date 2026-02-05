@@ -20,7 +20,6 @@ export class StaffDataSource {
   }
 
   async getById(staffId: number): Promise<Staff | null> {
-    // Backend route: GET /api/staff/id/:staffId
     const res = await fetch(`${this.baseUrl}/id/${staffId}`, {
       method: "GET",
     });
@@ -79,9 +78,8 @@ export class StaffDataSource {
     return this.handleResponse<StaffNameDTO[]>(res);
   }
 
-  async getNurses(): Promise<StaffNameDTO[]> {
-    // Backend route: GET /api/staff/nurses
-    const res = await fetch(`${this.baseUrl}/nurses`, {
+  async getStaffs(): Promise<StaffNameDTO[]> {
+    const res = await fetch(`${this.baseUrl}/staffs`, {
       method: "GET",
     });
     return this.handleResponse<StaffNameDTO[]>(res);

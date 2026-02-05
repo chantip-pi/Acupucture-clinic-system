@@ -8,6 +8,7 @@ import { IIllnessRepository } from "~/domain/repositories/IIllnessRepository";
 import { IMeridianRepository } from "~/domain/repositories/IMeridianRepository";
 import { IAppointmentRepository } from "~/domain/repositories/IAppointmentRepository";
 import { IMedicalRecordAcupunctureRepository } from "~/domain/repositories/IMedicalRecordAcupunctureRepository";
+import { IMedicalRecordRepository } from "~/domain/repositories/IMedicalRecordRepository";
 
 // ===== Application Use Cases =====
 // Patient
@@ -88,6 +89,7 @@ import { AppointmentRepository } from "../repositories/AppointmentRepository";
 import { GetAppointmentListUseCase } from "~/application/use-cases/appointment/GetAppointmentListUseCase";
 import { CreateAppointmentUseCase } from "~/application/use-cases/appointment/CreateAppointmentUseCase";
 import { GetAppointmentListByPatientIdUseCase } from "~/application/use-cases/appointment/GetAppointmentListByPatientId"; 
+import { GetAppointmentByIdUseCase } from "~/application/use-cases/appointment/GetAppointmentByIdUseCase"; 
 import { UpdateAppointmentUseCase } from "~/application/use-cases/appointment/UpdateAppointmentUseCase"; 
 import { CancelAppointmentUseCase } from "~/application/use-cases/appointment/CancelAppointmentUseCase"; 
 import { AcupointRepository } from "../repositories/AcupointRepository";
@@ -96,6 +98,16 @@ import { AcupunctureRepository } from "../repositories/AcupunctureRepository";
 import { IllnessRepository } from "../repositories/IllnessRepository";
 import { MeridianRepository } from "../repositories/MeridianRepository";
 import { MedicalRecordAcupunctureRepository } from "../repositories/MedicalRecordAcupunctureRepository";
+import { MedicalRecordDataSource } from "../datasource/MedicalRecordDatasource";
+import { MedicalRecordRepository } from "../repositories/MedicalRecordRepository";
+
+// Medical Record
+import { CreateMedicalRecordUseCase } from "~/application/use-cases/medicalRecord/CreateMedicalRecordUseCase";
+import { GetMedicalRecordListUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordListUseCase";
+import { GetMedicalRecordByIdUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordByIdUseCase";
+import { GetMedicalRecordListByPatientIdUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordListByPatientIdUseCase";
+import { UpdateMedicalRecordUseCase } from "~/application/use-cases/medicalRecord/UpdateMedicalRecordUseCase";
+import { GetAssignedStaffUseCase } from "~/application/use-cases/medicalRecord/GetAssignedStaffUseCase";
 
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
@@ -107,6 +119,7 @@ let acupunctureRepository: IAcupunctureRepository;
 let illnessRepository: IIllnessRepository;
 let meridianRepository: IMeridianRepository;
 let medicalRecordAcupunctureRepository: IMedicalRecordAcupunctureRepository;
+let medicalRecordRepository: IMedicalRecordRepository;
 
 // DataSources
 const mockDataSource = MockDataSource.getInstance();
@@ -128,10 +141,12 @@ acupunctureRepository = new AcupunctureRepository(acupunctureDataSource);
 illnessRepository = new IllnessRepository(illnessDataSource);
 meridianRepository = new MeridianRepository(meridianDataSource);
 const appointmentDatasource = new AppointmentDataSource();
+const medicalRecordDatasource = new MedicalRecordDataSource();
 patientRepository = new PatientRepository(patientDatasource);
 staffRepository = new StaffRepository(staffDataSource);
 appointmentRepository = new AppointmentRepository(appointmentDatasource);
 medicalRecordAcupunctureRepository = new MedicalRecordAcupunctureRepository(medicalRecordAcupunctureDataSource);
+medicalRecordRepository = new MedicalRecordRepository(medicalRecordDatasource);
 
 // Patient Use Cases
 export const addPatientUseCase = new AddPatientUseCase(patientRepository);
@@ -189,6 +204,14 @@ export const createAppointmentUseCase = new CreateAppointmentUseCase(appointment
 export const getAppointmentListByPatientIdUseCase = new GetAppointmentListByPatientIdUseCase(appointmentRepository);
 export const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointmentRepository);
 export const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepository);
+export const getAppointmentByIdUseCase = new GetAppointmentByIdUseCase(appointmentRepository);
+
+export const createMedicalRecordUseCase = new CreateMedicalRecordUseCase(medicalRecordRepository);
+export const getMedicalRecordListUseCase = new GetMedicalRecordListUseCase(medicalRecordRepository);
+export const getMedicalRecordByIdUseCase = new GetMedicalRecordByIdUseCase(medicalRecordRepository);
+export const getMedicalRecordListByPatientIdUseCase = new GetMedicalRecordListByPatientIdUseCase(medicalRecordRepository);
+export const updateMedicalRecordUseCase = new UpdateMedicalRecordUseCase(medicalRecordRepository);
+export const getAssignedStaffUseCase = new GetAssignedStaffUseCase(medicalRecordRepository);
 
 // Medical Record Acupuncture Use Cases
 export const addMedicalRecordAcupunctureUseCase = new AddMedicalRecordAcupunctureUseCase(medicalRecordAcupunctureRepository);

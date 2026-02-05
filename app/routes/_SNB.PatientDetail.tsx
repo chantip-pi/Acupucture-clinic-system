@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { useNavigate, useLocation } from "react-router-dom";
 import React, { useMemo, useState } from "react";
 import SideNavBar from "./_SNB";
 import { Button, Card, InfoList, SectionHeading } from "~/presentation/designSystem";
@@ -15,34 +15,35 @@ import EditAppointmentDialog from "./components/appointment/EditAppointmentDialo
 import { useCancelAppointment } from "~/presentation/hooks/appointment/useCancelAppointment";
 import { useUpdateAppointment } from "~/presentation/hooks/appointment/useUpdateAppointment";
 import ConfirmDialog from "./components/common/ConfirmDialog";
-import { safeSessionGet, safeSessionSet } from "~/presentation/session/storageUtils";
+import AddMedicalRecordDialog from "./components/medicalRecord/AddMedicalRecordDialog";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import MedicalRecordTable from "./components/medicalRecord/MedicalRecordTable";
+import { useGetMedicalRecordListByPatientId } from "~/presentation/hooks/medicalRecord/useGetMedicalRecordListByPatientId";
 
 function PatientDetail() {
 
 
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const patientId = useMemo(() => {
-    const storedPatientID = safeSessionGet("currentPatientID");
-    if (!storedPatientID) return null;
-  
-    const id = storedPatientID.replace(/^"|"$/g, "");
-    return id === "Guest" ? null : parseInt(id, 10);
-  }, []);
-  
+  const { patientId } = (location.state as { patientId?: number } | null) || {};
+  const resolvedPatientId: number | null =
+    typeof patientId === "number" ? patientId : null;
+
   const { updateAppointment, loading: updateAppointmentLoading, error: updateAppointmentError } = useUpdateAppointment();
-  const { cancelAppointment, loading: cancelAppointmentLoading, error: cancelAppointmentError} = useCancelAppointment();
-  const { patient: patientData, loading, error } = useGetPatientById(patientId);
-  const { appointments, loading: appointmentLoading , error: appointmentError} = useGetAppointmentListByPatientId(patientId);
+  const { cancelAppointment, loading: cancelAppointmentLoading, error: cancelAppointmentError } = useCancelAppointment();
+  const { patient: patientData, loading, error } = useGetPatientById(resolvedPatientId);
+  const { appointments, loading: appointmentLoading, error: appointmentError } = useGetAppointmentListByPatientId(resolvedPatientId);
+  const { medicalRecords } = useGetMedicalRecordListByPatientId(resolvedPatientId);
 
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);  
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [editDate, setEditDate] = useState<Date | null>(null);
   const [editReason, setEditReason] = useState<string>("");
   const [formError, setFormError] = useState<string>("");
+  const [showAddMedicalRecordDialog, setShowAddMedicalRecordDialog] = useState(false);
 
-  
   const filteredAppointments = useMemo(() => {
     if (!appointments) return [];
     const now = new Date();
@@ -86,8 +87,8 @@ function PatientDetail() {
   if (error) {
     return <ErrorPage message={error} onRetry={() => window.location.reload()} />;
   }
-  
-  
+
+
   if (!patientData) {
     return (
       <ErrorPage message={"No patient data found"} onRetry={() => window.location.reload()} />
@@ -101,8 +102,9 @@ function PatientDetail() {
   };
 
   const handleEdit = (patientId: number) => {
-    safeSessionSet("currentPatientID", JSON.stringify(patientId));
-    navigate("/editPatient");
+    navigate("/editPatient", {
+      state: { patientId },
+    });
   };
 
 
@@ -120,6 +122,7 @@ function PatientDetail() {
     setEditDate(null);
     setEditReason("");
     setFormError("");
+    setShowAddMedicalRecordDialog(false);
   };
 
   const handleSubmitUpdateAppointment = async () => {
@@ -176,45 +179,87 @@ function PatientDetail() {
 
     if (result.success) {
       handleCloseDialog();
-      window.location.reload(); // Refresh the appointment list
+      window.location.reload();
     } else {
       setFormError(result.error || "Failed to cancel appointment");
     }
   };
 
-  
 
-  
+  // Handle starting a medical record (appointment is optional)
+  const handleStartMedicalRecord = (recordData: {
+    appointmentId?: number;
+    doctorId: number;
+    patientId: number;
+    dateTime: string;
+    patientName: string;
+    doctorName: string;
+  }) => {
+    navigate("/createMedicalRecord", {
+      state: {
+        appointmentId: recordData.appointmentId,
+        doctorId: recordData.doctorId,
+        patientId: recordData.patientId,
+        dateTime: recordData.dateTime,
+        patientName: recordData.patientName,
+        doctorName: recordData.doctorName
+      },
+    });
+  };
+
   return (
     <div className="flex min-h-screen bg-surface-muted">
 
-<EditAppointmentDialog
-          isOpen={showEditDialog}
-          onEditAppointment={handleSubmitUpdateAppointment}
-          onCancelAppointment={() => setShowConfirmDialog(true)}
-          onClose={handleCloseDialog}
-          selectedPatientName={selectedAppointment?.patientName || ""}
-          selectedDoctorName={selectedAppointment?.doctorName || ""}
-          selectedDate={editDate}
-          reason={editReason}
-          formError={formError}
-          onDateChange={setEditDate}
-          onReasonChange={setEditReason}
-          isLoading={updateAppointmentLoading}
-        />
+      <EditAppointmentDialog
+        isOpen={showEditDialog}
+        onEditAppointment={handleSubmitUpdateAppointment}
+        onCancelAppointment={() => setShowConfirmDialog(true)}
+        onClose={handleCloseDialog}
+        selectedPatientName={selectedAppointment?.patientName || ""}
+        selectedDoctorName={selectedAppointment?.doctorName || ""}
+        selectedDate={editDate}
+        reason={editReason}
+        formError={formError}
+        onDateChange={setEditDate}
+        onReasonChange={setEditReason}
+        isLoading={updateAppointmentLoading}
+      />
 
-<ConfirmDialog
-            isOpen={showConfirmDialog}
-            title={"Cancel Appointment"}
-            message="Do you really want to cancel this appointment?"
-            cancelText="No"
-            confirmText="Yes"
-            isLoading={updateAppointmentLoading}
-            onConfirm={handleCancelAppointment}
-            onCancel={() => setShowConfirmDialog(false)}
-          />
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title={"Cancel Appointment"}
+        message="Do you really want to cancel this appointment?"
+        cancelText="No"
+        confirmText="Yes"
+        isLoading={updateAppointmentLoading}
+        onConfirm={handleCancelAppointment}
+        onCancel={() => setShowConfirmDialog(false)}
+      />
+
+      <AddMedicalRecordDialog
+        isOpen={showAddMedicalRecordDialog}
+        onClose={handleCloseDialog}
+        appointments={filteredAppointments}
+        patient={{ id: patientData.patientId, nameSurname: patientData.nameSurname }}
+        doctors={[]}
+        onStartMedicalRecord={handleStartMedicalRecord}
+      />
 
       <main className="flex-1 p-8 space-y-8">
+        <div className="flex items-center gap-3">
+
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => navigate("/patientList")}
+
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full ">
+              <FontAwesomeIcon icon={faArrowLeft} />
+            </span>
+            Back
+          </Button>
+        </div>
         <Card>
           <div className="flex items-center justify-between">
             <SectionHeading title="Patient Detail" />
@@ -224,7 +269,7 @@ function PatientDetail() {
                 size="sm"
                 onClick={() => handleEdit(patientData.patientId)}
               >
-                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
                   <FontAwesomeIcon icon={faPenToSquare} />
                 </span>
                 Edit
@@ -233,38 +278,59 @@ function PatientDetail() {
           </div>
 
           <div className="mt-4">
-          <InfoList
-  items={[
-    { label: "Name Surname", value: patientData.nameSurname ?? "N/A" },
-    { label: "Gender", value: patientData.gender ?? "N/A" },
-    {
-      label: "Age",
-      value: patientData
-        ? DateTimeHelper.calculateAge(patientData.birthday)
-        : "N/A",
-    },
-    { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
+            <InfoList
+              items={[
+                { label: "Name Surname", value: patientData.nameSurname ?? "N/A" },
+                { label: "Gender", value: patientData.gender ?? "N/A" },
+                {
+                  label: "Age",
+                  value: patientData
+                    ? DateTimeHelper.calculateAge(patientData.birthday)
+                    : "N/A",
+                },
+                { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
 
-    { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
-    { label: "Surgery History", value: patientData.surgeryHistory ?? "N/A" },
-    {
-      label: "Remaining Course",
-      value: String(patientData.remainingCourse ?? "0"),
-    },
-  ]}
-/>
+                { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
+                { label: "Surgery History", value: patientData.surgeryHistory ?? "N/A" },
+                {
+                  label: "Remaining Course",
+                  value: String(patientData.remainingCourse ?? "0"),
+                },
+              ]}
+            />
           </div>
         </Card>
 
         <Card>
-        <SectionHeading title="Appointment History" />
-        <AppointmentTable
-          appointments={filteredAppointments}
-          onEdit={handleUpdateAppointment}
-          allowEditStatuses={["scheduled"]}
-          emptyMessage="No appointments found."
-        />
+          <SectionHeading title="Appointment History" />
+          <AppointmentTable
+            appointments={filteredAppointments}
+            onEdit={handleUpdateAppointment}
+            allowEditStatuses={["scheduled"]}
+            emptyMessage="No appointments found."
+          />
         </Card>
+
+       <Card>
+  <div className="flex items-center justify-between mb-4">
+    <SectionHeading title="Medical Records" />
+    <Button
+      variant="secondary"
+      size="sm"
+      onClick={() => setShowAddMedicalRecordDialog(true)}
+    >
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+        <FontAwesomeIcon icon={faPenToSquare} />
+      </span>
+      Add Medical Record
+    </Button>
+  </div>
+  
+  <MedicalRecordTable 
+    medicalRecords={medicalRecords} 
+    onEdit={() => navigate("/patientList")} 
+  />
+</Card>
       </main>
     </div>
   );

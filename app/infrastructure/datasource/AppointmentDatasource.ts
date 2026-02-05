@@ -19,6 +19,15 @@ export class AppointmentDataSource {
   }
 
 
+  async getById(appointmentId: number): Promise<Appointment | null> {
+    const res = await fetch(`${this.baseUrl}/${appointmentId}`, {
+      method: "GET",
+    });
+    if (res.status === 404) return null;
+    return this.handleResponse<Appointment>(res);
+  }
+
+
   async getListByPatientId(patientId: number): Promise<Appointment[] | null> {
     const res = await fetch(`${this.baseUrl}/patient/${patientId}`, {
       method: "GET",
