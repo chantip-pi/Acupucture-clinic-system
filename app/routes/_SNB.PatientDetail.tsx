@@ -370,7 +370,7 @@ function PatientDetail() {
   
   <MedicalRecordTable 
     medicalRecords={medicalRecords} 
-    onEdit={() => navigate("/patientList")} 
+    onRowClick={(medicalRecord)=>navigate("/medicalRecordDetail", { state: { medicalRecordId: medicalRecord.recordId } })}
   />
 </Card>
       </main>

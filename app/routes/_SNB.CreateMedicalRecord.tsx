@@ -148,7 +148,7 @@ const CreateMedicalRecord = () => {
 
         {/* Appointment Information section */}
         {appointment && (
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4 mb-4">
             <h3 className="text-sm font-semibold text-slate-900">Appointment Information</h3>
 
             <div className="space-y-1 text-sm">
