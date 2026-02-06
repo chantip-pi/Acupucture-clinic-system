@@ -9,7 +9,6 @@ import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useGetAppointmentById } from "~/presentation/hooks/appointment/useGetAppointmentById";
 import LoadingPage from "./components/common/LoadingPage";
-import { useGetAssignedStaff } from "~/presentation/hooks/medicalRecord/useGetAssignedStaff";
 
 const MedicalRecordDetail = () => {
     const { state } = useLocation();
@@ -26,7 +25,6 @@ const MedicalRecordDetail = () => {
   const navigate = useNavigate();
   const { medicalRecord, loading, error } = useGetMedicalRecordById(medicalRecordId);
   const { appointment } = useGetAppointmentById(medicalRecord?.appointmentId ?? null);
-  const { staffs: assignees } = useGetAssignedStaff(medicalRecord?.recordId ?? null);
 
   if (loading) {
     return (
@@ -145,12 +143,12 @@ const MedicalRecordDetail = () => {
             </label>
             <div className="bg-white border border-slate-200 rounded-lg p-3">
               <div className="flex flex-wrap gap-2">
-                {assignees.map((staff) => (
+                {medicalRecord.assigneesNames.map((name) => (
                   <span
-                    key={staff.staffId}
+                    key={name}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
                   >
-                    {staff.nameSurname}
+                    {name}
                   </span>
                 ))}
               </div>

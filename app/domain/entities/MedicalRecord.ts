@@ -10,7 +10,8 @@ export interface MedicalRecord {
     diagnosis: string;
     prescriptions: string;
     remarks: string;
-    assignees: string[];
+    assignees: number[];
+    assigneesNames: string[];
   }
   
   export class MedicalRecordEntity {
@@ -26,8 +27,8 @@ export interface MedicalRecord {
       public readonly diagnosis: string,
       public readonly prescriptions: string,
       public readonly remarks: string,
-      public readonly assignees: string[],
-
+      public readonly assignees: number[],
+      public readonly assigneesNames: string[],
     ) {}
   
     static fromData(data: MedicalRecord): MedicalRecordEntity {
@@ -43,7 +44,8 @@ export interface MedicalRecord {
         data.diagnosis,
         data.prescriptions,
         data.remarks,
-        data.assignees
+        data.assignees,
+        data.assigneesNames
       );
     }
   
@@ -60,7 +62,8 @@ export interface MedicalRecord {
         diagnosis: this.diagnosis,
         prescriptions: this.prescriptions,
         remarks: this.remarks,
-        assignees: this.assignees
+        assignees: this.assignees,
+        assigneesNames: this.assigneesNames
       };
     }
 }
