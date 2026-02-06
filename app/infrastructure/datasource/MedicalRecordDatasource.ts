@@ -57,13 +57,6 @@ export class MedicalRecordDataSource {
     }
 
 
-    async getAssignedStaff(id: number): Promise<StaffNameDTO[] | null> {
-        const res = await fetch(`${this.baseUrl}/assignStaffs/${id}`, {
-            method: "GET",
-        });
-        if (res.status === 404) return null;
-        return this.handleResponse<StaffNameDTO[]>(res);
-    }
 
 }
 

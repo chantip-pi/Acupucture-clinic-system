@@ -47,7 +47,6 @@ import { GetMedicalRecordListUseCase } from "~/application/use-cases/medicalReco
 import { GetMedicalRecordByIdUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordByIdUseCase";
 import { GetMedicalRecordListByPatientIdUseCase } from "~/application/use-cases/medicalRecord/GetMedicalRecordListByPatientIdUseCase";
 import { UpdateMedicalRecordUseCase } from "~/application/use-cases/medicalRecord/UpdateMedicalRecordUseCase";
-import { GetAssignedStaffUseCase } from "~/application/use-cases/medicalRecord/GetAssignedStaffUseCase";
 
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
@@ -92,5 +91,4 @@ export const getMedicalRecordListUseCase = new GetMedicalRecordListUseCase(medic
 export const getMedicalRecordByIdUseCase = new GetMedicalRecordByIdUseCase(medicalRecordRepository);
 export const getMedicalRecordListByPatientIdUseCase = new GetMedicalRecordListByPatientIdUseCase(medicalRecordRepository);
 export const updateMedicalRecordUseCase = new UpdateMedicalRecordUseCase(medicalRecordRepository);
-export const getAssignedStaffUseCase = new GetAssignedStaffUseCase(medicalRecordRepository);
 

@@ -11,6 +11,5 @@ export interface IMedicalRecordRepository {
   create(appointment: Omit<MedicalRecord, "appointmentId">): Promise<MedicalRecord>;
   update(appointment: MedicalRecord): Promise<MedicalRecord>;
 
-  getAssignedStaff(id: number): Promise<StaffNameDTO[] | null>;
 
 }

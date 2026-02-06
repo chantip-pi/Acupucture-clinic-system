@@ -32,11 +32,5 @@ export class MedicalRecordRepository implements IMedicalRecordRepository {
     }
 
 
-    async getAssignedStaff(id: number): Promise<StaffNameDTO[] | null> {
-        return this.dataSource.getAssignedStaff(id);
-    }
-
-
-
 }
 
