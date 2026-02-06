@@ -56,13 +56,13 @@ const MedicalRecordTable: React.FC<MedicalRecordTableProps> = ({
                
                   <Button
                     size="sm"
-                    variant="primary"
+                    variant="secondary"
                     onClick={(e) => {
                       e.stopPropagation();
                       onEdit?.(medicalRecord);
                     }}
                   >
-                    Edit
+                    View Details
                   </Button>
                 
               </td>

@@ -116,10 +116,9 @@ const PatientList: React.FC = () => {
                 <td className="px-4 py-3 text-md text-slate-900">{patient.gender}</td>
                 <td className="px-4 py-3 text-md text-slate-900">{patient.phoneNumber}</td>
                 <td className="px-4 py-3">
-                  {/* TODO: ทำให้ปุ่มหายไปถ้าคนไข้มี appointment อยู่แล้ว */}
                   <Button
                     size="sm"
-                    variant="primary"
+                    variant="secondary"
                     onClick={() => handlePatientDetail(patient.patientId)}
                   >
                     View Details

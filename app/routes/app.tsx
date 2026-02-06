@@ -14,7 +14,8 @@ import AcupunctureSelect from './_SNB.AcupunctureSelect';
 import AcupunctureCreate from './_SNB.AcupunctureCreate';
 import AcupunctureLibrary from './_SNB.AcupunctureLibrary';
 import AcupunctureShowPage from './_SNB.AcupunctureShowPage';
-import CreateMedicalRecord from './_SNB.CreateMedicalRecord'
+import CreateMedicalRecord from './_SNB.CreateMedicalRecord';
+import MedicalRecordDetail from './_SNB.MedicalRecordDetail';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
         <Route path="/acupunctureLibrary" element={<AcupunctureLibrary/>}/>
         <Route path="/acupunctureShowPage" element={<AcupunctureShowPage/>}/>
         <Route path="/createMedicalRecord" element={<CreateMedicalRecord/>}/>
+        <Route path="/medicalRecordDetail" element={<MedicalRecordDetail/>}/>
       </Routes>
     </Router>
   );

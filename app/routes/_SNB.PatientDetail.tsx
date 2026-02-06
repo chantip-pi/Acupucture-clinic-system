@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import SideNavBar from "./_SNB";
 import { Button, Card, InfoList, SectionHeading } from "~/presentation/designSystem";
 import { useGetPatientById } from "~/presentation/hooks/patient/useGetPatientById";
@@ -19,6 +19,7 @@ import AddMedicalRecordDialog from "./components/medicalRecord/AddMedicalRecordD
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import MedicalRecordTable from "./components/medicalRecord/MedicalRecordTable";
 import { useGetMedicalRecordListByPatientId } from "~/presentation/hooks/medicalRecord/useGetMedicalRecordListByPatientId";
+import { getUserSession } from "~/presentation/session/userSession";
 
 function PatientDetail() {
 
@@ -43,6 +44,37 @@ function PatientDetail() {
   const [editReason, setEditReason] = useState<string>("");
   const [formError, setFormError] = useState<string>("");
   const [showAddMedicalRecordDialog, setShowAddMedicalRecordDialog] = useState(false);
+  const [sessionError, setSessionError] = useState<string | null>(null);
+  const [isSessionLoaded, setIsSessionLoaded] = useState<boolean>(false);
+  const [isManager, setIsManager] = useState<boolean>(false);
+  const [isDoctor, setIsDoctor] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    const session = getUserSession();
+    if (!session) {
+      setIsLoggedIn(false);
+      setIsManager(false);
+      setIsSessionLoaded(true);
+      setSessionError("No user information found. Please log in again.");
+      return;
+    }
+
+    setIsLoggedIn(true);
+    setIsManager(session.title?.toLowerCase() === "manager");
+    setIsDoctor(session.title?.toLowerCase() === "doctor");
+    setIsSessionLoaded(true);
+  }, []);
+
+ 
+  const checkAccess = (action: () => void) => {
+    if (!isManager && !isDoctor) {
+      alert("You don't have access to this action.");
+      return;
+    }
+
+    action();
+  };
 
   const filteredAppointments = useMemo(() => {
     if (!appointments) return [];
@@ -84,8 +116,8 @@ function PatientDetail() {
     return <LoadingPage />;
   }
 
-  if (error) {
-    return <ErrorPage message={error} onRetry={() => window.location.reload()} />;
+  if (error || appointmentError || sessionError) {
+    return <ErrorPage message={error || appointmentError || sessionError || "An error occurred"} onRetry={() => window.location.reload()} />;
   }
 
 
@@ -102,9 +134,9 @@ function PatientDetail() {
   };
 
   const handleEdit = (patientId: number) => {
-    navigate("/editPatient", {
+    checkAccess(() => navigate("/editPatient", {
       state: { patientId },
-    });
+    }));
   };
 
 
@@ -195,7 +227,7 @@ function PatientDetail() {
     patientName: string;
     doctorName: string;
   }) => {
-    navigate("/createMedicalRecord", {
+    checkAccess(() => navigate("/createMedicalRecord", {
       state: {
         appointmentId: recordData.appointmentId,
         doctorId: recordData.doctorId,
@@ -204,8 +236,18 @@ function PatientDetail() {
         patientName: recordData.patientName,
         doctorName: recordData.doctorName
       },
-    });
+    }));
   };
+
+  if (!isSessionLoaded) {
+    return <LoadingPage />;
+  }
+  if (!isLoggedIn) {
+    const handleGoBack = () => {
+      window.history.back();
+    };
+  }
+
 
   return (
     <div className="flex min-h-screen bg-surface-muted">
@@ -314,7 +356,7 @@ function PatientDetail() {
        <Card>
   <div className="flex items-center justify-between mb-4">
     <SectionHeading title="Medical Records" />
-    <Button
+    {(isManager || isDoctor) && (<Button
       variant="secondary"
       size="sm"
       onClick={() => setShowAddMedicalRecordDialog(true)}
@@ -323,12 +365,12 @@ function PatientDetail() {
         <FontAwesomeIcon icon={faPenToSquare} />
       </span>
       Add Medical Record
-    </Button>
+    </Button>)}
   </div>
   
   <MedicalRecordTable 
     medicalRecords={medicalRecords} 
-    onEdit={() => navigate("/patientList")} 
+    onRowClick={(medicalRecord)=>navigate("/medicalRecordDetail", { state: { medicalRecordId: medicalRecord.recordId } })}
   />
 </Card>
       </main>
