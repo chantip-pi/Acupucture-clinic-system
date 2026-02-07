@@ -30,6 +30,20 @@ export class AcupunctureDataSource {
     return this.handleResponse<Acupuncture>(res);
   }
 
+  async getByMeridianId(meridianId: number): Promise<Acupuncture[]> {
+    const res = await fetch(`${this.baseUrl}/meridian/${meridianId}`, {
+      method: "GET",
+    });
+    return this.handleResponse<Acupuncture[]>(res);
+  }
+
+  async getByRegionAndSide(region: string, side: string): Promise<Acupuncture[]> {
+    const res = await fetch(`${this.baseUrl}/region/${region}/side/${side}`, {
+      method: "GET",
+    });
+    return this.handleResponse<Acupuncture[]>(res);
+  }
+
   async create(
     acupuncture: Omit<Acupuncture, "acupunctureId">,
   ): Promise<Acupuncture> {

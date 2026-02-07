@@ -6,16 +6,11 @@ import {
   Button,
   Table,
 } from "~/presentation/designSystem";
-import AcupunctureCard from "./components/AcupunctureCard";
+import RegionSideView from "./components/RegionSideView";
 import MultiSelectDropdown from "./components/MultiSelectDropdown";
-import { useGetAcupointList } from "~/presentation/hooks/acupoint/useGetAcupointList";
-import { useGetAcupointLocationList } from "~/presentation/hooks/acupointLocation/useGetAcupointLocationList";
 import { useGetMeridianRegion } from "~/presentation/hooks/meridian/useGetMeridianRegion";
 import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
 import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGetMeridianSidesByRegion";
-import { Acupoint } from "~/domain/entities/Acupoint";
-import { Meridian } from "~/domain/entities/Meridian";
-import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import { useAddMedicalRecordAcupuncture } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useAddMedicalRecordAcupuncture";
 
 type ViewSide = string;
@@ -24,11 +19,14 @@ interface AcupuncturePoint {
   acupunctureId: number;
   acupointCode: string;
   acupointName: string;
-  x: number; // pointLeft as percentage
-  y: number; // pointTop as percentage
+  locationId: number;
+  pointLeft: number;
+  pointTop: number;
   meridianId: number;
   meridianName: string;
-  locationId: number;
+  region: string;
+  side: string;
+  image: string;
 }
 
 interface SelectedPoint extends AcupuncturePoint {
@@ -38,13 +36,9 @@ interface SelectedPoint extends AcupuncturePoint {
 }
 
 function AcupunctureSelect() {
-  const { acupoints, loading: acupointsLoading } = useGetAcupointList(null);
-  const { acupointLocations, loading: locationsLoading } =
-    useGetAcupointLocationList();
   const { meridians, loading: meridiansLoading } = useGetMeridianList();
   const { regions, loading: regionsLoading } = useGetMeridianRegion();
-  const { acupunctures, loading: acupuncturesLoading } = useGetAcupunctureList();
-  const { addMedicalRecordAcupuncture, loading: medicalRecordAcupunctureLoading, error: medicalRecordAcupuncture } = useAddMedicalRecordAcupuncture();
+  const { addMedicalRecordAcupuncture, loading: medicalRecordAcupunctureLoading } = useAddMedicalRecordAcupuncture();
 
   const getRegionName = (regionObj: any): string | null => {
     if (typeof regionObj === "string") return regionObj;
@@ -57,106 +51,27 @@ function AcupunctureSelect() {
   };
 
   const loading =
-    acupointsLoading || locationsLoading || meridiansLoading || regionsLoading || acupuncturesLoading;
-
-  const acupointMap = useMemo(() => {
-    const map = new Map<string, Acupoint>();
-    acupoints.forEach((point) => {
-      map.set(point.acupointCode, point);
-    });
-    return map;
-  }, [acupoints]);
-
-  const meridianMap = useMemo(() => {
-    const map = new Map<number, Meridian>();
-    meridians.forEach((meridian) => {
-      map.set(meridian.meridianId, meridian);
-    });
-    return map;
-  }, [meridians]);
-
-  const acupunctureMap = useMemo(() => {
-    const map = new Map<string, number>();
-    acupunctures.forEach((acupuncture) => {
-      const key = `${acupuncture.acupointCode}-${acupuncture.meridianId}`;
-      map.set(key, acupuncture.acupunctureId);
-    });
-    return map;
-  }, [acupunctures]);
-
-  const meridiansByRegionSide = useMemo(() => {
-    const map = new Map<string, Meridian[]>();
-    meridians.forEach((meridian) => {
-      const key = `${meridian.region.toLowerCase()}-${meridian.side.toLowerCase()}`;
-      if (!map.has(key)) {
-        map.set(key, []);
-      }
-      map.get(key)!.push(meridian);
-    });
-    return map;
-  }, [meridians]);
-
-  const pointsByRegionSideMeridian = useMemo(() => {
-    const map = new Map<string, Map<number, AcupuncturePoint[]>>();
-
-    acupointLocations.forEach((location) => {
-      const meridian = meridianMap.get(location.meridianId);
-      if (!meridian) return;
-
-      const regionKey = `${meridian.region.toLowerCase()}-${meridian.side.toLowerCase()}`;
-      if (!map.has(regionKey)) {
-        map.set(regionKey, new Map());
-      }
-
-      const meridianMapForRegion = map.get(regionKey)!;
-      if (!meridianMapForRegion.has(location.meridianId)) {
-        meridianMapForRegion.set(location.meridianId, []);
-      }
-
-      const acupoint = acupointMap.get(location.acupointCode);
-
-      if (acupoint) {
-        // Get acupunctureId from the acupuncture map using the composite key
-        const acupunctureKey = `${location.acupointCode}-${location.meridianId}`;
-        const acupunctureId = acupunctureMap.get(acupunctureKey) || 0;
-
-        meridianMapForRegion.get(location.meridianId)!.push({
-          acupunctureId: acupunctureId,
-          acupointCode: acupoint.acupointCode,
-          acupointName: acupoint.acupointName,
-          x: location.pointLeft,
-          y: location.pointTop,
-          meridianId: location.meridianId,
-          meridianName: meridian.meridianName,
-          locationId: location.locationId,
-        });
-      }
-    });
-
-    return map;
-  }, [acupointLocations, acupointMap, meridianMap, acupunctureMap]);
+    meridiansLoading || regionsLoading || medicalRecordAcupunctureLoading;
 
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
 
   const [selectedPoints, setSelectedPoints] = useState<SelectedPoint[]>([]);
 
-  const [visibleMeridians, setVisibleMeridians] = useState<
-    Record<string, Set<number>>
-  >({});
+  const [visibleMeridians, setVisibleMeridians] = useState<Record<string, Set<number>>>({});
 
   useEffect(() => {
     if (meridians.length > 0) {
       const initial: Record<string, Set<number>> = {};
-      meridiansByRegionSide.forEach((meridianList, key) => {
-        initial[key] = new Set(meridianList.map((m) => m.meridianId));
+      meridians.forEach((m) => {
+        const key = `${m.region.toLowerCase()}-${m.side.toLowerCase()}`;
+        if (!initial[key]) initial[key] = new Set<number>();
+        initial[key].add(m.meridianId);
       });
       setVisibleMeridians(initial);
     }
-  }, [meridians, meridiansByRegionSide]);
+  }, [meridians]);
 
-  const [viewsByRegion, setViewsByRegion] = useState<
-    Record<string, Record<string, boolean>>
-  >({});
+  const [viewsByRegion, setViewsByRegion] = useState<Record<string, Record<string, boolean>>>({});
 
   const { sidesByRegion } = useGetMeridianSidesByRegion(selectedRegions);
 
@@ -211,10 +126,8 @@ function AcupunctureSelect() {
       setSelectedPoints([
         ...selectedPoints,
         {
-          key: pointKey,
-          region,
-          side,
           ...point,
+          key: pointKey,
         },
       ]);
     }
@@ -242,77 +155,6 @@ function AcupunctureSelect() {
       alert("Failed to save acupuncture points. Please try again.");
       return;
     }
-  };
-
-  const getVisiblePointsForRegionSide = (
-    region: string,
-    side: string,
-  ): AcupuncturePoint[] => {
-    const key = `${region.toLowerCase()}-${side.toLowerCase()}`;
-    const meridianMapForRegion = pointsByRegionSideMeridian.get(key);
-    if (!meridianMapForRegion) return [];
-
-    const visibleMeridianIds = visibleMeridians[key] || new Set();
-    const allPoints: AcupuncturePoint[] = [];
-
-    meridianMapForRegion.forEach((points, meridianId) => {
-      if (visibleMeridianIds.has(meridianId)) {
-        allPoints.push(...points);
-      }
-    });
-
-    return allPoints;
-  };
-
-  // Get all meridians for a region/side (including hidden ones)
-  const getMeridiansForRegionSide = (
-    region: string,
-    side: string,
-  ): Meridian[] => {
-    const key = `${region.toLowerCase()}-${side.toLowerCase()}`;
-    return meridiansByRegionSide.get(key) || [];
-  };
-
-  // Get all points for a region/side (including from hidden meridians)
-  const getAllPointsForRegionSide = (
-    region: string,
-    side: string,
-  ): AcupuncturePoint[] => {
-    const key = `${region.toLowerCase()}-${side.toLowerCase()}`;
-    const meridianMapForRegion = pointsByRegionSideMeridian.get(key);
-    if (!meridianMapForRegion) return [];
-
-    const allPoints: AcupuncturePoint[] = [];
-    meridianMapForRegion.forEach((points) => {
-      allPoints.push(...points);
-    });
-
-    return allPoints;
-  };
-
-  // Get image for a region/side combination from meridians
-  const getImageForRegionSide = (
-    region: string,
-    side: string,
-  ): string | null => {
-    const key = `${region.toLowerCase()}-${side.toLowerCase()}`;
-    const meridiansForView = meridiansByRegionSide.get(key);
-
-    if (!meridiansForView || meridiansForView.length === 0) {
-      return null;
-    }
-
-    // Use the first visible meridian's image, or fallback to the first meridian's image
-    const visibleMeridianIds = visibleMeridians[key] || new Set();
-    const visibleMeridian = meridiansForView.find((m) =>
-      visibleMeridianIds.has(m.meridianId),
-    );
-
-    if (visibleMeridian) {
-      return visibleMeridian.image;
-    }
-
-    return meridiansForView[0]?.image || null;
   };
 
   if (loading) {
@@ -380,99 +222,19 @@ function AcupunctureSelect() {
                 <div className="flex flex-col gap-4">
                   {sidesForRegion
                     .filter((side) => viewsByRegion[region]?.[side])
-                    .map((side) => {
-                      const regionKey = `${region.toLowerCase()}-${side.toLowerCase()}`;
-                      const meridiansForView = getMeridiansForRegionSide(
-                        region,
-                        side,
-                      );
-                      const visiblePoints = getVisiblePointsForRegionSide(
-                        region,
-                        side,
-                      );
-                      const allPoints = getAllPointsForRegionSide(region, side);
-                      const visibleMeridianIds =
-                        visibleMeridians[regionKey] || new Set();
-                      const imageUrl = getImageForRegionSide(region, side);
-                      const sideLabel =
-                        side && typeof side === "string"
-                          ? side.charAt(0).toUpperCase() + side.slice(1)
-                          : "";
-
-                      return (
-                        <div key={side} className="space-y-4">
-                          <AcupunctureCard
-                            bodyPart={region}
-                            side={side}
-                            label={sideLabel}
-                            meridiansForView={meridiansForView}
-                            visiblePoints={visiblePoints}
-                            allPoints={allPoints}
-                            selectedPoints={selectedPoints}
-                            visibleMeridianIds={visibleMeridianIds}
-                            imageUrl={imageUrl}
-                            onPointClick={(point) =>
-                              handlePointClick(point, region, side)
-                            }
-                            onMeridianToggle={(meridianId) =>
-                              toggleMeridianVisibility(region, side, meridianId)
-                            }
-                          />
-
-                          {/* Selected points table for this view */}
-                          {selectedPoints.filter(
-                            (p) => p.region === region && p.side === side,
-                          ).length > 0 && (
-                            <div className="mt-3">
-                              <Table
-                                headers={[
-                                  "Acupoint Code",
-                                  "Name",
-                                  "Meridian",
-                                  "Actions",
-                                ]}
-                              >
-                                {selectedPoints
-                                  .filter(
-                                    (p) =>
-                                      p.region === region && p.side === side,
-                                  )
-                                  .map((point) => (
-                                    <tr
-                                      key={point.key}
-                                      className="hover:bg-slate-50"
-                                    >
-                                      <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                                        {point.acupointCode}
-                                      </td>
-                                      <td className="px-4 py-2 text-sm text-slate-600">
-                                        {point.acupointName}
-                                      </td>
-                                      <td className="px-4 py-2 text-sm text-slate-600">
-                                        {point.meridianName}
-                                      </td>
-                                      <td className="px-4 py-2 text-sm">
-                                        <button
-                                          onClick={() =>
-                                            setSelectedPoints(
-                                              selectedPoints.filter(
-                                                (p) => p.key !== point.key,
-                                              ),
-                                            )
-                                          }
-                                          className="text-red-600 hover:text-red-800"
-                                        >
-                                          Remove
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  ))}
-                              </Table>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                    .map((side) => (
+                      <div key={side} className="space-y-4">
+                        <RegionSideView
+                          region={region}
+                          side={side}
+                          selectedPoints={selectedPoints}
+                          visibleMeridians={visibleMeridians}
+                          handlePointClick={handlePointClick}
+                          setSelectedPoints={setSelectedPoints}
+                          toggleMeridianVisibility={toggleMeridianVisibility}
+                        />
+                      </div>
+                    ))}
                 </div>
               </div>
             );

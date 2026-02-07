@@ -8,11 +8,14 @@ interface AcupuncturePoint {
   acupunctureId: number;
   acupointCode: string;
   acupointName: string;
-  x: number; // pointLeft as percentage
-  y: number; // pointTop as percentage
+  locationId: number;
+  pointLeft: number;
+  pointTop: number;
   meridianId: number;
   meridianName: string;
-  locationId: number;
+  region: string;
+  side: string;
+  image: string;
 }
 
 interface SelectedPoint extends AcupuncturePoint {
@@ -93,8 +96,8 @@ function AcupunctureCard({
                         -translate-x-1/2 -translate-y-1/2
                       `}
                       style={{
-                        left: `${point.x}%`,
-                        top: `${point.y}%`,
+                        left: `${point.pointLeft}%`,
+                        top: `${point.pointTop}%`,
                       }}
                       title={`${point.acupointCode} - ${point.acupointName} (${point.meridianName})`}
                     />

@@ -13,6 +13,14 @@ export class AcupunctureRepository implements IAcupunctureRepository {
     return this.dataSource.getById(id);
   }
 
+  async getByMeridianId(meridianId: number): Promise<Acupuncture[]> {
+    return this.dataSource.getByMeridianId(meridianId);
+  }
+
+  async getByRegionAndSide(region: string, side: string): Promise<Acupuncture[]> {
+    return this.dataSource.getByRegionAndSide(region, side);
+  }
+
   async create(
     acupuncture: Omit<Acupuncture, "acupunctureId">,
   ): Promise<Acupuncture> {

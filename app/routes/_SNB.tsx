@@ -5,7 +5,6 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { Outlet, useNavigate } from "@remix-run/react";
 import { useRequireAuth } from "~/presentation/hooks/staff/useRequireAuth";
 import { FaClipboardList } from "react-icons/fa";
-import { FaDiagnoses } from "react-icons/fa";
 import {
   clearUserSession,
   getUserSession,
@@ -19,7 +18,6 @@ const navItems = [
   // { label: "Income / Expenses", icon: <RiExchange2Fill size={20} />, to: "/incomeExpenses" },
   // { label: "Equipment", icon: <FaWrench size={18} />, to: "/equipment" },
   { label: "Medical Record", icon: <FaClipboardList size={20} />, to: "/medicalRecord" },
-  { label: "Acupuncture", icon: <FaDiagnoses size={25} />, to: "/acupunctureSelect"},
 ];
 
 function SideNavBar() {

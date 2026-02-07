@@ -44,6 +44,8 @@ import { DeleteAcupointLocationUseCase } from "~/application/use-cases/acupointL
 import { AddAcupunctureUseCase } from "~/application/use-cases/acupuncture/AddAcupunctureUseCase";
 import { GetAcupunctureListUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureListUseCase";
 import { GetAcupunctureByIdUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureByIdUseCase";
+import { GetAcupunctureByMeridianIdUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureByMeridianIdUseCase";
+import { GetAcupunctureByRegionAndSideUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureByRegionAndSideUseCase";
 import { UpdateAcupunctureUseCase } from "~/application/use-cases/acupuncture/UpdateAcupunctureUseCase";
 import { DeleteAcupunctureUseCase } from "~/application/use-cases/acupuncture/DeleteAcupunctureUseCase";
 
@@ -180,6 +182,8 @@ export const deleteAcupointLocationUsecase = new DeleteAcupointLocationUseCase(a
 export const addAcupunctureUseCase = new AddAcupunctureUseCase(acupunctureRepository);
 export const getAcupunctureListUseCase = new GetAcupunctureListUseCase(acupunctureRepository);
 export const getAcupunctureByIdUseCase = new GetAcupunctureByIdUseCase(acupunctureRepository);
+export const getAcupunctureByMeridianIdUseCase = new GetAcupunctureByMeridianIdUseCase(acupunctureRepository);
+export const getAcupunctureByRegionAndSideUseCase = new GetAcupunctureByRegionAndSideUseCase(acupunctureRepository);
 export const updateAcupunctureUseCase = new UpdateAcupunctureUseCase(acupunctureRepository);
 export const deleteAcupunctureUsecase = new DeleteAcupunctureUseCase(acupunctureRepository);
 
