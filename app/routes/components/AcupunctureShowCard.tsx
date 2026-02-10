@@ -2,37 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { Card, Table } from "~/presentation/designSystem";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
-
-interface RecordedAcupuncturePoint {
-  acupunctureId: number;
-  acupointCode: string;
-  acupointName: string;
-  x: number;
-  y: number;
-  meridianId: number;
-  meridianName: string;
-  locationId: number;
-  region: string;
-  side: string;
-  image: string | null;
-}
-
-interface AcupunctureShowCardProps {
-  recordId?: number;
-  illnessId?: number;
-  visibleMeridians: Record<string, Set<number>>;
-  onMeridianToggle: (region: string, side: string, meridianId: number) => void;
-}
-
-// Single region/side view component
-interface RegionViewProps {
-  regionSideKey: string;
-  region: string;
-  side: string;
-  allPoints: RecordedAcupuncturePoint[];
-  visibleMeridianIds: Set<number>;
-  onMeridianToggle: (region: string, side: string, meridianId: number) => void;
-}
+import { AcupuncturePoint, AcupunctureShowCardProps, ShowCardRegionViewProps } from "~/domain/entities/AcupuncturePoint";
 
 function RegionView({
   region,
@@ -40,7 +10,7 @@ function RegionView({
   allPoints,
   visibleMeridianIds,
   onMeridianToggle,
-}: RegionViewProps) {
+}: ShowCardRegionViewProps) {
   // Get the image from first point (all points in same region/side view have same image)
   const baseUrl = "http://localhost:3000/api";
   const fullImageUrl = `${baseUrl}/images/${allPoints[0]?.image}`;
@@ -91,7 +61,7 @@ function RegionView({
                     <div
                       key={point.acupunctureId}
                       className={`absolute w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 bg-teal-500 ring-2 ring-teal-600`}
-                      style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                      style={{ left: `${point.pointLeft}%`, top: `${point.pointTop}%` }}
                       title={`${point.acupointCode} - ${point.acupointName} (${point.meridianName})`}
                     />
                   ))}
@@ -172,7 +142,7 @@ function AcupunctureShowCard({
   visibleMeridians,
   onMeridianToggle,
 }: AcupunctureShowCardProps) {
-  const [pointsByRegionSide, setPointsByRegionSide] = useState<Map<string, RecordedAcupuncturePoint[]>>(new Map());
+  const [pointsByRegionSide, setPointsByRegionSide] = useState<Map<string, AcupuncturePoint[]>>(new Map());
 
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId || 0);
   const { acupunctures } = useGetAcupunctureList();
@@ -192,22 +162,22 @@ function AcupunctureShowCard({
     );
 
     // Convert to RecordedAcupuncturePoint using all fields from Acupuncture entity
-    const allPoints: RecordedAcupuncturePoint[] = recordedAcupunctures.map((acu) => ({
+    const allPoints: AcupuncturePoint[] = recordedAcupunctures.map((acu) => ({
       acupunctureId: acu.acupunctureId,
       acupointCode: acu.acupointCode,
       acupointName: acu.acupointName,
-      x: acu.pointLeft,
-      y: acu.pointTop,
+      pointLeft: acu.pointLeft,
+      pointTop: acu.pointTop,
       meridianId: acu.meridianId,
       meridianName: acu.meridianName,
       locationId: acu.locationId,
       region: acu.region,
       side: acu.side,
       image: acu.image,
-    } as RecordedAcupuncturePoint));
+    } as AcupuncturePoint));
 
     // Group points by region/side
-    const grouped = new Map<string, RecordedAcupuncturePoint[]>();
+    const grouped = new Map<string, AcupuncturePoint[]>();
     allPoints.forEach((point) => {
       const key = `${point.region.toLowerCase()}-${point.side.toLowerCase()}`;
       if (!grouped.has(key)) {

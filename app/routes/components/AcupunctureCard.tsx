@@ -1,41 +1,5 @@
 import { Card } from "~/presentation/designSystem";
-import type { Meridian } from "~/domain/entities/Meridian";
-
-type ViewSide = string;
-
-interface AcupuncturePoint {
-  acupunctureId: number;
-  acupointCode: string;
-  acupointName: string;
-  locationId: number;
-  pointLeft: number;
-  pointTop: number;
-  meridianId: number;
-  meridianName: string;
-  region: string;
-  side: string;
-  image: string;
-}
-
-interface SelectedPoint extends AcupuncturePoint {
-  region: string;
-  side: ViewSide;
-  key: string;
-}
-
-interface AcupunctureCardProps {
-  bodyPart: string;
-  side: string;
-  label: string;
-  meridiansForView: Meridian[];
-  visiblePoints: AcupuncturePoint[];
-  allPoints: AcupuncturePoint[];
-  selectedPoints: SelectedPoint[];
-  visibleMeridianIds: Set<number>;
-  imageUrl: string | null;
-  onPointClick: (point: AcupuncturePoint) => void;
-  onMeridianToggle: (meridianId: number) => void;
-}
+import { AcupunctureCardProps } from "~/domain/entities/AcupuncturePoint";
 
 function AcupunctureCard({
   bodyPart,

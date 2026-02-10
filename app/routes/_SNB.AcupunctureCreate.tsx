@@ -16,14 +16,7 @@ import { useAddAcupoint } from "~/presentation/hooks/acupoint/useAddAcupoint";
 import { useAddAcupointLocation } from "~/presentation/hooks/acupointLocation/useAddAcupointLocation";
 import { useAddAcupuncture } from "~/presentation/hooks/acupuncture/useAddAcupuncture";
 import { useAddMeridian } from "~/presentation/hooks/meridian/useAddMeridian";
-import { useGetMeridianById } from "~/presentation/hooks/meridian/useGetMeridianById";
-
-interface CustomMarker {
-  top: number;
-  left: number;
-  acupointCode?: string;
-  acupointName?: string;
-}
+import { CustomMarker } from "~/domain/entities/CustomMarker";
 
 const AcupunctureCreate: React.FC = () => {
   const [markers, setMarkers] = useState<CustomMarker[]>([]);

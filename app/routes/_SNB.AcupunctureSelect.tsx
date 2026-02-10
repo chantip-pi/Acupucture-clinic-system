@@ -12,28 +12,7 @@ import { useGetMeridianRegion } from "~/presentation/hooks/meridian/useGetMeridi
 import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
 import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGetMeridianSidesByRegion";
 import { useAddMedicalRecordAcupuncture } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useAddMedicalRecordAcupuncture";
-
-type ViewSide = string;
-
-interface AcupuncturePoint {
-  acupunctureId: number;
-  acupointCode: string;
-  acupointName: string;
-  locationId: number;
-  pointLeft: number;
-  pointTop: number;
-  meridianId: number;
-  meridianName: string;
-  region: string;
-  side: string;
-  image: string;
-}
-
-interface SelectedPoint extends AcupuncturePoint {
-  region: string;
-  side: ViewSide;
-  key: string;
-}
+import { AcupuncturePoint, SelectedPoint } from "~/domain/entities/AcupuncturePoint";
 
 function AcupunctureSelect() {
   const { meridians, loading: meridiansLoading } = useGetMeridianList();

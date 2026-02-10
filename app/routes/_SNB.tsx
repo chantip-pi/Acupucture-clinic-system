@@ -15,9 +15,6 @@ const navItems = [
   { label: "Home", icon: <IoMdHome size={22} />, to: "/home" },
   { label: "Manage Staff", icon: <FaUserDoctor size={18} />, to: "/staffListView" },
   { label: "Manage Patient", icon: <FaUser size={18} />, to: "/patientList" },
-  // { label: "Income / Expenses", icon: <RiExchange2Fill size={20} />, to: "/incomeExpenses" },
-  // { label: "Equipment", icon: <FaWrench size={18} />, to: "/equipment" },
-  { label: "Medical Record", icon: <FaClipboardList size={20} />, to: "/medicalRecord" },
 ];
 
 function SideNavBar() {

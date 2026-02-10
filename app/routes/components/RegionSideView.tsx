@@ -3,38 +3,7 @@ import { Table } from "~/presentation/designSystem";
 import AcupunctureCard from "./AcupunctureCard";
 import { useGetAcupunctureByRegionAndSide } from "~/presentation/hooks/acupuncture/useGetAcupunctureByRegionAndSide";
 import { useGetMeridiansByRegionAndSide } from "~/presentation/hooks/meridian/useGetMeridiansByRegionAndSide";
-
-type ViewSide = string;
-
-interface AcupuncturePoint {
-  acupunctureId: number;
-  acupointCode: string;
-  acupointName: string;
-  locationId: number;
-  pointLeft: number;
-  pointTop: number;
-  meridianId: number;
-  meridianName: string;
-  region: string;
-  side: string;
-  image: string;
-}
-
-interface SelectedPoint extends AcupuncturePoint {
-  region: string;
-  side: ViewSide;
-  key: string;
-}
-
-interface Props {
-  region: string;
-  side: string;
-  selectedPoints: SelectedPoint[];
-  visibleMeridians: Record<string, Set<number>>;
-  handlePointClick: (point: AcupuncturePoint, region: string, side: string) => void;
-  toggleMeridianVisibility: (region: string, side: string, meridianId: number) => void;
-  setSelectedPoints: React.Dispatch<React.SetStateAction<SelectedPoint[]>>;
-}
+import { AcupuncturePoint, RegionSideViewProps } from "~/domain/entities/AcupuncturePoint";
 
 export default function RegionSideView({
   region,
@@ -44,7 +13,7 @@ export default function RegionSideView({
   handlePointClick,
   toggleMeridianVisibility,
   setSelectedPoints,
-}: Props) {
+}: RegionSideViewProps) {
   const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(region, side);
   const { meridians: meridiansForView } = useGetMeridiansByRegionAndSide(region, side);
 
