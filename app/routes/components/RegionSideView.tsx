@@ -105,12 +105,11 @@ export default function RegionSideView({
       />
 
       {/* Selected points table for this view */}
-      {selectedPoints.filter((p) => p.region === region && p.side === side)
-        .length > 0 && (
+      {selectedPoints.filter((p) => visibleMeridianIds.has(p.meridianId)).length > 0 && (
         <div className="mt-3">
-          <Table headers={["Acupoint Code", "Name", "Meridian", "Actions"]}>
+          <Table headers={["Acupuncture Code", "Acupuncture Name", "Meridian", "Actions"]}>
             {selectedPoints
-              .filter((p) => p.region === region && p.side === side)
+              .filter((p) => visibleMeridianIds.has(p.meridianId))
               .map((point) => (
                 <tr key={point.key} className="hover:bg-slate-50">
                   <td className="px-4 py-2 text-sm font-medium text-slate-900">

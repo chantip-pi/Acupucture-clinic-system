@@ -2,9 +2,8 @@ import { s } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 import { MedicalRecordAcupuncture } from "~/domain/entities/MedicalRecordAcupuncture";
 
 export class MedicalRecordAcupunctureDataSource {
-//   constructor( private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/medicalRecordAcupunctures") {}
-
-  constructor(private readonly baseUrl: string = "http://localhost:3000/api/medicalRecordAcupunctures") {}
+  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/medicalRecordAcupunctures") {}
+  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/medicalRecordAcupunctures") {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {

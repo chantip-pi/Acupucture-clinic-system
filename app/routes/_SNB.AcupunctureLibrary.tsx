@@ -4,7 +4,6 @@ import {
   Card,
   SectionHeading,
   Button,
-  Table,
 } from "~/presentation/designSystem";
 import { Illness } from "~/domain/entities/Illness";
 import { useGetIllnessList } from "~/presentation/hooks/illness/useGetIllnessList";

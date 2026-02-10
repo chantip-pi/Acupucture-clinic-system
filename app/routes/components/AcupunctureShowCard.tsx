@@ -1,5 +1,5 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Card } from "~/presentation/designSystem";
+import { useMemo, useState, useEffect } from "react";
+import { Card, Table } from "~/presentation/designSystem";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 
@@ -68,78 +68,101 @@ function RegionView({
   }, [allPoints]);
 
   return (
-    <Card padding="sm">
-      <p className="mb-2 text-sm font-medium text-slate-600">
-        {region.charAt(0).toUpperCase() + region.slice(1)} {side.toLowerCase()} view
-      </p>
+    <div className="space-y-4">
+      <Card padding="sm">
+        <p className="mb-2 text-sm font-medium text-slate-600">
+          {region.charAt(0).toUpperCase() + region.slice(1)} {side.toLowerCase()} view
+        </p>
 
-      <div className="flex flex-row gap-4">
-        <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
-          {imageUrl ? (
-            <div className="relative h-full">
-              <img
-                src={imageUrl}
-                alt={`${region} ${side} view`}
-                className="h-full object-contain"
-              />
+        <div className="flex flex-row gap-4">
+          <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
+            {imageUrl ? (
+              <div className="relative h-full">
+                <img
+                  src={imageUrl}
+                  alt={`${region} ${side} view`}
+                  className="h-full object-contain"
+                />
 
-              {/* MARKERS */}
-              <div className="absolute inset-0">
-                {visiblePoints.map((point) => (
-                  <div
-                    key={point.acupunctureId}
-                    className={`absolute w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 bg-teal-500 ring-2 ring-teal-600`}
-                    style={{ left: `${point.x}%`, top: `${point.y}%` }}
-                    title={`${point.acupointCode} - ${point.acupointName} (${point.meridianName})`}
-                  />
-                ))}
+                {/* MARKERS */}
+                <div className="absolute inset-0">
+                  {visiblePoints.map((point) => (
+                    <div
+                      key={point.acupunctureId}
+                      className={`absolute w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 bg-teal-500 ring-2 ring-teal-600`}
+                      style={{ left: `${point.x}%`, top: `${point.y}%` }}
+                      title={`${point.acupointCode} - ${point.acupointName} (${point.meridianName})`}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="text-slate-400 text-sm">
-              No image available for this view
+            ) : (
+              <div className="text-slate-400 text-sm">
+                No image available for this view
+              </div>
+            )}
+          </div>
+
+          {/* Meridian selection sidebar - only show if there are multiple meridians */}
+          {meridiansInView.length > 0 && (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 w-1/5">
+              <p className="mb-2 text-md font-semibold text-center">Meridian</p>
+              <div className="flex flex-col gap-2">
+                {meridiansInView.map((m) => {
+                  const isVisible = visibleMeridianIds.has(m.meridianId);
+                  const pointCount = allPoints.filter(
+                    (p) => p.meridianId === m.meridianId
+                  ).length;
+
+                  return (
+                    <label
+                      key={m.meridianId}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isVisible}
+                        onChange={() => handleMeridianToggle(m.meridianId)}
+                        title={`${pointCount} points`}
+                      />
+                      {m.meridianName}
+                      <span className="text-sm">
+                        {!isVisible && (
+                          <span className="ml-1 text-red-600">
+                            ({pointCount})
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
+      </Card>
 
-        {/* Meridian selection sidebar - only show if there are multiple meridians */}
-        {meridiansInView.length > 0 && (
-          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 w-1/5">
-            <p className="mb-2 text-md font-semibold text-center">Meridian</p>
-            <div className="flex flex-col gap-2">
-              {meridiansInView.map((m) => {
-                const isVisible = visibleMeridianIds.has(m.meridianId);
-                const pointCount = allPoints.filter(
-                  (p) => p.meridianId === m.meridianId
-                ).length;
-
-                return (
-                  <label
-                    key={m.meridianId}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isVisible}
-                      onChange={() => handleMeridianToggle(m.meridianId)}
-                      title={`${pointCount} points`}
-                    />
-                    {m.meridianName}
-                    <span className="text-sm">
-                      {!isVisible && (
-                        <span className="ml-1 text-red-600">
-                          ({pointCount})
-                        </span>
-                      )}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </Card>
+      {/* Selected points table for this view */}
+      {visiblePoints.length > 0 && (
+        <div>
+          <Table headers={["Acupuncture Code", "Acupuncture Name", "Meridian"]}>
+            {visiblePoints.map((point) => (
+              <tr key={point.acupunctureId} className="hover:bg-slate-50">
+                <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                  {point.acupointCode}
+                </td>
+                <td className="px-4 py-2 text-sm text-slate-600">
+                  {point.acupointName}
+                </td>
+                <td className="px-4 py-2 text-sm text-slate-600">
+                  {point.meridianName}
+                </td>
+              </tr>
+            ))}
+          </Table>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -182,7 +205,7 @@ function AcupunctureShowCard({
       image: acu.image,
     } as RecordedAcupuncturePoint));
 
-    // Group points by region/side (now available directly from Acupuncture)
+    // Group points by region/side
     const grouped = new Map<string, RecordedAcupuncturePoint[]>();
     allPoints.forEach((point) => {
       const key = `${point.region.toLowerCase()}-${point.side.toLowerCase()}`;

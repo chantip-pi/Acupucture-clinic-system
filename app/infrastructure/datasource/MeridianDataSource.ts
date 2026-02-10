@@ -1,11 +1,8 @@
 import { Meridian } from "~/domain/entities/Meridian";
 
 export class MeridianDataSource {
-  // constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/meridians") {}
-
-  constructor(
-    private readonly baseUrl: string = "http://localhost:3000/api/meridians",
-  ) {}
+  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/meridians") {}
+  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/meridians") {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {

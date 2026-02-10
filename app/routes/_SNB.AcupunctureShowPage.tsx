@@ -1,5 +1,10 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { PageShell, SectionHeading, Card } from "~/presentation/designSystem";
+import { useState, useMemo, useEffect } from "react";
+import {
+  PageShell,
+  SectionHeading,
+  Card,
+  Table,
+} from "~/presentation/designSystem";
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
@@ -30,21 +35,30 @@ function AcupunctureShowPage() {
     return initial;
   }, [acupunctureRecords, acupunctures]);
 
-  const [toggledMeridians, setToggledMeridians] = useState<Record<string, Set<number>>>({});
+  const [toggledMeridians, setToggledMeridians] = useState<
+    Record<string, Set<number>>
+  >({});
+
+  const selectedAcupunctures = useMemo(() => {
+    if (!acupunctureRecords || !acupunctures) return [];
+    
+    const recordedIds = new Set(acupunctureRecords.map(r => r.acupunctureId));
+    return acupunctures.filter(acu => recordedIds.has(acu.acupunctureId));
+  }, [acupunctureRecords, acupunctures]);
 
   useEffect(() => {
     setToggledMeridians(
       Object.entries(visibleMeridians).reduce((acc, [key, meridianIds]) => {
         acc[key] = new Set(meridianIds);
         return acc;
-      }, {} as Record<string, Set<number>>)
+      }, {} as Record<string, Set<number>>),
     );
   }, [visibleMeridians]);
 
   const toggleMeridianVisibility = (
     region: string,
     side: string,
-    meridianId: number
+    meridianId: number,
   ) => {
     const key = `${region.toLowerCase()}-${side.toLowerCase()}`;
     setToggledMeridians((prev) => {
@@ -67,6 +81,49 @@ function AcupunctureShowPage() {
           visibleMeridians={toggledMeridians}
           onMeridianToggle={toggleMeridianVisibility}
         />
+
+        {/* All selected points summary table */}
+        {acupunctureRecords.length > 0 && (
+          <div className="mt-6">
+            <h3 className="mb-3 text-lg font-semibold text-slate-900">
+              All Selected Points
+            </h3>
+            <Table
+              headers={[
+                "Region",
+                "Side",
+                "Acupuncture Code",
+                "Acupuncture Name",
+                "Meridian",
+              ]}
+            >
+              {selectedAcupunctures.map((point) => (
+                <tr key={`${point.region}-${point.side}-${point.acupunctureId}`} className="hover:bg-slate-50">
+                  <td className="px-4 py-2 text-sm text-slate-900">
+                    {point.region && typeof point.region === "string"
+                      ? point.region.charAt(0).toUpperCase() +
+                        point.region.slice(1)
+                      : ""}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600 capitalize">
+                    {point.side && typeof point.side === "string"
+                      ? point.side.charAt(0).toUpperCase() + point.side.slice(1)
+                      : ""}
+                  </td>
+                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                    {point.acupointCode}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.acupointName}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.meridianName}
+                  </td>
+                </tr>
+              ))}
+            </Table>
+          </div>
+        )}
       </Card>
     </PageShell>
   );

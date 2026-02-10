@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import { Card } from "~/presentation/designSystem";
 import type { Meridian } from "~/domain/entities/Meridian";
 
@@ -51,17 +50,13 @@ function AcupunctureCard({
   onPointClick,
   onMeridianToggle,
 }: AcupunctureCardProps) {
-  const isPointSelected = (
-    acupunctureId: number,
-  ): boolean => {
+  const isPointSelected = (acupunctureId: number): boolean => {
     const pointKey = `${bodyPart}-${side}-${acupunctureId}`;
     return selectedPoints.some((p) => p.key === pointKey);
   };
   return (
     <Card padding="sm">
-      <p className="mb-2 text-sm font-medium text-slate-600">
-        {label}
-      </p>
+      <p className="mb-2 text-sm font-medium text-slate-600">{label}</p>
 
       <div className="flex flex-row gap-4">
         <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
@@ -78,9 +73,7 @@ function AcupunctureCard({
               {/* MARKER LAYER (same size as image) */}
               <div className="absolute inset-0">
                 {visiblePoints.map((point) => {
-                  const selected = isPointSelected(
-                    point.acupunctureId,
-                  );
+                  const selected = isPointSelected(point.acupunctureId);
 
                   return (
                     <div
@@ -115,22 +108,15 @@ function AcupunctureCard({
         {/* Meridian selection card */}
         {meridiansForView.length > 0 && (
           <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 w-1/5">
-            <p className="mb-2 text-md font-semibold text-center">
-              Meridian
-            </p>
+            <p className="mb-2 text-md font-semibold text-center">Meridian</p>
             <div className="flex flex-col gap-2">
               {meridiansForView.map((meridian) => {
-                const isVisible = visibleMeridianIds.has(
-                  meridian.meridianId,
-                );
+                const isVisible = visibleMeridianIds.has(meridian.meridianId);
                 const pointsForMeridian = allPoints.filter(
                   (p) => p.meridianId === meridian.meridianId,
                 );
                 const selectedCountForMeridian = selectedPoints.filter(
-                  (p) =>
-                    p.meridianId === meridian.meridianId &&
-                    p.region === bodyPart &&
-                    p.side === side,
+                  (p) => p.meridianId === meridian.meridianId,
                 ).length;
 
                 return (
@@ -138,9 +124,7 @@ function AcupunctureCard({
                     <input
                       type="checkbox"
                       checked={isVisible}
-                      onChange={() =>
-                        onMeridianToggle(meridian.meridianId)
-                      }
+                      onChange={() => onMeridianToggle(meridian.meridianId)}
                       title={`${pointsForMeridian.length} points, ${selectedCountForMeridian} selected`}
                     ></input>
 

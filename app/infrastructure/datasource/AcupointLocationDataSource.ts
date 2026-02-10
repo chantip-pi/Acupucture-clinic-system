@@ -1,11 +1,8 @@
 import { AcupointLocation } from "~/domain/entities/AcupointLocation";
 
 export class AcupointLocationDataSource {
-  // constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/acupointLocations") {}
-
-  constructor(
-    private readonly baseUrl: string = "http://localhost:3000/api/acupointLocations",
-  ) {}
+  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/acupointLocations") {}
+  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/acupointLocations") {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {

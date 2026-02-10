@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import {
   PageShell,
   Card,
@@ -258,8 +258,8 @@ function AcupunctureSelect() {
               headers={[
                 "Region",
                 "Side",
-                "Acupoint Code",
-                "Name",
+                "Acupuncture Code",
+                "Acupuncture Name",
                 "Meridian",
                 "Actions",
               ]}
