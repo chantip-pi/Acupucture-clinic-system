@@ -21,12 +21,11 @@ export class MedicalRecordAcupunctureDataSource {
     return this.handleResponse<MedicalRecordAcupuncture[]>(res);
   }
 
-  async getByRecordId( recordId: number ): Promise<MedicalRecordAcupuncture | null> {
+  async getByRecordId( recordId: number ): Promise<MedicalRecordAcupuncture[]> {
     const res = await fetch(`${this.baseUrl}/${recordId}`, {
         method: "GET",
     });
-    if (res.status === 404) return null;
-    return this.handleResponse<MedicalRecordAcupuncture>(res);
+    return this.handleResponse<MedicalRecordAcupuncture[]>(res);
   }
 
   async create( recordId: number, medicalRecordAcupuncture: Omit<MedicalRecordAcupuncture, "recordId"> ): Promise<MedicalRecordAcupuncture> {

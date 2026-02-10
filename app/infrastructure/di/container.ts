@@ -60,6 +60,7 @@ import { DeleteIllnessUseCase } from "~/application/use-cases/illness/DeleteIlln
 import { AddMeridianUseCase } from "~/application/use-cases/meridian/AddMeridianUseCase";
 import { GetMeridianListUseCase } from "~/application/use-cases/meridian/GetMeridianListUseCase";
 import { GetMeridianByIdUseCase } from "~/application/use-cases/meridian/GetMeridianByIdUseCase";
+import { GetMeridiansByRegionAndSideUseCase } from "~/application/use-cases/meridian/GetMeridiansByRegionAndSideUseCase";
 import { UpdateMeridianUseCase } from "~/application/use-cases/meridian/UpdateMeridianUseCase";
 import { DeleteMeridianUseCase } from "~/application/use-cases/meridian/DeleteMeridianUseCase";
 import { GetMeridianRegionUseCase } from "~/application/use-cases/meridian/GetMeridianRegionUseCase";
@@ -198,10 +199,13 @@ export const deleteIllnessUsecase = new DeleteIllnessUseCase(illnessRepository);
 export const addMeridianUseCase = new AddMeridianUseCase(meridianRepository);
 export const getMeridianListUseCase = new GetMeridianListUseCase(meridianRepository);
 export const getMeridianByIdUseCase = new GetMeridianByIdUseCase(meridianRepository);
+export const getMeridiansByRegionAndSideUseCase = new GetMeridiansByRegionAndSideUseCase(meridianRepository);
 export const getMeridianRegionUseCase = new GetMeridianRegionUseCase(meridianRepository);
 export const getMeridianSideByRegionUseCase = new GetMeridianSideByRegionUseCase(meridianRepository);
 export const updateMeridianUseCase = new UpdateMeridianUseCase(meridianRepository);
 export const deleteMeridianUsecase = new DeleteMeridianUseCase(meridianRepository);
+
+// Appointment Use Cases
 export const getAppointmentListUseCase = new GetAppointmentListUseCase(appointmentRepository);
 export const createAppointmentUseCase = new CreateAppointmentUseCase(appointmentRepository);
 export const getAppointmentListByPatientIdUseCase = new GetAppointmentListByPatientIdUseCase(appointmentRepository);
@@ -209,6 +213,7 @@ export const updateAppointmentUseCase = new UpdateAppointmentUseCase(appointment
 export const cancelAppointmentUseCase = new CancelAppointmentUseCase(appointmentRepository);
 export const getAppointmentByIdUseCase = new GetAppointmentByIdUseCase(appointmentRepository);
 
+// Medical Record Use Cases
 export const createMedicalRecordUseCase = new CreateMedicalRecordUseCase(medicalRecordRepository);
 export const getMedicalRecordListUseCase = new GetMedicalRecordListUseCase(medicalRecordRepository);
 export const getMedicalRecordByIdUseCase = new GetMedicalRecordByIdUseCase(medicalRecordRepository);

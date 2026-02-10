@@ -4,8 +4,8 @@ import { MedicalRecordAcupuncture } from "~/domain/entities/MedicalRecordAcupunc
 
 export function useGetMedicalRecordAcupunctureById(recordId: number | null) {
   const [acupunctureRecords, setAcupunctureRecords] = useState<
-    MedicalRecordAcupuncture | null
-  >(null);
+    MedicalRecordAcupuncture[]
+  >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {

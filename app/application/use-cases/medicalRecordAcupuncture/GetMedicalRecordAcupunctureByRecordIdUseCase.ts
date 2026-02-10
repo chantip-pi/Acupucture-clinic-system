@@ -6,7 +6,7 @@ export class GetMedicalRecordAcupunctureByRecordIdUseCase {
     private readonly medicalRecordAcupunctureRepository: IMedicalRecordAcupunctureRepository,
   ) {}
 
-    async execute(recordId: number): Promise<MedicalRecordAcupuncture | null> {
+    async execute(recordId: number): Promise<MedicalRecordAcupuncture[]> {
         return await this.medicalRecordAcupunctureRepository.getByRecordId(recordId);
     }
 }

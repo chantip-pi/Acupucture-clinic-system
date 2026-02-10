@@ -1,11 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Card } from "~/presentation/designSystem";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
-import { useGetAcupointLocationList } from "~/presentation/hooks/acupointLocation/useGetAcupointLocationList";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
-import { useGetMeridianById } from "~/presentation/hooks/meridian/useGetMeridianById";
-import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
-import type { MedicalRecordAcupuncture } from "~/domain/entities/MedicalRecordAcupuncture";
 
 interface RecordedAcupuncturePoint {
   acupunctureId: number;
@@ -16,6 +12,9 @@ interface RecordedAcupuncturePoint {
   meridianId: number;
   meridianName: string;
   locationId: number;
+  region: string;
+  side: string;
+  image: string | null;
 }
 
 interface AcupunctureShowCardProps {
@@ -42,9 +41,8 @@ function RegionView({
   visibleMeridianIds,
   onMeridianToggle,
 }: RegionViewProps) {
-  // Get the first meridian for the image
-  const firstMeridianId = allPoints[0]?.meridianId;
-  const { meridian } = useGetMeridianById(firstMeridianId);
+  // Get the image from first point (all points in same region/side view have same image)
+  const imageUrl = allPoints[0]?.image || null;
 
   const handleMeridianToggle = (toggledMeridianId: number) => {
     onMeridianToggle(region, side, toggledMeridianId);
@@ -72,16 +70,16 @@ function RegionView({
   return (
     <Card padding="sm">
       <p className="mb-2 text-sm font-medium text-slate-600">
-        {meridian?.region} {meridian?.side} view
+        {region.charAt(0).toUpperCase() + region.slice(1)} {side.toLowerCase()} view
       </p>
 
       <div className="flex flex-row gap-4">
         <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
-          {meridian?.image ? (
+          {imageUrl ? (
             <div className="relative h-full">
               <img
-                src={meridian.image}
-                alt={`${meridian?.region} ${meridian?.side} view`}
+                src={imageUrl}
+                alt={`${region} ${side} view`}
                 className="h-full object-contain"
               />
 
@@ -154,84 +152,40 @@ function AcupunctureShowCard({
 
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId || 0);
   const { acupunctures } = useGetAcupunctureList();
-  const { acupointLocations } = useGetAcupointLocationList();
-  const { meridians } = useGetMeridianList();
-
-  const acupunctureById = useMemo(() => {
-    const map = new Map<number, any>();
-    (acupunctures || []).forEach((a) => map.set(a.acupunctureId, a));
-    return map;
-  }, [acupunctures]);
-
-  const locationByCode = useMemo(() => {
-    const map = new Map<string, any>();
-    (acupointLocations || []).forEach((l) => map.set(l.acupointCode, l));
-    return map;
-  }, [acupointLocations]);
-
-  const meridianInfoMap = useMemo(() => {
-    const infoMap = new Map<number, { region: string; side: string; meridianName: string }>();
-    meridians.forEach((meridian) => {
-      infoMap.set(meridian.meridianId, {
-        region: meridian.region,
-        side: meridian.side,
-        meridianName: meridian.meridianName,
-      });
-    });
-    return infoMap;
-  }, [meridians]);
-
-  const recordedIds = useMemo(() => {
-    const set = new Set<number>();
-    if (!acupunctureRecords) return set;
-    if (Array.isArray(acupunctureRecords)) {
-      acupunctureRecords.forEach((r: MedicalRecordAcupuncture) =>
-        set.add(r.acupunctureId)
-      );
-    } else if ((acupunctureRecords as any).acupunctureId) {
-      set.add((acupunctureRecords as any).acupunctureId);
-    }
-    return set;
-  }, [acupunctureRecords]);
 
   useEffect(() => {
-    if (!recordId || !acupunctures || !acupointLocations || !meridians) {
+    if (!recordId || !acupunctures || !acupunctureRecords) {
       setPointsByRegionSide(new Map());
       return;
     }
 
-    // Convert all recorded points to full data
-    const allPoints: RecordedAcupuncturePoint[] = Array.from(recordedIds)
-      .map((id) => {
-        const acupuncture = acupunctureById.get(id);
-        if (!acupuncture) return null;
+    const recordedIds = new Set<number>();
+    acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
 
-        const location = locationByCode.get(acupuncture.acupointCode);
-        if (!location) return null;
+    // Filter acupunctures that were recorded
+    const recordedAcupunctures = acupunctures.filter((acu) =>
+      recordedIds.has(acu.acupunctureId)
+    );
 
-        return {
-          acupunctureId: acupuncture.acupunctureId,
-          acupointCode: acupuncture.acupointCode,
-          acupointName: acupuncture.acupointName ?? "",
-          x: location.pointLeft,
-          y: location.pointTop,
-          meridianId: acupuncture.meridianId,
-          meridianName:
-            meridianInfoMap.get(acupuncture.meridianId)?.meridianName ??
-            acupuncture.meridianName ??
-            "",
-          locationId: location.locationId,
-        } as RecordedAcupuncturePoint;
-      })
-      .filter((p): p is RecordedAcupuncturePoint => p != null);
+    // Convert to RecordedAcupuncturePoint using all fields from Acupuncture entity
+    const allPoints: RecordedAcupuncturePoint[] = recordedAcupunctures.map((acu) => ({
+      acupunctureId: acu.acupunctureId,
+      acupointCode: acu.acupointCode,
+      acupointName: acu.acupointName,
+      x: acu.pointLeft,
+      y: acu.pointTop,
+      meridianId: acu.meridianId,
+      meridianName: acu.meridianName,
+      locationId: acu.locationId,
+      region: acu.region,
+      side: acu.side,
+      image: acu.image,
+    } as RecordedAcupuncturePoint));
 
-    // Group points by region/side
+    // Group points by region/side (now available directly from Acupuncture)
     const grouped = new Map<string, RecordedAcupuncturePoint[]>();
     allPoints.forEach((point) => {
-      const meridianInfo = meridianInfoMap.get(point.meridianId);
-      if (!meridianInfo) return;
-
-      const key = `${meridianInfo.region.toLowerCase()}-${meridianInfo.side.toLowerCase()}`;
+      const key = `${point.region.toLowerCase()}-${point.side.toLowerCase()}`;
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
@@ -239,17 +193,7 @@ function AcupunctureShowCard({
     });
 
     setPointsByRegionSide(grouped);
-  }, [
-    recordId,
-    acupunctureRecords,
-    acupunctures,
-    acupointLocations,
-    meridians,
-    acupunctureById,
-    locationByCode,
-    recordedIds,
-    meridianInfoMap,
-  ]);
+  }, [recordId, acupunctureRecords, acupunctures]);
 
   const regionSideKeys = Array.from(pointsByRegionSide.keys());
 

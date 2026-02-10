@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { Table } from "~/presentation/designSystem";
 import AcupunctureCard from "./AcupunctureCard";
 import { useGetAcupunctureByRegionAndSide } from "~/presentation/hooks/acupuncture/useGetAcupunctureByRegionAndSide";
-import type { Meridian } from "~/domain/entities/Meridian";
+import { useGetMeridiansByRegionAndSide } from "~/presentation/hooks/meridian/useGetMeridiansByRegionAndSide";
 
 type ViewSide = string;
 
@@ -45,26 +45,8 @@ export default function RegionSideView({
   toggleMeridianVisibility,
   setSelectedPoints,
 }: Props) {
-  const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(
-    region,
-    side,
-  );
-
-  const meridiansForView = useMemo(() => {
-    const map = new Map<number, Meridian>();
-    (acupsForView || []).forEach((a) => {
-      if (!map.has(a.meridianId)) {
-        map.set(a.meridianId, {
-          meridianId: a.meridianId,
-          meridianName: a.meridianName,
-          image: a.image,
-          region: a.region,
-          side: a.side,
-        } as Meridian);
-      }
-    });
-    return Array.from(map.values());
-  }, [acupsForView]);
+  const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(region, side);
+  const { meridians: meridiansForView } = useGetMeridiansByRegionAndSide(region, side);
 
   // group points by meridianId
   const pointsByMeridian = useMemo(() => {

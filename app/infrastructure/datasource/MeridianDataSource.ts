@@ -30,6 +30,13 @@ export class MeridianDataSource {
     return this.handleResponse<Meridian>(res);
   }
 
+  async getByRegionAndSide(region: string, side: string): Promise<Meridian[]> {
+    const res = await fetch(`${this.baseUrl}/region/{${region}}/side/{${side}}`, {
+      method: "GET",
+    });
+    return this.handleResponse<Meridian[]>(res);
+  }
+
   async getAvailableRegions(): Promise<string[]> {
     const res = await fetch(`${this.baseUrl}/regions`, {
       method: "GET",

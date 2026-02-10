@@ -1,48 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { PageShell, SectionHeading, Card } from "~/presentation/designSystem";
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
-import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 
 function AcupunctureShowPage() {
   const recordId = 1;
 
-  const { meridians } = useGetMeridianList();
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
   const { acupunctures } = useGetAcupunctureList();
-  const [visibleMeridians, setVisibleMeridians] = useState<Record<string, Set<number>>>({});
 
-  useEffect(() => {
-    if (!meridians || !acupunctureRecords || !acupunctures) return;
+  const visibleMeridians = useMemo(() => {
+    if (!acupunctureRecords || !acupunctures) return {};
 
     const recordedIds = new Set<number>();
-    if (Array.isArray(acupunctureRecords)) {
-      acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
-    } else if (acupunctureRecords?.acupunctureId) {
-      recordedIds.add(acupunctureRecords.acupunctureId);
-    }
-
-    const recordedMeridianIds = new Set<number>();
-    acupunctures.forEach((acu) => {
-      if (recordedIds.has(acu.acupunctureId)) {
-        recordedMeridianIds.add(acu.meridianId);
-      }
-    });
+    acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
 
     const initial: Record<string, Set<number>> = {};
-    meridians.forEach((meridian) => {
-      if (recordedMeridianIds.has(meridian.meridianId)) {
-        const key = `${meridian.region.toLowerCase()}-${meridian.side.toLowerCase()}`;
+    acupunctures.forEach((acu) => {
+      if (recordedIds.has(acu.acupunctureId)) {
+        const key = `${acu.region.toLowerCase()}-${acu.side.toLowerCase()}`;
         if (!initial[key]) {
           initial[key] = new Set();
         }
-        initial[key].add(meridian.meridianId);
+        initial[key].add(acu.meridianId);
       }
     });
 
-    setVisibleMeridians(initial);
-  }, [meridians, acupunctureRecords, acupunctures]);
+    return initial;
+  }, [acupunctureRecords, acupunctures]);
+
+  const [toggledMeridians, setToggledMeridians] = useState<Record<string, Set<number>>>({});
+
+  useEffect(() => {
+    setToggledMeridians(
+      Object.entries(visibleMeridians).reduce((acc, [key, meridianIds]) => {
+        acc[key] = new Set(meridianIds);
+        return acc;
+      }, {} as Record<string, Set<number>>)
+    );
+  }, [visibleMeridians]);
 
   const toggleMeridianVisibility = (
     region: string,
@@ -50,7 +47,7 @@ function AcupunctureShowPage() {
     meridianId: number
   ) => {
     const key = `${region.toLowerCase()}-${side.toLowerCase()}`;
-    setVisibleMeridians((prev) => {
+    setToggledMeridians((prev) => {
       const newSet = new Set(prev[key] || []);
       if (newSet.has(meridianId)) {
         newSet.delete(meridianId);
@@ -67,7 +64,7 @@ function AcupunctureShowPage() {
         <SectionHeading title="Show Acupuncture Points" />
         <AcupunctureShowCard
           recordId={recordId}
-          visibleMeridians={visibleMeridians}
+          visibleMeridians={toggledMeridians}
           onMeridianToggle={toggleMeridianVisibility}
         />
       </Card>

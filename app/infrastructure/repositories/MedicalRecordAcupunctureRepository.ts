@@ -8,7 +8,7 @@ export class MedicalRecordAcupunctureRepository implements IMedicalRecordAcupunc
     async getAll(): Promise<MedicalRecordAcupuncture[]> {
         return this.dataSource.getAll();
     }
-    async getByRecordId(recordId: number): Promise<MedicalRecordAcupuncture | null> {
+    async getByRecordId(recordId: number): Promise<MedicalRecordAcupuncture[]> {
         return this.dataSource.getByRecordId(recordId);
     }
     async create(recordId: number, medicalRecordAcupuncture: Omit<MedicalRecordAcupuncture, "recordId">): Promise<MedicalRecordAcupuncture> {
