@@ -42,7 +42,8 @@ function RegionView({
   onMeridianToggle,
 }: RegionViewProps) {
   // Get the image from first point (all points in same region/side view have same image)
-  const imageUrl = allPoints[0]?.image || null;
+  const baseUrl = "http://localhost:3000/api";
+  const fullImageUrl = `${baseUrl}/images/${allPoints[0]?.image}`;
 
   const handleMeridianToggle = (toggledMeridianId: number) => {
     onMeridianToggle(region, side, toggledMeridianId);
@@ -76,10 +77,10 @@ function RegionView({
 
         <div className="flex flex-row gap-4">
           <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
-            {imageUrl ? (
+            {fullImageUrl ? (
               <div className="relative h-full">
                 <img
-                  src={imageUrl}
+                  src={fullImageUrl}
                   alt={`${region} ${side} view`}
                   className="h-full object-contain"
                 />

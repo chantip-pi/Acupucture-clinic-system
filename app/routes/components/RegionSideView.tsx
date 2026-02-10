@@ -48,6 +48,8 @@ export default function RegionSideView({
   const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(region, side);
   const { meridians: meridiansForView } = useGetMeridiansByRegionAndSide(region, side);
 
+  const baseUrl = "http://localhost:3000/api";
+
   // group points by meridianId
   const pointsByMeridian = useMemo(() => {
     const map = new Map<number, AcupuncturePoint[]>();
@@ -82,7 +84,7 @@ export default function RegionSideView({
     if (visibleMeridianIds.has(mid)) visiblePoints.push(...pts);
   });
 
-  const imageUrl = meridiansForView[0]?.image || null;
+  const fullImageUrl = `${baseUrl}/images/${meridiansForView[0]?.image}`;
 
   return (
     <div className="space-y-4">
@@ -95,7 +97,7 @@ export default function RegionSideView({
         allPoints={allPoints}
         selectedPoints={selectedPoints}
         visibleMeridianIds={visibleMeridianIds}
-        imageUrl={imageUrl}
+        imageUrl={fullImageUrl}
         onPointClick={(point: AcupuncturePoint) =>
           handlePointClick(point, region, side)
         }

@@ -16,6 +16,7 @@ import { useAddAcupoint } from "~/presentation/hooks/acupoint/useAddAcupoint";
 import { useAddAcupointLocation } from "~/presentation/hooks/acupointLocation/useAddAcupointLocation";
 import { useAddAcupuncture } from "~/presentation/hooks/acupuncture/useAddAcupuncture";
 import { useAddMeridian } from "~/presentation/hooks/meridian/useAddMeridian";
+import { useGetMeridianById } from "~/presentation/hooks/meridian/useGetMeridianById";
 
 interface CustomMarker {
   top: number;
@@ -28,6 +29,7 @@ const AcupunctureCreate: React.FC = () => {
   const [markers, setMarkers] = useState<CustomMarker[]>([]);
   const [image, setImage] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [imageFilename, setImageFilename] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
@@ -45,6 +47,8 @@ const AcupunctureCreate: React.FC = () => {
   const { addAcupuncture, loading: acupunctureLoading, error: acupunctureError } = useAddAcupuncture();
 
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
+
+  const baseUrl = "http://localhost:3000/api/images";
 
   const MarkerView: React.FC<
     MarkerComponentProps & {
@@ -102,8 +106,7 @@ const AcupunctureCreate: React.FC = () => {
       const formData = new FormData();
       formData.append("image", file);
 
-      const baseUrl = "http://localhost:3000/api";
-      const response = await fetch(`${baseUrl}/images`, {
+      const response = await fetch(`${baseUrl}`, {
         method: "POST",
         body: formData,
       });
@@ -120,9 +123,10 @@ const AcupunctureCreate: React.FC = () => {
         throw new Error("Image uploaded but no filename returned");
       }
 
-      const fullImageUrl = `${baseUrl}/images/${filename}`;
-      setImageUrl(fullImageUrl);
-      setImage(fullImageUrl);
+      const previewUrl = `${baseUrl}/${filename}`;
+      setImageFilename(filename);
+      setImageUrl(previewUrl);
+      setImage(previewUrl);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Failed to upload image";
       setError(errorMessage);
@@ -155,7 +159,7 @@ const AcupunctureCreate: React.FC = () => {
       // 1. Create Meridian
       let meridianIdNum: number;
       
-      if (!imageUrl) {
+      if (!imageFilename) {
         setError("Please upload an image before saving");
         return;
       }
@@ -165,7 +169,7 @@ const AcupunctureCreate: React.FC = () => {
         meridianName,
         region: meridianRegion,
         side: meridianSide,
-        image: imageUrl, // Store the full URL (e.g., http://localhost:3000/api/images/1.jpg)
+        image: imageFilename,
       });
 
       if (!meridianResult.success || !meridianResult.meridian) {

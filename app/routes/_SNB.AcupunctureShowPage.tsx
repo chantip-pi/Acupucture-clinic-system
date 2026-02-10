@@ -10,7 +10,7 @@ import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medical
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 
 function AcupunctureShowPage() {
-  const recordId = 1;
+  const recordId = 1; // Replace with actual recordId
 
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
   const { acupunctures } = useGetAcupunctureList();
