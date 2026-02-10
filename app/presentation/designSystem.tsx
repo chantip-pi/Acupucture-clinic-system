@@ -331,4 +331,93 @@ export function InlineLink({
   );
 }
 
+export function Modal({
+  isOpen,
+  onClose,
+  children,
+  className,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className={cx(
+          "bg-white rounded-lg p-5 shadow-lg max-w-sm w-full mx-4",
+          className
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function ModalHeader({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cx("pb-2.5", className)}>
+      {children}
+    </div>
+  );
+}
+
+export function ModalTitle({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <h2 className={cx("text-2xl font-semibold m-0", className)}>
+      {children}
+    </h2>
+  );
+}
+
+export function ModalBody({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cx("py-5 px-0 border-t border-b border-slate-200", className)}>
+      {children}
+    </div>
+  );
+}
+
+export function ModalFooter({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cx("pt-2.5 flex gap-2.5 justify-end", className)}>
+      {children}
+    </div>
+  );
+}
+
 

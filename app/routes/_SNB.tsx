@@ -4,10 +4,12 @@ import { FaUser, FaWrench } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
 import { Outlet, useNavigate } from "@remix-run/react";
 import { useRequireAuth } from "~/presentation/hooks/staff/useRequireAuth";
+import { FaClipboardList } from "react-icons/fa";
 import {
   clearUserSession,
   getUserSession,
 } from "~/presentation/session/userSession";
+import AcupunctureDropDown from "./components/AcupunctureDropDown";
 
 const navItems = [
   { label: "Home", icon: <IoMdHome size={22} />, to: "/home" },
@@ -57,6 +59,7 @@ function SideNavBar() {
                 </button>
               </li>
             ))}
+            <AcupunctureDropDown/>
           </ul>
         </nav>
 
