@@ -12,7 +12,7 @@ function RegionView({
   onMeridianToggle,
 }: ShowCardRegionViewProps) {
   // Get the image from first point (all points in same region/side view have same image)
-  const baseUrl = "http://localhost:3000/api";
+  const baseUrl = "https://clinic-backend-6f5w.onrender.com/api";
   const fullImageUrl = `${baseUrl}/images/${allPoints[0]?.image}`;
 
   const handleMeridianToggle = (toggledMeridianId: number) => {

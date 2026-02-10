@@ -17,7 +17,7 @@ export default function RegionSideView({
   const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(region, side);
   const { meridians: meridiansForView } = useGetMeridiansByRegionAndSide(region, side);
 
-  const baseUrl = "http://localhost:3000/api";
+  const baseUrl = "https://clinic-backend-6f5w.onrender.com/api";
 
   // group points by meridianId
   const pointsByMeridian = useMemo(() => {

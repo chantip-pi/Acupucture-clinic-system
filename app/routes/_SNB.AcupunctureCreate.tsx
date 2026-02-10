@@ -41,7 +41,7 @@ const AcupunctureCreate: React.FC = () => {
 
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
 
-  const baseUrl = "http://localhost:3000/api/images";
+  const baseUrl = "https://clinic-backend-6f5w.onrender.com/api/images";
 
   const MarkerView: React.FC<
     MarkerComponentProps & {
