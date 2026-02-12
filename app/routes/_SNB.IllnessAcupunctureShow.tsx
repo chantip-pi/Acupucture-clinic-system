@@ -11,6 +11,8 @@ import AcupunctureShowCard from "./components/AcupunctureShowCard";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupuncture/useGetIllnessAcupunctureById";
 import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessById";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function IllnessAcupunctureShow() {
   //show acupuncture points for an illness
@@ -83,6 +85,15 @@ function IllnessAcupunctureShow() {
 
   return (
     <PageShell className="p-8">
+      <div className="flex items-center gap-3 py-4">
+        <Button size="sm" variant="back" onClick={() => navigate(-1)}>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full">
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </span>
+          Back
+        </Button>
+      </div>
+
       <Card>
         <SectionHeading title="Acupuncture Point Library" />
         <h1 className="font-semibold">Illness: {illness?.illnessName}</h1>
@@ -136,11 +147,6 @@ function IllnessAcupunctureShow() {
                 </tr>
               ))}
             </Table>
-            <div className="py-4 text-end">
-              <Button variant="back" onClick={() => navigate(-1)}>
-                Back
-              </Button>
-            </div>
           </div>
         )}
       </Card>

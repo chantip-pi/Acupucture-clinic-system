@@ -10,6 +10,8 @@ import {
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function AcupunctureShowPage() {
   //show acupuncture points for a medical record
@@ -79,6 +81,15 @@ function AcupunctureShowPage() {
 
   return (
     <PageShell className="p-8">
+      <div className="flex items-center gap-3 py-4">
+        <Button size="sm" variant="back" onClick={() => navigate(-1)}>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full">
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </span>
+          Back
+        </Button>
+      </div>
+
       <Card>
         <SectionHeading title="Show Acupuncture Points" />
         <AcupunctureShowCard
@@ -130,11 +141,6 @@ function AcupunctureShowPage() {
                 </tr>
               ))}
             </Table>
-            <div className="py-4 text-end">
-              <Button variant="back" onClick={() => navigate(-1)}>
-                Back
-              </Button>
-            </div>
           </div>
         )}
       </Card>
