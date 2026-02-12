@@ -121,6 +121,8 @@ import { MedicalRecordDataSource } from "../datasource/MedicalRecordDatasource";
 import { MedicalRecordRepository } from "../repositories/MedicalRecordRepository";
 import { IllnessAcupunctureRepository } from "../repositories/IllnessAcupunctureRepository";
 
+
+import { GetSuggestUseCase } from "~/application/use-cases/gemini/GetSuggestUseCase";
 // Initialize repositories based on datasource configuration
 let patientRepository: IPatientRepository;
 let staffRepository: IStaffRepository;
@@ -132,7 +134,15 @@ let illnessRepository: IIllnessRepository;
 let meridianRepository: IMeridianRepository;
 let medicalRecordAcupunctureRepository: IMedicalRecordAcupunctureRepository;
 let medicalRecordRepository: IMedicalRecordRepository;
+
 let illnessAcupunctureRepository: IIllnessAcupunctureRepository;
+
+import { IGeminiRepository } from "~/domain/repositories/IGeminiRepository";
+import { GeminiDataSource } from "../datasource/GeminiDataSource";
+import { GeminiRepository } from "../repositories/GeminiRepository";
+// Initialize repositories based on datasource configuration
+let geminiRepository: IGeminiRepository;
+
 
 // DataSources
 const mockDataSource = MockDataSource.getInstance();
@@ -145,6 +155,8 @@ const illnessDataSource = new IllnessDataSource();
 const meridianDataSource = new MeridianDataSource();
 const medicalRecordAcupunctureDataSource = new MedicalRecordAcupunctureDataSource();
 const illnessAcupunctureDataSource = new IllnessAcupunctureDataSource();
+const geminiDatasource = new GeminiDataSource();
+
 
 // Repositories
 patientRepository = new PatientRepository(patientDatasource);
@@ -162,6 +174,8 @@ appointmentRepository = new AppointmentRepository(appointmentDatasource);
 medicalRecordAcupunctureRepository = new MedicalRecordAcupunctureRepository(medicalRecordAcupunctureDataSource);
 medicalRecordRepository = new MedicalRecordRepository(medicalRecordDatasource);
 illnessAcupunctureRepository = new IllnessAcupunctureRepository(illnessAcupunctureDataSource);
+geminiRepository = new GeminiRepository(geminiDatasource);
+
 
 // Patient Use Cases
 export const addPatientUseCase = new AddPatientUseCase(patientRepository);
@@ -184,6 +198,8 @@ export const getAcupointListUseCase = new GetAcupointListUseCase(acupointReposit
 export const getAcupointByCodeUseCase = new GetAcupointByCodeUseCase(acupointRepository);
 export const updateAcupointUseCase = new UpdateAcupointUseCase(acupointRepository);
 export const deleteAcupointUsecase = new DeleteAcupointUseCase(acupointRepository);
+export const getSuggestUseCase = new GetSuggestUseCase(geminiRepository);
+
 
 // Acupoint Location Use Cases
 export const addAcupointLocationUseCase = new AddAcupointLocationUseCase(acupointLocationRepository);
