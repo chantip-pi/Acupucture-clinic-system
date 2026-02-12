@@ -1,6 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import React, { useEffect, useMemo, useState } from "react";
-import SideNavBar from "./_SNB";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Card, InfoList, SectionHeading } from "~/presentation/designSystem";
 import { useGetPatientById } from "~/presentation/hooks/patient/useGetPatientById";
 import { useGetAppointmentListByPatientId } from "~/presentation/hooks/appointment/useGetAppointmentListByPatientId";
@@ -20,6 +19,7 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import MedicalRecordTable from "./components/medicalRecord/MedicalRecordTable";
 import { useGetMedicalRecordListByPatientId } from "~/presentation/hooks/medicalRecord/useGetMedicalRecordListByPatientId";
 import { getUserSession } from "~/presentation/session/userSession";
+import { MedicalRecord } from "~/domain/entities/MedicalRecord";
 
 function PatientDetail() {
 
@@ -370,7 +370,7 @@ function PatientDetail() {
   
   <MedicalRecordTable 
     medicalRecords={medicalRecords} 
-    onRowClick={(medicalRecord)=>navigate("/medicalRecordDetail", { state: { medicalRecordId: medicalRecord.recordId } })}
+    onRowClick={(medicalRecord: MedicalRecord)=>navigate("/medicalRecordDetail", { state: { medicalRecordId: medicalRecord.recordId } })}
   />
 </Card>
       </main>

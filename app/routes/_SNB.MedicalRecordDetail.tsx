@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import ErrorPage from "./components/common/ErrorPage";
 import { useGetMedicalRecordById } from "~/presentation/hooks/medicalRecord/useGetMedicalRecordById";
@@ -160,7 +159,7 @@ const MedicalRecordDetail = () => {
         <div className="space-y-4">
           <div>
             <label className="text-l font-medium text-gray-700 mb-2 block">
-              Diagnosis
+              Suggest
             </label>
             <div className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap">
               {medicalRecord.diagnosis}
