@@ -292,7 +292,7 @@ function PatientDetail() {
 
           <Button
             size="sm"
-            variant="secondary"
+            variant="back"
             onClick={() => navigate("/patientList")}
 
           >

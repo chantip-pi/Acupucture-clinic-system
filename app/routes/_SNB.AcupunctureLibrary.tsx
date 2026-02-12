@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   PageShell,
   Card,
@@ -13,6 +14,7 @@ function AcupunctureLibrary() {
   const [selectedLetter, setSelectedLetter] = useState("A");
   const [illnessData, setIllnessData] = useState<Record<string, Illness[]>>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
 
   const alphabetLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -166,6 +168,11 @@ function AcupunctureLibrary() {
                 filteredIllnesses.map((illness, index) => (
                   <div
                     key={illness.illnessId || index}
+                    onClick={() =>
+                      navigate("/illnessAcupunctureShow", {
+                        state: { illnessId: illness.illnessId },
+                      })
+                    }
                     className="py-6 px-4 hover:bg-slate-50 cursor-pointer transition-colors duration-150 border-b border-slate-200 last:border-b-0"
                   >
                     <div className="flex items-center justify-between">
@@ -218,6 +225,11 @@ function AcupunctureLibrary() {
                     {illnessesForLetter.map((illness, index) => (
                       <div
                         key={illness.illnessId || `${letter}-${index}`}
+                        onClick={() =>
+                          navigate("/illnessAcupunctureShow", {
+                            state: { illnessId: illness.illnessId },
+                          })
+                        }
                         className="py-6 px-4 hover:bg-slate-50 cursor-pointer transition-colors duration-150 border-b border-slate-200"
                       >
                         <div className="flex items-center justify-between">

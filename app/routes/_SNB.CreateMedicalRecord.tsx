@@ -151,7 +151,7 @@ const CreateMedicalRecord = () => {
 
         <Button
           size="sm"
-          variant="secondary"
+          variant="back"
           onClick={() => navigate(-1)}
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-full ">

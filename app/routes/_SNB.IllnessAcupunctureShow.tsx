@@ -8,25 +8,27 @@ import {
   Button,
 } from "~/presentation/designSystem";
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
-import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
+import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupuncture/useGetIllnessAcupunctureById";
+import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessById";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function AcupunctureShowPage() {
-  //show acupuncture points for a medical record
+function IllnessAcupunctureShow() {
+  //show acupuncture points for an illness
   const { state } = useLocation();
-  const recordId = state?.recordId;
+  const illnessId = state?.illnessId;
   const navigate = useNavigate();
 
-  const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
   const { acupunctures } = useGetAcupunctureList();
+  const { illnessAcupunctures } = useGetIllnessAcupunctureById(illnessId);
+  const { illness } = useGetIllnessById(illnessId);
 
   const visibleMeridians = useMemo(() => {
-    if (!acupunctureRecords || !acupunctures) return {};
+    if (!acupunctures) return {};
 
     const recordedIds = new Set<number>();
-    acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
+    illnessAcupunctures.forEach((r) => recordedIds.add(r.acupunctureId));
 
     const initial: Record<string, Set<number>> = {};
     acupunctures.forEach((acu) => {
@@ -40,18 +42,20 @@ function AcupunctureShowPage() {
     });
 
     return initial;
-  }, [acupunctureRecords, acupunctures]);
+  }, [illnessAcupunctures, acupunctures]);
 
   const [toggledMeridians, setToggledMeridians] = useState<
     Record<string, Set<number>>
   >({});
 
   const selectedAcupunctures = useMemo(() => {
-    if (!acupunctureRecords || !acupunctures) return [];
+    if (!illnessAcupunctures || !acupunctures) return [];
 
-    const recordedIds = new Set(acupunctureRecords.map((r) => r.acupunctureId));
+    const recordedIds = new Set(
+      illnessAcupunctures.map((r) => r.acupunctureId),
+    );
     return acupunctures.filter((acu) => recordedIds.has(acu.acupunctureId));
-  }, [acupunctureRecords, acupunctures]);
+  }, [illnessAcupunctures, acupunctures]);
 
   useEffect(() => {
     setToggledMeridians(
@@ -91,18 +95,20 @@ function AcupunctureShowPage() {
       </div>
 
       <Card>
-        <SectionHeading title="Show Acupuncture Points" />
+        <SectionHeading title="Acupuncture Point Library" />
+        <h1 className="font-semibold">Illness: {illness?.illnessName}</h1>
+        <p className="pb-4">{illness?.description}</p>
         <AcupunctureShowCard
-          recordId={recordId}
+          illnessId={illnessId}
           visibleMeridians={toggledMeridians}
           onMeridianToggle={toggleMeridianVisibility}
         />
 
-        {/* All selected points summary table */}
-        {acupunctureRecords.length > 0 && (
+        {/* All points summary table */}
+        {illnessAcupunctures.length > 0 && (
           <div className="mt-6">
             <h3 className="mb-3 text-lg font-semibold text-slate-900">
-              All Selected Points
+              Acupuncture Points
             </h3>
             <Table
               headers={[
@@ -148,4 +154,4 @@ function AcupunctureShowPage() {
   );
 }
 
-export default AcupunctureShowPage;
+export default IllnessAcupunctureShow;

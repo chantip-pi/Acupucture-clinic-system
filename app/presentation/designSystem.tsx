@@ -124,7 +124,7 @@ export function Button({
   children,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "ghost" | "danger" | "back";
   size?: "sm" | "md" | "lg";
 }) {
   const base =
@@ -145,6 +145,8 @@ export function Button({
       "text-slate-800 hover:bg-slate-100 focus:ring-brand",
     danger:
       "bg-danger text-white hover:bg-red-600 focus:ring-red-600",
+    back:
+      "bg-gray-500 text-white hover:bg-gray-600 focus:ring-brand"
   }[variant];
 
   return (

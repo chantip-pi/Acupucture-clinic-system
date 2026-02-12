@@ -12,7 +12,7 @@ export async function requireUser(_request: Request): Promise<UserSession> {
 export async function requireManager(request: Request) {
   const user = await requireUser(request);
 
-  if (user.role?.toLowerCase() !== "manager") {
+  if (user.title.toLowerCase() !== "manager") {
     throw new Response("Forbidden", { status: 403 });
   }
 
