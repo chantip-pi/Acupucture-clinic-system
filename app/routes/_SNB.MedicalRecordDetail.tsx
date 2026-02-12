@@ -13,7 +13,7 @@ import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medical
 const MedicalRecordDetail = () => {
   const { state } = useLocation();
   const { medicalRecordId } = (state as { medicalRecordId?: number }) || {};
-  const { acupunctureRecords} = useGetMedicalRecordAcupunctureById(medicalRecordId || null);
+  const { acupunctureRecords } = useGetMedicalRecordAcupunctureById( medicalRecordId || null );
 
   if (!medicalRecordId) {
     return (
@@ -23,12 +23,10 @@ const MedicalRecordDetail = () => {
       />
     );
   }
+
   const navigate = useNavigate();
-  const { medicalRecord, loading, error } =
-    useGetMedicalRecordById(medicalRecordId);
-  const { appointment } = useGetAppointmentById(
-    medicalRecord?.appointmentId ?? null,
-  );
+  const { medicalRecord, loading, error } = useGetMedicalRecordById(medicalRecordId);
+  const { appointment } = useGetAppointmentById( medicalRecord?.appointmentId ?? null );
 
   if (loading) {
     return <LoadingPage />;
@@ -207,16 +205,18 @@ const MedicalRecordDetail = () => {
         <div className="py-4">
           {acupunctureRecords && acupunctureRecords.length > 0 && (
             <Button
+              variant="secondary"
               onClick={() =>
                 navigate("/acupunctureShowPage", {
                   state: { recordId: medicalRecord.recordId },
                 })
               }
             >
-              Recorded Acupuncture Points
+              Show Acupuncture
             </Button>
           )}
         </div>
+        
       </Card>
     </div>
   );
