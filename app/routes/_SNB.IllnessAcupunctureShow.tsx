@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   PageShell,
   SectionHeading,
   Card,
   Table,
+  Button,
 } from "~/presentation/designSystem";
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
@@ -12,7 +14,9 @@ import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessByI
 
 function IllnessAcupunctureShow() {
   //show acupuncture points for an illness
-  const illnessId = 1; //Replace with actual illnessId
+  const { state } = useLocation();
+  const illnessId = state?.illnessId;
+  const navigate = useNavigate();
 
   const { acupunctures } = useGetAcupunctureList();
   const { illnessAcupunctures } = useGetIllnessAcupunctureById(illnessId);
@@ -132,6 +136,16 @@ function IllnessAcupunctureShow() {
                 </tr>
               ))}
             </Table>
+            <div className="py-4 text-end">
+              <Button
+                variant="back"
+                onClick={() =>
+                  navigate("/acupunctureLibrary")
+                }
+              >
+                Back
+              </Button>
+            </div>
           </div>
         )}
       </Card>
