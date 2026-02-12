@@ -136,9 +136,20 @@ function Suggest() {
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {!hasMessages && !hookError && !error && (
-          <div className="text-center text-gray-500 mt-8">
-            Start by typing symptoms below and pressing Send.
-          </div>
+         <div className="max-w-md w-full bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
+    
+         <p className="text-gray-600 font-medium">
+           Start by typing symptoms below and pressing <span className="font-semibold text-gray-800">Send</span>.
+         </p>
+     
+         <ul className="mt-4 text-sm text-gray-500 text-left list-disc list-inside space-y-1">
+           <li>Onset and duration</li>
+           <li>Frequency and progression</li>
+           <li>Severity (pain scale)</li>
+           <li>Location</li>
+         </ul>
+     
+       </div>
         )}
 
         {(error || hookError) && (
