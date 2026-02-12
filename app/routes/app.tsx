@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './_SNB.Home';
 import AddPatient from './_SNB.AddPatient';
@@ -16,6 +16,7 @@ import AcupunctureLibrary from './_SNB.AcupunctureLibrary';
 import AcupunctureShowPage from './_SNB.AcupunctureShowPage';
 import CreateMedicalRecord from './_SNB.CreateMedicalRecord';
 import MedicalRecordDetail from './_SNB.MedicalRecordDetail';
+import Suggest from './_SNB.Suggest';
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/acupunctureShowPage" element={<AcupunctureShowPage/>}/>
         <Route path="/createMedicalRecord" element={<CreateMedicalRecord/>}/>
         <Route path="/medicalRecordDetail" element={<MedicalRecordDetail/>}/>
+        <Route path="/suggest" element={<Suggest />} />
       </Routes>
     </Router>
   );
