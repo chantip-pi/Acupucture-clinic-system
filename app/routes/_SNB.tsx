@@ -23,6 +23,32 @@ function SideNavBar() {
   useRequireAuth();
   const [currentUser, setCurrentUser] = useState("Guest");
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
+  const [assistantWidth, setAssistantWidth] = useState(420);
+
+  const handleToggleSuggest = () => {
+    setIsSuggestOpen((prev) => !prev);
+  };
+
+  const handleStartResize = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+
+    const startX = e.clientX;
+    const startWidth = assistantWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = startX - moveEvent.clientX;
+      const nextWidth = Math.min(Math.max(startWidth + deltaX, 320), 700);
+      setAssistantWidth(nextWidth);
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+  };
 
   const handleLogOut = () => {
     clearUserSession();
@@ -80,23 +106,28 @@ function SideNavBar() {
         {/* Floating Suggest Assistant Button */}
         <button
           type="button"
-          onClick={() => setIsSuggestOpen(true)}
+          onClick={handleToggleSuggest}
           className="fixed bottom-6 right-6 z-40 rounded-full bg-[#1FA1AF] text-white shadow-lg px-5 py-3 flex items-center gap-2 hover:bg-[#178995] transition-colors"
         >
           <FaClipboardList size={18} />
-          <span className="font-semibold text-sm">Suggest Assistant</span>
+          <span className="font-semibold text-sm">
+            {isSuggestOpen ? "Hide Suggest" : "Suggest Assistant"}
+          </span>
         </button>
 
         {/* Right-side Suggest Panel */}
         {isSuggestOpen && (
-          <div className="fixed inset-y-0 right-0 z-50 flex">
-            {/* Optional backdrop on the rest of the screen */}
+          <div
+            className="fixed inset-y-4 right-4 z-50 flex"
+            style={{ width: assistantWidth }}
+          >
+            {/* Resize handle */}
             <div
-              className="fixed inset-0 bg-black/30"
-              onClick={() => setIsSuggestOpen(false)}
+              className="w-1 cursor-col-resize bg-slate-200 hover:bg-slate-400 transition-colors rounded-l-full"
+              onMouseDown={handleStartResize}
             />
 
-            <div className="relative h-full w-full max-w-md bg-white shadow-2xl border-l border-gray-200 flex flex-col">
+            <div className="relative h-full flex-1 bg-white shadow-2xl border border-gray-200 flex flex-col rounded-xl overflow-hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-slate-50">
                 <div className="flex items-center gap-2">
                   <FaClipboardList size={18} className="text-[#1FA1AF]" />
@@ -113,7 +144,7 @@ function SideNavBar() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-2">
+              <div className="flex-1  p-2">
                 <Suggest />
               </div>
             </div>
