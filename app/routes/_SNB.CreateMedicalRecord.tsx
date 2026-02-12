@@ -4,12 +4,13 @@ import ErrorPage from "./components/common/ErrorPage";
 import { useGetStaffList } from "~/presentation/hooks/staff/useGetStaffList";
 import { useGetAppointmentById } from "~/presentation/hooks/appointment/useGetAppointmentById";
 import { Button, Card, FormField, Select } from "~/presentation/designSystem";
-import { Calendar, Check, ChevronsUpDown, Command, Icon, Stethoscope } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MultiStaffSelect from "./components/medicalRecord/MultiStaffSelect";
 import { useCreateMedicalRecord } from "~/presentation/hooks/medicalRecord/useCreateMedicalRecord";
+import { Checkbox } from "app/components/ui/checkbox"
 
 
 const CreateMedicalRecord = () => {
@@ -18,6 +19,7 @@ const CreateMedicalRecord = () => {
   const [staffOpen, setStaffOpen] = useState(false);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
   const [error, setError] = useState<string>("");
+  const [hasAcupuncture, setHasAcupuncture] = useState(false)
 
 
   if (!state) {
@@ -161,19 +163,19 @@ const CreateMedicalRecord = () => {
               </div>
 
               <div className="pt-3  border-slate-200 flex items-center gap-2 text-sm">
-              <FontAwesomeIcon
-                icon={faUser}
-                className="h-4 w-4 text-slate-900"
-              />
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="h-4 w-4 text-slate-900"
+                />
 
-              <span className="text-slate-600">
-                Doctor:
-              </span>
+                <span className="text-slate-600">
+                  Doctor:
+                </span>
 
-              <span className="font-semibold text-slate-900">
-                {appointment.doctorName}
-              </span>
-            </div>
+                <span className="font-semibold text-slate-900">
+                  {appointment.doctorName}
+                </span>
+              </div>
 
               <div className="pt-2 border-t border-slate-200">
                 <div className="text-sm text-slate-500 mb-1">Reason</div>
@@ -217,20 +219,20 @@ const CreateMedicalRecord = () => {
 
         {/* Staff Selection */}
         <label className="text-l font-medium text-gray-700 mb-2 block py-2">
-        Assignees
-      </label>
+          Assignees
+        </label>
         <MultiStaffSelect
-        staffList={staffList}
-        selectedStaffIds={selectedStaffIds}
-        onStaffChange={handleStaffChange}
-      />
+          staffList={staffList}
+          selectedStaffIds={selectedStaffIds}
+          onStaffChange={handleStaffChange}
+        />
 
 
         <form
           onSubmit={handleSubmit}
           className=" gap-4 py-4 sm:grid-cols-2"
         >
-          <FormField label="Diagnosis"> 
+          <FormField label="Diagnosis">
 
             <textarea
               name="diagnosis"
@@ -281,22 +283,35 @@ const CreateMedicalRecord = () => {
           </FormField>
 
           {(error || hookError) && (
-              <p className="text-md text-red-600 sm:col-span-2">
-                {error || hookError}
-              </p>
-            )}
+            <p className="text-md text-red-600 sm:col-span-2">
+              {error || hookError}
+            </p>
+          )}
+          <span className="flex items-center gap-2 py-4">
+            <Checkbox className="data-[state=checked]:bg-brand data-[state=checked]:text-white data-[state=checked]:border-0" checked={hasAcupuncture} onCheckedChange={checked => setHasAcupuncture(checked === true)} />
+            <span>Have Acupuncture Point</span>
+          </span>
 
           <div className="sm:col-span-2 flex justify-end">
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading}
-            >
-             {loading ? "Saving..." : "Save"}
-            </Button>
+            {!hasAcupuncture ? (
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading}
+              >
+                {loading ? "Saving..." : "Save"}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="primary"
+                disabled={loading}
+              >
+                Next
+              </Button>
+            )}
           </div>
         </form>
-
 
 
       </Card>
