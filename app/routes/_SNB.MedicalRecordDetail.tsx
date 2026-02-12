@@ -8,27 +8,30 @@ import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useGetAppointmentById } from "~/presentation/hooks/appointment/useGetAppointmentById";
 import LoadingPage from "./components/common/LoadingPage";
+import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 
 const MedicalRecordDetail = () => {
-    const { state } = useLocation();
-    const { medicalRecordId } = (state as { medicalRecordId?: number }) || {};
-   
-        if(!medicalRecordId){
-            return (
-                <ErrorPage
-                    message="Medical record not found."
-                    onRetry={() => window.history.back()}
-                />
-            );
-        }
+  const { state } = useLocation();
+  const { medicalRecordId } = (state as { medicalRecordId?: number }) || {};
+  const { acupunctureRecords} = useGetMedicalRecordAcupunctureById(medicalRecordId || null);
+
+  if (!medicalRecordId) {
+    return (
+      <ErrorPage
+        message="Medical record not found."
+        onRetry={() => window.history.back()}
+      />
+    );
+  }
   const navigate = useNavigate();
-  const { medicalRecord, loading, error } = useGetMedicalRecordById(medicalRecordId);
-  const { appointment } = useGetAppointmentById(medicalRecord?.appointmentId ?? null);
+  const { medicalRecord, loading, error } =
+    useGetMedicalRecordById(medicalRecordId);
+  const { appointment } = useGetAppointmentById(
+    medicalRecord?.appointmentId ?? null,
+  );
 
   if (loading) {
-    return (
-<LoadingPage />
-    );
+    return <LoadingPage />;
   }
 
   if (error || !medicalRecord) {
@@ -84,23 +87,23 @@ const MedicalRecordDetail = () => {
                 <Calendar className="w-3 h-3" />
                 <span className="text-sm">Scheduled:</span>
                 <span className="font-medium text-slate-900">
-                  {DateTimeHelper.formatDateTime(new Date(appointment.appointmentDateTime))}
+                  {DateTimeHelper.formatDateTime(
+                    new Date(appointment.appointmentDateTime),
+                  )}
                 </span>
               </div>
               <div className="pt-3  border-slate-200 flex items-center gap-2 text-sm">
-              <FontAwesomeIcon
-                icon={faUser}
-                className="h-4 w-4 text-slate-900"
-              />
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="h-4 w-4 text-slate-900"
+                />
 
-              <span className="text-slate-600">
-                Doctor:
-              </span>
+                <span className="text-slate-600">Doctor:</span>
 
-              <span className="font-semibold text-slate-900">
-                {appointment.doctorName}
-              </span>
-            </div>
+                <span className="font-semibold text-slate-900">
+                  {appointment.doctorName}
+                </span>
+              </div>
               {appointment.reason && (
                 <div className="pt-2 border-t border-slate-200">
                   <div className="text-sm text-slate-500 mb-1">Reason</div>
@@ -113,19 +116,26 @@ const MedicalRecordDetail = () => {
 
         {/* Visit Information section */}
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4 mb-4">
-          <h3 className="text-sm font-semibold text-slate-900">Visit Information</h3>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Visit Information
+          </h3>
 
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2 text-slate-600">
               <Calendar className="w-3 h-3" />
               <span className="text-sm">Visit Date:</span>
               <span className="font-medium text-slate-900">
-                {DateTimeHelper.formatDateTime(new Date(medicalRecord.dateTime))}
+                {DateTimeHelper.formatDateTime(
+                  new Date(medicalRecord.dateTime),
+                )}
               </span>
             </div>
 
             <div className="pt-3 border-slate-200 flex items-center gap-2 text-sm">
-              <FontAwesomeIcon icon={faUser} className="h-4 w-4 text-slate-900" />
+              <FontAwesomeIcon
+                icon={faUser}
+                className="h-4 w-4 text-slate-900"
+              />
               <span className="text-slate-600">Doctor:</span>
               <span className="font-semibold text-slate-900">
                 {medicalRecord.doctorName}
@@ -192,6 +202,20 @@ const MedicalRecordDetail = () => {
               {medicalRecord.remarks}
             </div>
           </div>
+        </div>
+
+        <div className="py-4">
+          {acupunctureRecords && acupunctureRecords.length > 0 && (
+            <Button
+              onClick={() =>
+                navigate("/acupunctureShowPage", {
+                  state: { recordId: medicalRecord.recordId },
+                })
+              }
+            >
+              Recorded Acupuncture Points
+            </Button>
+          )}
         </div>
       </Card>
     </div>

@@ -1,9 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   PageShell,
   SectionHeading,
   Card,
   Table,
+  Button,
 } from "~/presentation/designSystem";
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
@@ -11,7 +13,9 @@ import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAc
 
 function AcupunctureShowPage() {
   //show acupuncture points for a medical record
-  const recordId = 1; // Replace with actual recordId
+  const { state } = useLocation();
+  const recordId = state?.recordId;
+  const navigate = useNavigate();
 
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
   const { acupunctures } = useGetAcupunctureList();
@@ -42,9 +46,9 @@ function AcupunctureShowPage() {
 
   const selectedAcupunctures = useMemo(() => {
     if (!acupunctureRecords || !acupunctures) return [];
-    
-    const recordedIds = new Set(acupunctureRecords.map(r => r.acupunctureId));
-    return acupunctures.filter(acu => recordedIds.has(acu.acupunctureId));
+
+    const recordedIds = new Set(acupunctureRecords.map((r) => r.acupunctureId));
+    return acupunctures.filter((acu) => recordedIds.has(acu.acupunctureId));
   }, [acupunctureRecords, acupunctures]);
 
   useEffect(() => {
@@ -99,7 +103,10 @@ function AcupunctureShowPage() {
               ]}
             >
               {selectedAcupunctures.map((point) => (
-                <tr key={`${point.region}-${point.side}-${point.acupunctureId}`} className="hover:bg-slate-50">
+                <tr
+                  key={`${point.region}-${point.side}-${point.acupunctureId}`}
+                  className="hover:bg-slate-50"
+                >
                   <td className="px-4 py-2 text-sm text-slate-900">
                     {point.region && typeof point.region === "string"
                       ? point.region.charAt(0).toUpperCase() +
@@ -123,6 +130,11 @@ function AcupunctureShowPage() {
                 </tr>
               ))}
             </Table>
+            <div className="py-4 text-end">
+              <Button variant="back" onClick={() => navigate(-1)}>
+                Back
+              </Button>
+            </div>
           </div>
         )}
       </Card>

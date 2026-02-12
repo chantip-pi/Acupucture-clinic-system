@@ -137,12 +137,7 @@ function IllnessAcupunctureShow() {
               ))}
             </Table>
             <div className="py-4 text-end">
-              <Button
-                variant="back"
-                onClick={() =>
-                  navigate("/acupunctureLibrary")
-                }
-              >
+              <Button variant="back" onClick={() => navigate(-1)}>
                 Back
               </Button>
             </div>
