@@ -6,21 +6,23 @@ import {
   Table,
 } from "~/presentation/designSystem";
 import AcupunctureShowCard from "./components/AcupunctureShowCard";
-import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
+import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupuncture/useGetIllnessAcupunctureById";
+import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessById";
 
-function AcupunctureShowPage() {
-  //show acupuncture points for a medical record
-  const recordId = 1; // Replace with actual recordId
+function IllnessAcupunctureShow() {
+  //show acupuncture points for an illness
+  const illnessId = 1; //Replace with actual illnessId
 
-  const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
   const { acupunctures } = useGetAcupunctureList();
+  const { illnessAcupunctures } = useGetIllnessAcupunctureById(illnessId);
+  const { illness } = useGetIllnessById(illnessId);
 
   const visibleMeridians = useMemo(() => {
-    if (!acupunctureRecords || !acupunctures) return {};
+    if (!acupunctures) return {};
 
     const recordedIds = new Set<number>();
-    acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
+    illnessAcupunctures.forEach((r) => recordedIds.add(r.acupunctureId));
 
     const initial: Record<string, Set<number>> = {};
     acupunctures.forEach((acu) => {
@@ -34,18 +36,20 @@ function AcupunctureShowPage() {
     });
 
     return initial;
-  }, [acupunctureRecords, acupunctures]);
+  }, [illnessAcupunctures, acupunctures]);
 
   const [toggledMeridians, setToggledMeridians] = useState<
     Record<string, Set<number>>
   >({});
 
   const selectedAcupunctures = useMemo(() => {
-    if (!acupunctureRecords || !acupunctures) return [];
-    
-    const recordedIds = new Set(acupunctureRecords.map(r => r.acupunctureId));
-    return acupunctures.filter(acu => recordedIds.has(acu.acupunctureId));
-  }, [acupunctureRecords, acupunctures]);
+    if (!illnessAcupunctures || !acupunctures) return [];
+
+    const recordedIds = new Set(
+      illnessAcupunctures.map((r) => r.acupunctureId),
+    );
+    return acupunctures.filter((acu) => recordedIds.has(acu.acupunctureId));
+  }, [illnessAcupunctures, acupunctures]);
 
   useEffect(() => {
     setToggledMeridians(
@@ -76,18 +80,20 @@ function AcupunctureShowPage() {
   return (
     <PageShell className="p-8">
       <Card>
-        <SectionHeading title="Show Acupuncture Points" />
+        <SectionHeading title="Acupuncture Point Library" />
+        <h1 className="font-semibold">Illness: {illness?.illnessName}</h1>
+        <p className="pb-4">{illness?.description}</p>
         <AcupunctureShowCard
-          recordId={recordId}
+          illnessId={illnessId}
           visibleMeridians={toggledMeridians}
           onMeridianToggle={toggleMeridianVisibility}
         />
 
-        {/* All selected points summary table */}
-        {acupunctureRecords.length > 0 && (
+        {/* All points summary table */}
+        {illnessAcupunctures.length > 0 && (
           <div className="mt-6">
             <h3 className="mb-3 text-lg font-semibold text-slate-900">
-              All Selected Points
+              Acupuncture Points
             </h3>
             <Table
               headers={[
@@ -99,7 +105,10 @@ function AcupunctureShowPage() {
               ]}
             >
               {selectedAcupunctures.map((point) => (
-                <tr key={`${point.region}-${point.side}-${point.acupunctureId}`} className="hover:bg-slate-50">
+                <tr
+                  key={`${point.region}-${point.side}-${point.acupunctureId}`}
+                  className="hover:bg-slate-50"
+                >
                   <td className="px-4 py-2 text-sm text-slate-900">
                     {point.region && typeof point.region === "string"
                       ? point.region.charAt(0).toUpperCase() +
@@ -130,4 +139,4 @@ function AcupunctureShowPage() {
   );
 }
 
-export default AcupunctureShowPage;
+export default IllnessAcupunctureShow;

@@ -3,6 +3,7 @@ import { Card, Table } from "~/presentation/designSystem";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import { AcupuncturePoint, AcupunctureShowCardProps, ShowCardRegionViewProps } from "~/domain/entities/AcupuncturePoint";
+import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupuncture/useGetIllnessAcupunctureById";
 
 function RegionView({
   region,
@@ -139,6 +140,7 @@ function RegionView({
 
 function AcupunctureShowCard({
   recordId,
+  illnessId,
   visibleMeridians,
   onMeridianToggle,
 }: AcupunctureShowCardProps) {
@@ -146,15 +148,20 @@ function AcupunctureShowCard({
 
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId || 0);
   const { acupunctures } = useGetAcupunctureList();
+  const { illnessAcupunctures } = useGetIllnessAcupunctureById(illnessId || 0);
 
   useEffect(() => {
-    if (!recordId || !acupunctures || !acupunctureRecords) {
+    if (!(recordId || illnessId) || !acupunctures || !acupunctureRecords) {
       setPointsByRegionSide(new Map());
       return;
     }
 
     const recordedIds = new Set<number>();
-    acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
+    if (recordId) {
+      acupunctureRecords.forEach((r) => recordedIds.add(r.acupunctureId));
+    } else if (illnessId) {
+      illnessAcupunctures.forEach((r) => recordedIds.add(r.acupunctureId));
+    }
 
     // Filter acupunctures that were recorded
     const recordedAcupunctures = acupunctures.filter((acu) =>
@@ -187,7 +194,7 @@ function AcupunctureShowCard({
     });
 
     setPointsByRegionSide(grouped);
-  }, [recordId, acupunctureRecords, acupunctures]);
+  }, [recordId, illnessId, acupunctureRecords, illnessAcupunctures, acupunctures]);
 
   const regionSideKeys = Array.from(pointsByRegionSide.keys());
 
