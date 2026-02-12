@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MultiStaffSelect from "./components/medicalRecord/MultiStaffSelect";
 import { useCreateMedicalRecord } from "~/presentation/hooks/medicalRecord/useCreateMedicalRecord";
 import { Checkbox } from "app/components/ui/checkbox"
-
+import SelectAcupunctureSourceDialog from "./components/medicalRecord/SelectAcupunctureSourceDialog";
 
 const CreateMedicalRecord = () => {
   const { state } = useLocation();
@@ -19,8 +19,8 @@ const CreateMedicalRecord = () => {
   const [staffOpen, setStaffOpen] = useState(false);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
   const [error, setError] = useState<string>("");
-  const [hasAcupuncture, setHasAcupuncture] = useState(false)
-
+  const [hasAcupuncture, setHasAcupuncture] = useState(false);
+  const [isSelectSourceOpen, setIsSelectSourceOpen] = useState(false);
 
   if (!state) {
     return (
@@ -104,7 +104,6 @@ const CreateMedicalRecord = () => {
   };
 
   const submitToApi = async () => {
-
     const result = await createMedicalRecord({
       appointmentId: formData.appointmentId || null,
       doctorId: formData.doctorId,
@@ -123,8 +122,29 @@ const CreateMedicalRecord = () => {
       setError(result.error || "Failed to add patient");
     }
   };
+
+  const handlePickLibrary = () => {
+    //TODO: navigate to select from library
+    handleCloseDialog
+  };
+
+  const handlePickManual = () => {
+    // TODO: navigate to select manually
+    handleCloseDialog
+  };
+
+  const handleCloseDialog = () => {
+    setIsSelectSourceOpen(false);
+  }
+
   return (
     <div className="p-8">
+      <SelectAcupunctureSourceDialog
+        onClose={handleCloseDialog}
+        isOpen={isSelectSourceOpen}
+        onPickLibrary={handlePickLibrary}
+        onPickManual={handlePickManual}
+      />
 
       {/* Actions */}
       <div className="flex items-center gap-3 py-4">
@@ -306,16 +326,14 @@ const CreateMedicalRecord = () => {
                 type="button"
                 variant="primary"
                 disabled={loading}
+                onClick={() => setIsSelectSourceOpen(true)}
               >
                 Next
               </Button>
             )}
           </div>
         </form>
-
-
       </Card>
-
     </div>
 
   );
