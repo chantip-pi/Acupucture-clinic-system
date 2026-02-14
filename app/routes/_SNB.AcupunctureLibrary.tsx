@@ -5,15 +5,24 @@ import {
   Card,
   SectionHeading,
   Button,
+  Select,
 } from "~/presentation/designSystem";
 import { Illness } from "~/domain/entities/Illness";
 import { useGetIllnessList } from "~/presentation/hooks/illness/useGetIllnessList";
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getUserSession } from "~/presentation/session/userSession";
+import LoadingPage from "./components/common/LoadingPage";
+import { illnessCategoryOptions } from "~/domain/entities/IlllnessCategoryEnum";
 
 function AcupunctureLibrary() {
   const { illnesses, loading: illnessesLoading } = useGetIllnessList();
   const [selectedLetter, setSelectedLetter] = useState("A");
   const [illnessData, setIllnessData] = useState<Record<string, Illness[]>>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [isManager, setIsManager] = useState<boolean>(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+
   const navigate = useNavigate();
 
   const alphabetLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -57,42 +66,106 @@ function AcupunctureLibrary() {
     }
   }, [illnesses]);
 
-  // Filter illnesses based on search term
-  const filteredIllnesses = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return illnessData[selectedLetter] || [];
+  useEffect(() => {
+    const session = getUserSession();
+    if (!session) {
+      setIsManager(false);
+      return;
     }
 
+    setIsManager(session.title?.toLowerCase() === "manager");
+  }, []);
+
+  // Filter illnesses based on search term and category
+  const filteredIllnesses = useMemo(() => {
+    let illnesses = searchTerm.trim() 
+      ? Object.values(illnessData).flat()
+      : (illnessData[selectedLetter] || []);
+  
     const searchLower = searchTerm.toLowerCase();
-    const allIllnesses = Object.values(illnessData).flat();
-    return allIllnesses.filter((illness) =>
-      illness.illnessName.toLowerCase().includes(searchLower),
-    );
-  }, [illnessData, selectedLetter, searchTerm]);
+    
+    return illnesses.filter((illness) => {
+      const matchesSearch = !searchTerm.trim() || 
+        illness.illnessName.toLowerCase().includes(searchLower);
+      const matchesCategory = 
+        categoryFilter === "" || 
+        illness.category === categoryFilter;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [illnessData, selectedLetter, searchTerm, categoryFilter]);
+
+  // Filter illnesses by category for letter-grouped view
+  const filteredIllnessData = useMemo(() => {
+    if (categoryFilter === "") {
+      return illnessData;
+    }
+
+    const filtered: Record<string, Illness[]> = {};
+    Object.keys(illnessData).forEach((letter) => {
+      const filteredForLetter = illnessData[letter].filter(
+        (illness) => illness.category === categoryFilter
+      );
+      if (filteredForLetter.length > 0) {
+        filtered[letter] = filteredForLetter;
+      }
+    });
+    return filtered;
+  }, [illnessData, categoryFilter]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
   if (illnessesLoading) {
-    return (
-      <PageShell>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-lg text-slate-600">Loading illnesses...</div>
-        </div>
-      </PageShell>
-    );
+    return <LoadingPage />;
   }
+
+  const checkAccess = (action: () => void) => {
+    if (!isManager) {
+      alert("You don't have access to this action.");
+      return;
+    }
+
+    action();
+  };
+
+  const handleCategoryFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryFilter(e.target.value);
+  };
 
   return (
     <PageShell className="p-8">
       <Card>
-        <SectionHeading title="Acupuncture Point Library" />
+        <div className="flex items-center justify-between mb-4">
+          <SectionHeading title="Acupuncture Library" />
+          {(isManager) && (<Button
+            variant="secondary"
+            size="sm"
+            onClick={() => checkAccess(() => navigate('/createIllness'))}
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+              <FontAwesomeIcon icon={faPenToSquare} />
+            </span>
+            Add Illness
+          </Button>)}
+        </div>
         {/* Search and Filter Section */}
         <div className="flex gap-3 mb-6">
-          <Button variant="secondary" size="md" className="px-6">
-            Filter
-          </Button>
+          <div className="w-48">
+            <Select
+              name="category"
+              value={categoryFilter}
+              onChange={handleCategoryFilter}
+            >
+              <option value="">All Categories</option>
+              {illnessCategoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </Select>
+          </div>
           <input
             type="text"
             placeholder="Search the illness"
@@ -112,7 +185,7 @@ function AcupunctureLibrary() {
           <div className="flex flex-wrap gap-2">
             {alphabetLetters.map((letter) => {
               const hasIllnesses =
-                illnessData[letter] && illnessData[letter].length > 0;
+                filteredIllnessData[letter] && filteredIllnessData[letter].length > 0;
               const isSelected = selectedLetter === letter;
 
               return (
@@ -138,13 +211,12 @@ function AcupunctureLibrary() {
                     }
                   }}
                   disabled={!hasIllnesses}
-                  className={`w-8 h-8 rounded-full font-semibold text-sm transition-all duration-150 ${
-                    isSelected
-                      ? "bg-teal-600 text-white shadow-sm"
-                      : hasIllnesses
+                  className={`w-8 h-8 rounded-full font-semibold text-sm transition-all duration-150 ${isSelected
+                    ? "bg-teal-600 text-white shadow-sm"
+                    : hasIllnesses
                       ? "bg-white text-slate-700 hover:bg-slate-50 border border-slate-300"
                       : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                  }`}
+                    }`}
                 >
                   {letter}
                 </button>
@@ -160,6 +232,7 @@ function AcupunctureLibrary() {
               <div className="text-sm bg-[#DCE8E9] text-[#2F919C] p-3 rounded-md">
                 Found {filteredIllnesses.length} result
                 {filteredIllnesses.length !== 1 ? "s" : ""} for "{searchTerm}"
+                {categoryFilter && ` in category "${categoryFilter}"`}
               </div>
             </div>
 
@@ -203,10 +276,10 @@ function AcupunctureLibrary() {
             </div>
           </>
         ) : (
-          /* Show all letters with their illnesses */
+          /* Show all letters with their illnesses (filtered by category) */
           <div className="space-y-6">
             {alphabetLetters.map((letter) => {
-              const illnessesForLetter = illnessData[letter] || [];
+              const illnessesForLetter = filteredIllnessData[letter] || [];
 
               // Only show letters that have illnesses
               if (illnessesForLetter.length === 0) return null;
@@ -257,9 +330,11 @@ function AcupunctureLibrary() {
               );
             })}
 
-            {Object.keys(illnessData).length === 0 && (
+            {Object.keys(filteredIllnessData).length === 0 && (
               <div className="py-8 text-center text-slate-500">
-                No illnesses available
+                {categoryFilter 
+                  ? `No illnesses found in category "${categoryFilter}"`
+                  : "No illnesses available"}
               </div>
             )}
           </div>

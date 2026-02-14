@@ -13,6 +13,8 @@ import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupun
 import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessById";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ErrorPage from "./components/common/ErrorPage";
+import LoadingPage from "./components/common/LoadingPage";
 
 function IllnessAcupunctureShow() {
   //show acupuncture points for an illness
@@ -20,9 +22,9 @@ function IllnessAcupunctureShow() {
   const illnessId = state?.illnessId;
   const navigate = useNavigate();
 
-  const { acupunctures } = useGetAcupunctureList();
-  const { illnessAcupunctures } = useGetIllnessAcupunctureById(illnessId);
-  const { illness } = useGetIllnessById(illnessId);
+  const { acupunctures, loading: acupunctureLoading } = useGetAcupunctureList();
+  const { illnessAcupunctures, loading: illnessAcupunctureLoading } = useGetIllnessAcupunctureById(illnessId);
+  const { illness,loading: illnessLoading } = useGetIllnessById(illnessId);
 
   const visibleMeridians = useMemo(() => {
     if (!acupunctures) return {};
@@ -83,10 +85,20 @@ function IllnessAcupunctureShow() {
     });
   };
 
+  if(acupunctureLoading || illnessAcupunctureLoading || illnessLoading){
+    return <LoadingPage/>
+  }
+  
+  if (!illness) {
+    return (
+      <ErrorPage message={"No patient data found"} onRetry={() => window.location.reload()} />
+    );
+  };
+
   return (
     <PageShell className="p-8">
       <div className="flex items-center gap-3 py-4">
-        <Button size="sm" variant="back" onClick={() => navigate(-1)}>
+        <Button size="sm" variant="back" onClick={() => navigate('/acupunctureLibrary')}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full">
             <FontAwesomeIcon icon={faArrowLeft} />
           </span>
@@ -95,9 +107,10 @@ function IllnessAcupunctureShow() {
       </div>
 
       <Card>
-        <SectionHeading title="Acupuncture Point Library" />
-        <h1 className="font-semibold">Illness: {illness?.illnessName}</h1>
-        <p className="pb-4">{illness?.description}</p>
+        <SectionHeading title={illness.illnessName} />
+        <p className="pb-4">{illness.description}</p>
+        <h1 className="font-semibold">Category: {illness.category}</h1>
+
         <AcupunctureShowCard
           illnessId={illnessId}
           visibleMeridians={toggledMeridians}
