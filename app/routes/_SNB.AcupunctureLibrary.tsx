@@ -5,6 +5,7 @@ import {
   Card,
   SectionHeading,
   Button,
+  Select,
 } from "~/presentation/designSystem";
 import { Illness } from "~/domain/entities/Illness";
 import { useGetIllnessList } from "~/presentation/hooks/illness/useGetIllnessList";
@@ -12,6 +13,7 @@ import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getUserSession } from "~/presentation/session/userSession";
 import LoadingPage from "./components/common/LoadingPage";
+import { illnessCategoryOptions } from "~/domain/entities/IlllnessCategoryEnum";
 
 function AcupunctureLibrary() {
   const { illnesses, loading: illnessesLoading } = useGetIllnessList();
@@ -19,6 +21,7 @@ function AcupunctureLibrary() {
   const [illnessData, setIllnessData] = useState<Record<string, Illness[]>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isManager, setIsManager] = useState<boolean>(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
 
   const navigate = useNavigate();
 
@@ -73,18 +76,42 @@ function AcupunctureLibrary() {
     setIsManager(session.title?.toLowerCase() === "manager");
   }, []);
 
-  // Filter illnesses based on search term
+  // Filter illnesses based on search term and category
   const filteredIllnesses = useMemo(() => {
-    if (!searchTerm.trim()) {
-      return illnessData[selectedLetter] || [];
+    let illnesses = searchTerm.trim() 
+      ? Object.values(illnessData).flat()
+      : (illnessData[selectedLetter] || []);
+  
+    const searchLower = searchTerm.toLowerCase();
+    
+    return illnesses.filter((illness) => {
+      const matchesSearch = !searchTerm.trim() || 
+        illness.illnessName.toLowerCase().includes(searchLower);
+      const matchesCategory = 
+        categoryFilter === "" || 
+        illness.category === categoryFilter;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [illnessData, selectedLetter, searchTerm, categoryFilter]);
+
+  // Filter illnesses by category for letter-grouped view
+  const filteredIllnessData = useMemo(() => {
+    if (categoryFilter === "") {
+      return illnessData;
     }
 
-    const searchLower = searchTerm.toLowerCase();
-    const allIllnesses = Object.values(illnessData).flat();
-    return allIllnesses.filter((illness) =>
-      illness.illnessName.toLowerCase().includes(searchLower),
-    );
-  }, [illnessData, selectedLetter, searchTerm]);
+    const filtered: Record<string, Illness[]> = {};
+    Object.keys(illnessData).forEach((letter) => {
+      const filteredForLetter = illnessData[letter].filter(
+        (illness) => illness.category === categoryFilter
+      );
+      if (filteredForLetter.length > 0) {
+        filtered[letter] = filteredForLetter;
+      }
+    });
+    return filtered;
+  }, [illnessData, categoryFilter]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -92,7 +119,6 @@ function AcupunctureLibrary() {
 
   if (illnessesLoading) {
     return <LoadingPage />;
-
   }
 
   const checkAccess = (action: () => void) => {
@@ -104,6 +130,9 @@ function AcupunctureLibrary() {
     action();
   };
 
+  const handleCategoryFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCategoryFilter(e.target.value);
+  };
 
   return (
     <PageShell className="p-8">
@@ -123,9 +152,20 @@ function AcupunctureLibrary() {
         </div>
         {/* Search and Filter Section */}
         <div className="flex gap-3 mb-6">
-          <Button variant="secondary" size="md" className="px-6">
-            Filter
-          </Button>
+          <div className="w-48">
+            <Select
+              name="category"
+              value={categoryFilter}
+              onChange={handleCategoryFilter}
+            >
+              <option value="">All Categories</option>
+              {illnessCategoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </Select>
+          </div>
           <input
             type="text"
             placeholder="Search the illness"
@@ -145,7 +185,7 @@ function AcupunctureLibrary() {
           <div className="flex flex-wrap gap-2">
             {alphabetLetters.map((letter) => {
               const hasIllnesses =
-                illnessData[letter] && illnessData[letter].length > 0;
+                filteredIllnessData[letter] && filteredIllnessData[letter].length > 0;
               const isSelected = selectedLetter === letter;
 
               return (
@@ -192,6 +232,7 @@ function AcupunctureLibrary() {
               <div className="text-sm bg-[#DCE8E9] text-[#2F919C] p-3 rounded-md">
                 Found {filteredIllnesses.length} result
                 {filteredIllnesses.length !== 1 ? "s" : ""} for "{searchTerm}"
+                {categoryFilter && ` in category "${categoryFilter}"`}
               </div>
             </div>
 
@@ -235,10 +276,10 @@ function AcupunctureLibrary() {
             </div>
           </>
         ) : (
-          /* Show all letters with their illnesses */
+          /* Show all letters with their illnesses (filtered by category) */
           <div className="space-y-6">
             {alphabetLetters.map((letter) => {
-              const illnessesForLetter = illnessData[letter] || [];
+              const illnessesForLetter = filteredIllnessData[letter] || [];
 
               // Only show letters that have illnesses
               if (illnessesForLetter.length === 0) return null;
@@ -289,9 +330,11 @@ function AcupunctureLibrary() {
               );
             })}
 
-            {Object.keys(illnessData).length === 0 && (
+            {Object.keys(filteredIllnessData).length === 0 && (
               <div className="py-8 text-center text-slate-500">
-                No illnesses available
+                {categoryFilter 
+                  ? `No illnesses found in category "${categoryFilter}"`
+                  : "No illnesses available"}
               </div>
             )}
           </div>
