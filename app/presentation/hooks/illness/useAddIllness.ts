@@ -10,13 +10,13 @@ export function useAddIllness() {
     setLoading(true);
     setError(null);
     try {
-      await addIllnessUseCase.execute(dto);
-      return { success: true };
+     const result =  await addIllnessUseCase.execute(dto);
+      return { success: result };
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to add illness";
       setError(errorMessage);
-      return { success: false, error: errorMessage };
+      return { success: null, error: errorMessage };
     } finally {
       setLoading(false);
     }
