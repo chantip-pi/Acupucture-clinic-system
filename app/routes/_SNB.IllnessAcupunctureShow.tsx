@@ -13,6 +13,7 @@ import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupun
 import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessById";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ErrorPage from "./components/common/ErrorPage";
 
 function IllnessAcupunctureShow() {
   //show acupuncture points for an illness
@@ -83,6 +84,13 @@ function IllnessAcupunctureShow() {
     });
   };
 
+  
+  if (!illness) {
+    return (
+      <ErrorPage message={"No patient data found"} onRetry={() => window.location.reload()} />
+    );
+  };
+
   return (
     <PageShell className="p-8">
       <div className="flex items-center gap-3 py-4">
@@ -95,9 +103,10 @@ function IllnessAcupunctureShow() {
       </div>
 
       <Card>
-        <SectionHeading title="Acupuncture Point Library" />
-        <h1 className="font-semibold">Illness: {illness?.illnessName}</h1>
-        <p className="pb-4">{illness?.description}</p>
+        <SectionHeading title={illness.illnessName} />
+        <p className="pb-4">{illness.description}</p>
+        <h1 className="font-semibold">Category: {illness.category}</h1>
+
         <AcupunctureShowCard
           illnessId={illnessId}
           visibleMeridians={toggledMeridians}
