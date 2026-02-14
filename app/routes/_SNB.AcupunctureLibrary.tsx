@@ -19,8 +19,6 @@ function AcupunctureLibrary() {
   const [illnessData, setIllnessData] = useState<Record<string, Illness[]>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [isManager, setIsManager] = useState<boolean>(false);
-  const [isSessionLoaded, setIsSessionLoaded] = useState<boolean>(false);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -68,15 +66,11 @@ function AcupunctureLibrary() {
   useEffect(() => {
     const session = getUserSession();
     if (!session) {
-      setIsLoggedIn(false);
       setIsManager(false);
-      setIsSessionLoaded(true);
       return;
     }
 
-    setIsLoggedIn(true);
     setIsManager(session.title?.toLowerCase() === "manager");
-    setIsSessionLoaded(true);
   }, []);
 
   // Filter illnesses based on search term
@@ -114,19 +108,19 @@ function AcupunctureLibrary() {
   return (
     <PageShell className="p-8">
       <Card>
-      <div className="flex items-center justify-between mb-4">
-    <SectionHeading title="Acupuncture Library" />
-    {(isManager) && (<Button
-      variant="secondary"
-      size="sm"
-      onClick={()=>checkAccess(()=>navigate('/createIllness'))}
-    >
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
-        <FontAwesomeIcon icon={faPenToSquare} />
-      </span>
-      Add Illness
-    </Button>)}
-  </div>
+        <div className="flex items-center justify-between mb-4">
+          <SectionHeading title="Acupuncture Library" />
+          {(isManager) && (<Button
+            variant="secondary"
+            size="sm"
+            onClick={() => checkAccess(() => navigate('/createIllness'))}
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+              <FontAwesomeIcon icon={faPenToSquare} />
+            </span>
+            Add Illness
+          </Button>)}
+        </div>
         {/* Search and Filter Section */}
         <div className="flex gap-3 mb-6">
           <Button variant="secondary" size="md" className="px-6">
@@ -177,13 +171,12 @@ function AcupunctureLibrary() {
                     }
                   }}
                   disabled={!hasIllnesses}
-                  className={`w-8 h-8 rounded-full font-semibold text-sm transition-all duration-150 ${
-                    isSelected
-                      ? "bg-teal-600 text-white shadow-sm"
-                      : hasIllnesses
+                  className={`w-8 h-8 rounded-full font-semibold text-sm transition-all duration-150 ${isSelected
+                    ? "bg-teal-600 text-white shadow-sm"
+                    : hasIllnesses
                       ? "bg-white text-slate-700 hover:bg-slate-50 border border-slate-300"
                       : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
-                  }`}
+                    }`}
                 >
                   {letter}
                 </button>

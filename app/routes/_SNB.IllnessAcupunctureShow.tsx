@@ -14,6 +14,7 @@ import { useGetIllnessById } from "~/presentation/hooks/illness/useGetIllnessByI
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ErrorPage from "./components/common/ErrorPage";
+import LoadingPage from "./components/common/LoadingPage";
 
 function IllnessAcupunctureShow() {
   //show acupuncture points for an illness
@@ -21,9 +22,9 @@ function IllnessAcupunctureShow() {
   const illnessId = state?.illnessId;
   const navigate = useNavigate();
 
-  const { acupunctures } = useGetAcupunctureList();
-  const { illnessAcupunctures } = useGetIllnessAcupunctureById(illnessId);
-  const { illness } = useGetIllnessById(illnessId);
+  const { acupunctures, loading: acupunctureLoading } = useGetAcupunctureList();
+  const { illnessAcupunctures, loading: illnessAcupunctureLoading } = useGetIllnessAcupunctureById(illnessId);
+  const { illness,loading: illnessLoading } = useGetIllnessById(illnessId);
 
   const visibleMeridians = useMemo(() => {
     if (!acupunctures) return {};
@@ -84,6 +85,9 @@ function IllnessAcupunctureShow() {
     });
   };
 
+  if(acupunctureLoading || illnessAcupunctureLoading || illnessLoading){
+    return <LoadingPage/>
+  }
   
   if (!illness) {
     return (
@@ -94,7 +98,7 @@ function IllnessAcupunctureShow() {
   return (
     <PageShell className="p-8">
       <div className="flex items-center gap-3 py-4">
-        <Button size="sm" variant="back" onClick={() => navigate(-1)}>
+        <Button size="sm" variant="back" onClick={() => navigate('/acupunctureLibrary')}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full">
             <FontAwesomeIcon icon={faArrowLeft} />
           </span>
