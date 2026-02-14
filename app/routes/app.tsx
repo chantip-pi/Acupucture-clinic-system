@@ -18,6 +18,7 @@ import CreateMedicalRecord from './_SNB.CreateMedicalRecord';
 import MedicalRecordDetail from './_SNB.MedicalRecordDetail';
 import Suggest from './_SNB.Suggest';
 import IllnessAcupunctureShow from './_SNB.IllnessAcupunctureShow';
+import CreateIllness from './_SNB.CreateIllness';
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
         <Route path="/medicalRecordDetail" element={<MedicalRecordDetail/>}/>
         <Route path="/suggest" element={<Suggest />} />
         <Route path="/illnessAcupunctureShow" element={<IllnessAcupunctureShow/>}/>
+        <Route path="/createIllness" element={<CreateIllness/>} />
       </Routes>
     </Router>
   );

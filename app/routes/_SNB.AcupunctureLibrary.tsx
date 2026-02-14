@@ -8,12 +8,20 @@ import {
 } from "~/presentation/designSystem";
 import { Illness } from "~/domain/entities/Illness";
 import { useGetIllnessList } from "~/presentation/hooks/illness/useGetIllnessList";
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getUserSession } from "~/presentation/session/userSession";
+import LoadingPage from "./components/common/LoadingPage";
 
 function AcupunctureLibrary() {
   const { illnesses, loading: illnessesLoading } = useGetIllnessList();
   const [selectedLetter, setSelectedLetter] = useState("A");
   const [illnessData, setIllnessData] = useState<Record<string, Illness[]>>({});
   const [searchTerm, setSearchTerm] = useState("");
+  const [isManager, setIsManager] = useState<boolean>(false);
+  const [isSessionLoaded, setIsSessionLoaded] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
   const navigate = useNavigate();
 
   const alphabetLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
@@ -57,6 +65,20 @@ function AcupunctureLibrary() {
     }
   }, [illnesses]);
 
+  useEffect(() => {
+    const session = getUserSession();
+    if (!session) {
+      setIsLoggedIn(false);
+      setIsManager(false);
+      setIsSessionLoaded(true);
+      return;
+    }
+
+    setIsLoggedIn(true);
+    setIsManager(session.title?.toLowerCase() === "manager");
+    setIsSessionLoaded(true);
+  }, []);
+
   // Filter illnesses based on search term
   const filteredIllnesses = useMemo(() => {
     if (!searchTerm.trim()) {
@@ -75,19 +97,36 @@ function AcupunctureLibrary() {
   };
 
   if (illnessesLoading) {
-    return (
-      <PageShell>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-lg text-slate-600">Loading illnesses...</div>
-        </div>
-      </PageShell>
-    );
+    return <LoadingPage />;
+
   }
+
+  const checkAccess = (action: () => void) => {
+    if (!isManager) {
+      alert("You don't have access to this action.");
+      return;
+    }
+
+    action();
+  };
+
 
   return (
     <PageShell className="p-8">
       <Card>
-        <SectionHeading title="Acupuncture Point Library" />
+      <div className="flex items-center justify-between mb-4">
+    <SectionHeading title="Acupuncture Library" />
+    {(isManager) && (<Button
+      variant="secondary"
+      size="sm"
+      onClick={()=>checkAccess(()=>navigate('/createIllness'))}
+    >
+      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+        <FontAwesomeIcon icon={faPenToSquare} />
+      </span>
+      Add Illness
+    </Button>)}
+  </div>
         {/* Search and Filter Section */}
         <div className="flex gap-3 mb-6">
           <Button variant="secondary" size="md" className="px-6">
