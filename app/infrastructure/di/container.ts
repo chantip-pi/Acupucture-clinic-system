@@ -150,6 +150,8 @@ let medicalRecordIllnessRepository: IMedicalRecordIllnessRepository;
 import { IGeminiRepository } from "~/domain/repositories/IGeminiRepository";
 import { GeminiDataSource } from "../datasource/GeminiDataSource";
 import { GeminiRepository } from "../repositories/GeminiRepository";
+import { GetAcupunctureByMeridianNameUseCase } from "~/application/use-cases/acupuncture/GetAcupunctureByMeridianNameUseCase";
+import { GetMeridianNamesUseCase } from "~/application/use-cases/meridian/GetMeridianNamesUseCase";
 // Initialize repositories based on datasource configuration
 let geminiRepository: IGeminiRepository;
 
@@ -224,6 +226,7 @@ export const addAcupunctureUseCase = new AddAcupunctureUseCase(acupunctureReposi
 export const getAcupunctureListUseCase = new GetAcupunctureListUseCase(acupunctureRepository);
 export const getAcupunctureByIdUseCase = new GetAcupunctureByIdUseCase(acupunctureRepository);
 export const getAcupunctureByMeridianIdUseCase = new GetAcupunctureByMeridianIdUseCase(acupunctureRepository);
+export const getAcupunctureByMeridianNameUseCase = new GetAcupunctureByMeridianNameUseCase(acupunctureRepository);
 export const getAcupunctureByRegionAndSideUseCase = new GetAcupunctureByRegionAndSideUseCase(acupunctureRepository);
 export const updateAcupunctureUseCase = new UpdateAcupunctureUseCase(acupunctureRepository);
 export const deleteAcupunctureUsecase = new DeleteAcupunctureUseCase(acupunctureRepository);
@@ -238,6 +241,7 @@ export const deleteIllnessUsecase = new DeleteIllnessUseCase(illnessRepository);
 // Meridian Use Cases
 export const addMeridianUseCase = new AddMeridianUseCase(meridianRepository);
 export const getMeridianListUseCase = new GetMeridianListUseCase(meridianRepository);
+export const getMeridianNamesUseCase = new GetMeridianNamesUseCase(meridianRepository);
 export const getMeridianByIdUseCase = new GetMeridianByIdUseCase(meridianRepository);
 export const getMeridiansByRegionAndSideUseCase = new GetMeridiansByRegionAndSideUseCase(meridianRepository);
 export const getMeridianRegionUseCase = new GetMeridianRegionUseCase(meridianRepository);

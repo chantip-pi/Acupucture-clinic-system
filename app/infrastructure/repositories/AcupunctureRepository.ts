@@ -17,6 +17,10 @@ export class AcupunctureRepository implements IAcupunctureRepository {
     return this.dataSource.getByMeridianId(meridianId);
   }
 
+  async getByMeridianName(meridianName: string): Promise<Acupuncture[]> {
+    return this.dataSource.getByMeridianName(meridianName);
+  }
+
   async getByRegionAndSide(region: string, side: string): Promise<Acupuncture[]> {
     return this.dataSource.getByRegionAndSide(region, side);
   }

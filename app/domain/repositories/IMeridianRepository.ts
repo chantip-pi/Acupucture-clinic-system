@@ -2,6 +2,7 @@ import { Meridian } from "../entities/Meridian";
 
 export interface IMeridianRepository {
   getAll(): Promise<Meridian[]>;
+  getAllNames(): Promise<string[]>;
   getById(meridianId: number): Promise<Meridian | null>;
   getByRegionAndSide(region: string, side: string): Promise<Meridian[]>;
   getAvailableRegions(): Promise<string[]>;
