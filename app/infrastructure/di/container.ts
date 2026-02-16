@@ -10,6 +10,7 @@ import { IAppointmentRepository } from "~/domain/repositories/IAppointmentReposi
 import { IMedicalRecordAcupunctureRepository } from "~/domain/repositories/IMedicalRecordAcupunctureRepository";
 import { IMedicalRecordRepository } from "~/domain/repositories/IMedicalRecordRepository";
 import { IIllnessAcupunctureRepository } from "~/domain/repositories/IIllnessAcupunctureRepository";
+import { IMedicalRecordIllnessRepository } from "~/domain/repositories/IMedicalRecordIllnessRepository";
 
 // ===== Application Use Cases =====
 // Patient
@@ -88,6 +89,13 @@ import { GetIllnessAcupunctureListUseCase } from "~/application/use-cases/illnes
 import { DeleteIllnessAcupunctureUseCase } from "~/application/use-cases/illnessAcupuncture/DeleteIllnessAcupunctureUseCase";
 import { DeleteAllAcupunctureForIllnessUseCase } from "~/application/use-cases/illnessAcupuncture/DeleteAllAcupunctureForIllnessUseCase";
 
+// Medical Record Illness
+import { AddMedicalRecordIllnessUseCase } from "~/application/use-cases/medicalRecordIllness/AddMedicalRecordIllnessUseCase";
+import { GetMedicalRecordIllnessByRecordIdUseCase } from "~/application/use-cases/medicalRecordIllness/GetMedicalRecordIllnessByRecordIdUseCase";
+import { GetMedicalRecordIllnessListUseCase } from "~/application/use-cases/medicalRecordIllness/GetMedicalRecordIllnessListUseCase";
+import { DeleteMedicalRecordIllnessUseCase } from "~/application/use-cases/medicalRecordIllness/DeleteMedicalRecordIllnessUseCase";
+import { DeleteAllIllnessForRecordUseCase } from "~/application/use-cases/medicalRecordIllness/DeleteAllIllnessForRecordUseCase";
+
 // ===== Data Sources =====
 import { MockDataSource } from "../datasource/MockDataSource";
 import { PatientDataSource } from "../datasource/PatientDataSource";
@@ -100,6 +108,7 @@ import { MeridianDataSource } from "../datasource/MeridianDataSource";
 import { AppointmentDataSource } from "../datasource/AppointmentDatasource";
 import { MedicalRecordAcupunctureDataSource } from "../datasource/MedicalRecordAcupunctureDataSource";
 import { IllnessAcupunctureDataSource } from "../datasource/IllnessAcupunctureDataSource";
+import { MedicalRecordIllnessDataSource } from "../datasource/MedicalRecordIllnessDataSource";
 
 // ===== Repositories (Infrastructure) =====
 import { PatientRepository } from "../repositories/PatientRepository";
@@ -120,6 +129,7 @@ import { MedicalRecordAcupunctureRepository } from "../repositories/MedicalRecor
 import { MedicalRecordDataSource } from "../datasource/MedicalRecordDatasource";
 import { MedicalRecordRepository } from "../repositories/MedicalRecordRepository";
 import { IllnessAcupunctureRepository } from "../repositories/IllnessAcupunctureRepository";
+import { MedicalRecordIllnessRepository } from "../repositories/MedicalRecordIllnessRepository";
 
 
 import { GetSuggestUseCase } from "~/application/use-cases/gemini/GetSuggestUseCase";
@@ -134,8 +144,8 @@ let illnessRepository: IIllnessRepository;
 let meridianRepository: IMeridianRepository;
 let medicalRecordAcupunctureRepository: IMedicalRecordAcupunctureRepository;
 let medicalRecordRepository: IMedicalRecordRepository;
-
 let illnessAcupunctureRepository: IIllnessAcupunctureRepository;
+let medicalRecordIllnessRepository: IMedicalRecordIllnessRepository;
 
 import { IGeminiRepository } from "~/domain/repositories/IGeminiRepository";
 import { GeminiDataSource } from "../datasource/GeminiDataSource";
@@ -156,7 +166,7 @@ const meridianDataSource = new MeridianDataSource();
 const medicalRecordAcupunctureDataSource = new MedicalRecordAcupunctureDataSource();
 const illnessAcupunctureDataSource = new IllnessAcupunctureDataSource();
 const geminiDatasource = new GeminiDataSource();
-
+const medicalRecordIllnessDataSource = new MedicalRecordIllnessDataSource();
 
 // Repositories
 patientRepository = new PatientRepository(patientDatasource);
@@ -175,6 +185,7 @@ medicalRecordAcupunctureRepository = new MedicalRecordAcupunctureRepository(medi
 medicalRecordRepository = new MedicalRecordRepository(medicalRecordDatasource);
 illnessAcupunctureRepository = new IllnessAcupunctureRepository(illnessAcupunctureDataSource);
 geminiRepository = new GeminiRepository(geminiDatasource);
+medicalRecordIllnessRepository = new MedicalRecordIllnessRepository(medicalRecordIllnessDataSource);
 
 
 // Patient Use Cases
@@ -262,3 +273,10 @@ export const getIllnessAcupunctureByIdUseCase = new GetIllnessAcupunctureByIdUse
 export const getIllnessAcupunctureListUseCase = new GetIllnessAcupunctureListUseCase(illnessAcupunctureRepository);
 export const deleteIllnessAcupunctureUseCase = new DeleteIllnessAcupunctureUseCase(illnessAcupunctureRepository);
 export const deleteAllAcupunctureForIllnessUseCase = new DeleteAllAcupunctureForIllnessUseCase(illnessAcupunctureRepository);
+
+// Medical Record Illness Use Cases
+export const addMedicalRecordIllnessUseCase = new AddMedicalRecordIllnessUseCase(medicalRecordIllnessRepository);
+export const getMedicalRecordIllnessByRecordIdUseCase = new GetMedicalRecordIllnessByRecordIdUseCase(medicalRecordIllnessRepository);
+export const getMedicalRecordIllnessListUseCase = new GetMedicalRecordIllnessListUseCase(medicalRecordIllnessRepository);
+export const deleteMedicalRecordIllnessUseCase = new DeleteMedicalRecordIllnessUseCase(medicalRecordIllnessRepository);
+export const deleteAllIllnessForRecordUseCase = new DeleteAllIllnessForRecordUseCase(medicalRecordIllnessRepository);

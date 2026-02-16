@@ -1,4 +1,3 @@
-import { s } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 import { MedicalRecordAcupuncture } from "~/domain/entities/MedicalRecordAcupuncture";
 
 export class MedicalRecordAcupunctureDataSource {
