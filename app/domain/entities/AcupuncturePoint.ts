@@ -57,5 +57,5 @@ export interface RegionSideViewProps {
   visibleMeridians: Record<string, Set<number>>;
   handlePointClick: (point: AcupuncturePoint, region: string, side: string) => void;
   toggleMeridianVisibility: (region: string, side: string, meridianId: number) => void;
-  setSelectedPoints: React.Dispatch<React.SetStateAction<SelectedPoint[]>>;
+  setSelectedPoints: (points: SelectedPoint[]) => void;
 }

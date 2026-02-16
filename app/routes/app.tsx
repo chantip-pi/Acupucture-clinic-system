@@ -10,7 +10,6 @@ import EditPatient from './_SNB.EditPatient';
 import PatientDetail from './_SNB.PatientDetail';
 import LogIn from './LogIn';
 import AddStaff from './_SNB.AddStaff';
-import AcupunctureSelect from './_SNB.AcupunctureSelect';
 import AcupunctureCreate from './_SNB.AcupunctureCreate';
 import AcupunctureLibrary from './_SNB.AcupunctureLibrary';
 import AcupunctureShowPage from './_SNB.AcupunctureShowPage';
@@ -34,7 +33,6 @@ function App() {
         <Route path="/patientDetail" element={<PatientDetail />} />
         <Route path="/logIn" element={<LogIn/>}/>
         <Route path="/addStaff" element={<AddStaff/>}/>
-        <Route path="/acupunctureSelect" element={<AcupunctureSelect/>}/>
         <Route path="/acupunctureCreate" element={<AcupunctureCreate/>}/>
         <Route path="/acupunctureLibrary" element={<AcupunctureLibrary/>}/>
         <Route path="/acupunctureShowPage" element={<AcupunctureShowPage/>}/>

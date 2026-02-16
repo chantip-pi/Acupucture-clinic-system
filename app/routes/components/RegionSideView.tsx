@@ -55,6 +55,11 @@ export default function RegionSideView({
 
   const fullImageUrl = `${baseUrl}/images/${meridiansForView[0]?.image}`;
 
+  const handleRemovePoint = (pointKey: string) => {
+    const newPoints = selectedPoints.filter((p) => p.key !== pointKey);
+    setSelectedPoints(newPoints);
+  };
+
   return (
     <div className="space-y-4">
       <AcupunctureCard
@@ -94,11 +99,7 @@ export default function RegionSideView({
                   </td>
                   <td className="px-4 py-2 text-sm">
                     <button
-                      onClick={() =>
-                        setSelectedPoints(
-                          (prev) => prev.filter((p) => p.key !== point.key),
-                        )
-                      }
+                      onClick={() => handleRemovePoint(point.key)}
                       className="text-red-600 hover:text-red-800"
                     >
                       Remove
