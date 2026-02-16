@@ -169,7 +169,10 @@ function AcupunctureSelect({
                     variant={
                       viewsByRegion[region]?.[side] ? "primary" : "secondary"
                     }
-                    onClick={() => toggleView(region, side)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      toggleView(region, side);
+                    }}
                   >
                     {side && typeof side === "string"
                       ? side.charAt(0).toUpperCase() + side.slice(1)
@@ -248,6 +251,7 @@ function AcupunctureSelect({
                 </td>
                 <td className="px-4 py-2 text-sm">
                   <button
+                    type="button"
                     onClick={() =>
                       onSelectedPointsChange(
                         selectedPoints.filter((p) => p.key !== point.key),
@@ -266,7 +270,7 @@ function AcupunctureSelect({
 
       {!hideSaveButton && (
         <div className="mt-8 flex justify-end">
-          <Button variant="primary" onClick={() => console.log("Save button - implement parent handler")}>
+          <Button type="button" variant="primary" onClick={() => console.log("Save button - implement parent handler")}>
             Save
           </Button>
         </div>
