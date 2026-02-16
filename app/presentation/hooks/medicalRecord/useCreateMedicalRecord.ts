@@ -7,13 +7,20 @@ export function useCreateMedicalRecord() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createMedicalRecord = async (dto: CreateMedicalRecordDTO) => {
+  const createMedicalRecord = async (dto: CreateMedicalRecordDTO): Promise<{
+    success: boolean;
+    error?: string;
+    recordId?: number;
+  }> => {
     setLoading(true);
     setError(null);
 
     try {
-      await createMedicalRecordUseCase.execute(dto);
-      return { success: true };
+      const result = await createMedicalRecordUseCase.execute(dto);
+      return { 
+        success: true,
+        recordId: result.recordId
+      };
     } catch (err) {
       const errorMessage = BackendErrorService.getErrorMessage(err);
       setError(errorMessage);

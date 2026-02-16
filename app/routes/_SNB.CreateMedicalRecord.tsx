@@ -10,8 +10,11 @@ import { faArrowLeft, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import MultiStaffSelect from "./components/medicalRecord/MultiStaffSelect";
 import { useCreateMedicalRecord } from "~/presentation/hooks/medicalRecord/useCreateMedicalRecord";
-import { Checkbox } from "app/components/ui/checkbox"
+import { useAddMedicalRecordAcupuncture } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useAddMedicalRecordAcupuncture";
+import { Checkbox } from "app/components/ui/checkbox";
 import SelectAcupunctureSourceDialog from "./components/medicalRecord/SelectAcupunctureSourceDialog";
+import AcupunctureSelect from "./components/AcupunctureSelect";
+import { SelectedPoint } from "~/domain/entities/AcupuncturePoint";
 
 const CreateMedicalRecord = () => {
   const { state } = useLocation();
@@ -21,6 +24,10 @@ const CreateMedicalRecord = () => {
   const [error, setError] = useState<string>("");
   const [hasAcupuncture, setHasAcupuncture] = useState(false);
   const [isSelectSourceOpen, setIsSelectSourceOpen] = useState(false);
+  const [showAcupunctureSelect, setShowAcupunctureSelect] = useState(false);
+  const [selectedAcupuncturePoints, setSelectedAcupuncturePoints] = useState<
+    SelectedPoint[]
+  >([]);
 
   if (!state) {
     return (
@@ -51,7 +58,7 @@ const CreateMedicalRecord = () => {
     patientId,
     dateTime,
     doctorName,
-    patientName
+    patientName,
   } = state as {
     appointmentId?: number;
     doctorId: number;
@@ -63,8 +70,13 @@ const CreateMedicalRecord = () => {
 
   const { staffs: staffList } = useGetStaffList();
   const { appointment } = useGetAppointmentById(appointmentId ?? null);
-  const { createMedicalRecord, loading, error: hookError } = useCreateMedicalRecord();
-
+  const {
+    createMedicalRecord,
+    loading,
+    error: hookError,
+  } = useCreateMedicalRecord();
+  const { addMedicalRecordAcupuncture, loading: acupunctureLoading } =
+    useAddMedicalRecordAcupuncture();
 
   const [formData, setFormData] = useState({
     appointmentId: appointmentId,
@@ -74,19 +86,17 @@ const CreateMedicalRecord = () => {
     diagnosis: "",
     symptoms: "",
     prescriptions: "",
-    remarks: ""
+    remarks: "",
   });
 
-
   const handleChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "remainingCourse" ? Number(value) : value,
+      [name]: name === "remainingCourse" ? Number(value) : value,
     }));
   };
 
@@ -97,13 +107,13 @@ const CreateMedicalRecord = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-
     console.log("Form data being submitted:", formData);
 
     submitToApi();
   };
 
   const submitToApi = async () => {
+    // First create the medical record
     const result = await createMedicalRecord({
       appointmentId: formData.appointmentId || null,
       doctorId: formData.doctorId,
@@ -111,31 +121,60 @@ const CreateMedicalRecord = () => {
       dateTime: formData.dateTime,
       diagnosis: formData.diagnosis,
       symptoms: formData.symptoms,
-      prescriptions: formData.symptoms,
+      prescriptions: formData.prescriptions,
       remarks: formData.remarks,
       assignees: selectedStaffIds,
     });
 
     if (result.success) {
+      // If acupuncture points are selected, save them
+      if (
+        hasAcupuncture &&
+        selectedAcupuncturePoints.length > 0 &&
+        result.recordId
+      ) {
+        try {
+          for (const point of selectedAcupuncturePoints) {
+            await addMedicalRecordAcupuncture({
+              recordId: result.recordId,
+              acupunctureId: point.acupunctureId,
+            });
+          }
+          console.log(
+            `Saved ${selectedAcupuncturePoints.length} acupuncture points`,
+          );
+        } catch (error) {
+          console.error("Error saving acupuncture points:", error);
+          setError(
+            "Medical record saved but failed to save acupuncture points",
+          );
+          return;
+        }
+      }
+
       navigate("/patientList");
     } else {
-      setError(result.error || "Failed to add patient");
+      setError(result.error || "Failed to create medical record");
     }
   };
 
   const handlePickLibrary = () => {
     //TODO: navigate to select from library
-    handleCloseDialog
+    handleCloseDialog();
   };
 
   const handlePickManual = () => {
-    // TODO: navigate to select manually
-    handleCloseDialog
+    setShowAcupunctureSelect(true);
+    handleCloseDialog();
   };
 
   const handleCloseDialog = () => {
     setIsSelectSourceOpen(false);
-  }
+  };
+
+  const handleAcupuncturePointsChange = (points: SelectedPoint[]) => {
+    setSelectedAcupuncturePoints(points);
+  };
 
   return (
     <div className="p-8">
@@ -148,12 +187,7 @@ const CreateMedicalRecord = () => {
 
       {/* Actions */}
       <div className="flex items-center gap-3 py-4">
-
-        <Button
-          size="sm"
-          variant="back"
-          onClick={() => navigate(-1)}
-        >
+        <Button size="sm" variant="back" onClick={() => navigate(-1)}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full ">
             <FontAwesomeIcon icon={faArrowLeft} />
           </span>
@@ -162,7 +196,6 @@ const CreateMedicalRecord = () => {
       </div>
 
       <Card>
-
         {/* Title */}
         <h2 className="text-xl font-semibold text-gray-800 py-4">
           {`${patientName}'s Medical Record`}
@@ -171,14 +204,18 @@ const CreateMedicalRecord = () => {
         {/* Appointment Information section */}
         {appointment && (
           <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4 mb-4">
-            <h3 className="text-sm font-semibold text-slate-900">Appointment Information</h3>
+            <h3 className="text-sm font-semibold text-slate-900">
+              Appointment Information
+            </h3>
 
             <div className="space-y-1 text-sm">
               <div className="flex items-center gap-2 text-slate-600">
                 <Calendar className="w-3 h-3" />
                 <span className="text-sm">Scheduled:</span>
                 <span className="font-medium text-slate-900">
-                  {DateTimeHelper.formatDateTime(new Date(appointment.appointmentDateTime))}
+                  {DateTimeHelper.formatDateTime(
+                    new Date(appointment.appointmentDateTime),
+                  )}
                 </span>
               </div>
 
@@ -188,9 +225,7 @@ const CreateMedicalRecord = () => {
                   className="h-4 w-4 text-slate-900"
                 />
 
-                <span className="text-slate-600">
-                  Doctor:
-                </span>
+                <span className="text-slate-600">Doctor:</span>
 
                 <span className="font-semibold text-slate-900">
                   {appointment.doctorName}
@@ -208,7 +243,9 @@ const CreateMedicalRecord = () => {
         {/* Visit Information section */}
 
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4 ">
-          <h3 className="text-sm font-semibold text-slate-900">Visit Information</h3>
+          <h3 className="text-sm font-semibold text-slate-900">
+            Visit Information
+          </h3>
 
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2 text-slate-600">
@@ -225,15 +262,10 @@ const CreateMedicalRecord = () => {
                 className="h-4 w-4 text-slate-900"
               />
 
-              <span className="text-slate-600">
-                Doctor:
-              </span>
+              <span className="text-slate-600">Doctor:</span>
 
-              <span className="font-semibold text-slate-900">
-                {doctorName}
-              </span>
+              <span className="font-semibold text-slate-900">{doctorName}</span>
             </div>
-
           </div>
         </div>
 
@@ -247,13 +279,8 @@ const CreateMedicalRecord = () => {
           onStaffChange={handleStaffChange}
         />
 
-
-        <form
-          onSubmit={handleSubmit}
-          className=" gap-4 py-4 sm:grid-cols-2"
-        >
+        <form onSubmit={handleSubmit} className=" gap-4 py-4 sm:grid-cols-2">
           <FormField label="Diagnosis">
-
             <textarea
               name="diagnosis"
               value={formData.diagnosis}
@@ -263,12 +290,10 @@ const CreateMedicalRecord = () => {
               className="w-full rounded-lg border border-slate-300 px-4 py-3 text-sm
              focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
             />
-
           </FormField>
 
           <FormField label="Symptoms">
             <textarea
-
               name="symptoms"
               value={formData.symptoms}
               onChange={handleChange}
@@ -280,7 +305,6 @@ const CreateMedicalRecord = () => {
 
           <FormField label="Medical prescriptions">
             <textarea
-
               name="prescriptions"
               value={formData.prescriptions}
               onChange={handleChange}
@@ -292,7 +316,6 @@ const CreateMedicalRecord = () => {
 
           <FormField label="Doctor's remarks">
             <textarea
-
               name="remarks"
               value={formData.remarks}
               onChange={handleChange}
@@ -308,20 +331,36 @@ const CreateMedicalRecord = () => {
             </p>
           )}
           <span className="flex items-center gap-2 py-4">
-            <Checkbox className="data-[state=checked]:bg-brand data-[state=checked]:text-white data-[state=checked]:border-0" checked={hasAcupuncture} onCheckedChange={checked => setHasAcupuncture(checked === true)} />
+            <Checkbox
+              className="data-[state=checked]:bg-brand data-[state=checked]:text-white data-[state=checked]:border-0"
+              checked={hasAcupuncture}
+              onCheckedChange={(checked) => setHasAcupuncture(checked === true)}
+            />
             <span>Have Acupuncture Point</span>
           </span>
 
-          <div className="sm:col-span-2 flex justify-end">
+          {/* Acupuncture Select Component */}
+          {showAcupunctureSelect && (
+            <div className="mt-8">
+              <AcupunctureSelect
+                selectedPoints={selectedAcupuncturePoints}
+                onSelectedPointsChange={handleAcupuncturePointsChange}
+                hideShell={true}
+                hideSaveButton={true}
+              />
+            </div>
+          )}
+
+          <div className="sm:col-span-2 flex justify-end pt-4">
             {!hasAcupuncture ? (
               <Button
                 type="submit"
                 variant="primary"
-                disabled={loading}
+                disabled={loading || acupunctureLoading}
               >
                 {loading ? "Saving..." : "Save"}
               </Button>
-            ) : (
+            ) : !showAcupunctureSelect ? ( //TODO: implement this part to work with illness acupuncture too
               <Button
                 type="button"
                 variant="primary"
@@ -330,12 +369,19 @@ const CreateMedicalRecord = () => {
               >
                 Next
               </Button>
+            ) : (
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading || acupunctureLoading}
+              >
+                {loading || acupunctureLoading ? "Saving..." : "Save All"}
+              </Button>
             )}
           </div>
         </form>
       </Card>
     </div>
-
   );
 };
 
