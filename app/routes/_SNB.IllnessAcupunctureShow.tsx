@@ -91,7 +91,7 @@ function IllnessAcupunctureShow() {
   
   if (!illness) {
     return (
-      <ErrorPage message={"No patient data found"} onRetry={() => window.location.reload()} />
+      <ErrorPage message={"No illness data found"} onRetry={() => window.location.reload()} />
     );
   };
 
