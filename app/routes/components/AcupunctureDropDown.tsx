@@ -41,6 +41,15 @@ const AcupunctureDropDown = () => {
           >
             Acupuncture Library
           </button>
+          <button
+            onClick={() => {
+              navigate("/meridianLibrary");
+              setOpen(false);
+            }}
+            className="block w-full px-3 py-2 text-left text-sm font-medium transition hover:text-white"
+          >
+            Meridian Library
+          </button>
         </div>
       )}
     </>

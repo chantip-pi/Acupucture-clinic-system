@@ -19,6 +19,13 @@ export class MeridianDataSource {
     return this.handleResponse<Meridian[]>(res);
   }
 
+  async getAllNames(): Promise<string[]> {
+    const res = await fetch(`${this.baseUrl}/names`, {
+      method: "GET",
+    });
+    return this.handleResponse<string[]>(res);
+  }
+
   async getById(meridianId: number): Promise<Meridian | null> {
     const res = await fetch(`${this.baseUrl}/meridian/${meridianId}`, {
       method: "GET",

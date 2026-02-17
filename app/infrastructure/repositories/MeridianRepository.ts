@@ -9,6 +9,11 @@ export class MeridianRepository implements IMeridianRepository {
     return this.dataSource.getAll();
   }
   
+  async getAllNames(): Promise<string[]> {
+    return this.dataSource.getAllNames();
+  }
+
+  
   async getById(id: number): Promise<Meridian | null> {
     return this.dataSource.getById(id);
   }

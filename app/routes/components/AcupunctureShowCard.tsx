@@ -49,7 +49,7 @@ function RegionView({
         <div className="flex flex-row gap-4">
           <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
             {fullImageUrl ? (
-              <div className="relative h-full">
+              <div className="relative h-full z-10">
                 <img
                   src={fullImageUrl}
                   alt={`${region} ${side} view`}

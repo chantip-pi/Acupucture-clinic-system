@@ -17,6 +17,9 @@ import { useAddAcupointLocation } from "~/presentation/hooks/acupointLocation/us
 import { useAddAcupuncture } from "~/presentation/hooks/acupuncture/useAddAcupuncture";
 import { useAddMeridian } from "~/presentation/hooks/meridian/useAddMeridian";
 import { CustomMarker } from "~/domain/entities/CustomMarker";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNavigate } from "react-router-dom";
 
 const AcupunctureCreate: React.FC = () => {
   const [markers, setMarkers] = useState<CustomMarker[]>([]);
@@ -42,6 +45,8 @@ const AcupunctureCreate: React.FC = () => {
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
 
   const baseUrl = "https://clinic-backend-6f5w.onrender.com/api/images";
+
+  const navigate = useNavigate();
 
   const MarkerView: React.FC<
     MarkerComponentProps & {
@@ -270,6 +275,16 @@ const AcupunctureCreate: React.FC = () => {
 
   return (
     <PageShell className="p-8">
+        {/* Back Button */}
+        <div className="flex items-center gap-3 py-4">
+                <Button size="sm" variant="back" onClick={() => navigate("/meridianLibrary")}>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full">
+                        <FontAwesomeIcon icon={faArrowLeft} />
+                    </span>
+                    Back
+                </Button>
+            </div>
+            
       {!image && (
         <Card>
           <SectionHeading title="Add Marker Information" />
