@@ -12,6 +12,7 @@ import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medical
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import LoadingPage from "./components/common/LoadingPage";
 
 function AcupunctureShowPage() {
   //show acupuncture points for a medical record
@@ -19,8 +20,8 @@ function AcupunctureShowPage() {
   const recordId = state?.recordId;
   const navigate = useNavigate();
 
-  const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
-  const { acupunctures } = useGetAcupunctureList();
+  const { acupunctureRecords, loading: acupunctureRecordsLoading } = useGetMedicalRecordAcupunctureById(recordId);
+  const { acupunctures, loading: acupuncturesLoading } = useGetAcupunctureList();
 
   const visibleMeridians = useMemo(() => {
     if (!acupunctureRecords || !acupunctures) return {};
@@ -79,6 +80,10 @@ function AcupunctureShowPage() {
     });
   };
 
+  if (acupunctureRecordsLoading || acupuncturesLoading) {
+    return <LoadingPage />;
+  }
+
   return (
     <PageShell className="p-8">
       <div className="flex items-center gap-3 py-4">
@@ -106,11 +111,11 @@ function AcupunctureShowPage() {
             </h3>
             <Table
               headers={[
-                "Region",
-                "Side",
                 "Acupuncture Code",
                 "Acupuncture Name",
                 "Meridian",
+                "Region",
+                "Side",
               ]}
             >
               {selectedAcupunctures.map((point) => (
@@ -118,6 +123,15 @@ function AcupunctureShowPage() {
                   key={`${point.region}-${point.side}-${point.acupunctureId}`}
                   className="hover:bg-slate-50"
                 >
+                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                    {point.acupointCode}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.acupointName}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.meridianName}
+                  </td>
                   <td className="px-4 py-2 text-sm text-slate-900">
                     {point.region && typeof point.region === "string"
                       ? point.region.charAt(0).toUpperCase() +
@@ -128,15 +142,6 @@ function AcupunctureShowPage() {
                     {point.side && typeof point.side === "string"
                       ? point.side.charAt(0).toUpperCase() + point.side.slice(1)
                       : ""}
-                  </td>
-                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                    {point.acupointCode}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.acupointName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.meridianName}
                   </td>
                 </tr>
               ))}

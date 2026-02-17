@@ -20,6 +20,7 @@ import IllnessAcupunctureShow from './_SNB.IllnessAcupunctureShow';
 import CreateIllness from './_SNB.CreateIllness';
 import MeridianLibrary from './_SNB.MeridianLibrary';
 import MeridianAcupunctureShow from './_SNB.MeridianAcupunctureShow';
+import MedicalRecordIllnessShowPage from './_SNB.MedicalRecordIllnessShowPage';
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
         <Route path="/createIllness" element={<CreateIllness/>} />
         <Route path="/meridianLibrary" element = {<MeridianLibrary/>}/>
         <Route path="/meridianAcupunctureShow" element={<MeridianAcupunctureShow/>}/>
+        <Route path="/medicalRecordIllnessShowPage" element={<MedicalRecordIllnessShowPage/>}/>
       </Routes>
     </Router>
   );
