@@ -15,11 +15,11 @@ import { Checkbox } from "app/components/ui/checkbox";
 import SelectAcupunctureSourceDialog from "./components/medicalRecord/SelectAcupunctureSourceDialog";
 import AcupunctureSelect from "./components/AcupunctureSelect";
 import { SelectedPoint } from "~/domain/entities/AcupuncturePoint";
+import LoadingPage from "./components/common/LoadingPage";
 
 const CreateMedicalRecord = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const [staffOpen, setStaffOpen] = useState(false);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
   const [error, setError] = useState<string>("");
   const [hasAcupuncture, setHasAcupuncture] = useState(false);
@@ -69,14 +69,37 @@ const CreateMedicalRecord = () => {
   };
 
   const { staffs: staffList } = useGetStaffList();
-  const { appointment } = useGetAppointmentById(appointmentId ?? null);
+  const { appointment, loading: appointmentLoading, error: appointmentError } = useGetAppointmentById(appointmentId ?? null);
   const {
     createMedicalRecord,
-    loading,
-    error: hookError,
+    loading: createMedicalRecordLoading,
+    error: createMedicalRecordError,
   } = useCreateMedicalRecord();
-  const { addMedicalRecordAcupuncture, loading: acupunctureLoading } =
+  const { addMedicalRecordAcupuncture, loading: acupunctureLoading, error: acupunctureError } =
     useAddMedicalRecordAcupuncture();
+
+
+  const isLoading =
+    acupunctureLoading ||
+    createMedicalRecordLoading;
+
+  const hasError =
+    acupunctureError ||
+    createMedicalRecordError;
+
+
+  if (isLoading) {
+    return <LoadingPage />;
+  }
+
+  if (hasError) {
+    return (
+      <ErrorPage
+        message="Something went wrong. please try again."
+        onRetry={() => window.history.back()}
+      />
+    );
+  }
 
   const [formData, setFormData] = useState({
     appointmentId: appointmentId,
@@ -96,7 +119,7 @@ const CreateMedicalRecord = () => {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "remainingCourse" ? Number(value) : value,
+      [name]: value,
     }));
   };
 
@@ -151,8 +174,7 @@ const CreateMedicalRecord = () => {
           return;
         }
       }
-
-      navigate("/patientList");
+      navigate(-1);
     } else {
       setError(result.error || "Failed to create medical record");
     }
@@ -325,9 +347,9 @@ const CreateMedicalRecord = () => {
             />
           </FormField>
 
-          {(error || hookError) && (
+          {(error || createMedicalRecordError || acupunctureError) && (
             <p className="text-md text-red-600 sm:col-span-2">
-              {error || hookError}
+              {error || createMedicalRecordError || acupunctureError}
             </p>
           )}
           <span className="flex items-center gap-2 py-4">
@@ -356,15 +378,15 @@ const CreateMedicalRecord = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={loading || acupunctureLoading}
+                disabled={createMedicalRecordLoading || acupunctureLoading}
               >
-                {loading ? "Saving..." : "Save"}
+                {createMedicalRecordLoading ? "Saving..." : "Save"}
               </Button>
             ) : !showAcupunctureSelect ? ( //TODO: implement this part to work with illness acupuncture too
               <Button
                 type="button"
                 variant="primary"
-                disabled={loading}
+                disabled={createMedicalRecordLoading}
                 onClick={() => setIsSelectSourceOpen(true)}
               >
                 Next
@@ -373,9 +395,9 @@ const CreateMedicalRecord = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={loading || acupunctureLoading}
+                disabled={createMedicalRecordLoading || acupunctureLoading}
               >
-                {loading || acupunctureLoading ? "Saving..." : "Save All"}
+                {createMedicalRecordLoading || acupunctureLoading ? "Saving..." : "Save All"}
               </Button>
             )}
           </div>
