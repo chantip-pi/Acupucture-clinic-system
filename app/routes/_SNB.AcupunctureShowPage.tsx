@@ -12,6 +12,7 @@ import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medical
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import LoadingPage from "./components/common/LoadingPage";
 
 function AcupunctureShowPage() {
   //show acupuncture points for a medical record
@@ -19,8 +20,8 @@ function AcupunctureShowPage() {
   const recordId = state?.recordId;
   const navigate = useNavigate();
 
-  const { acupunctureRecords } = useGetMedicalRecordAcupunctureById(recordId);
-  const { acupunctures } = useGetAcupunctureList();
+  const { acupunctureRecords, loading: acupunctureRecordsLoading } = useGetMedicalRecordAcupunctureById(recordId);
+  const { acupunctures, loading: acupuncturesLoading } = useGetAcupunctureList();
 
   const visibleMeridians = useMemo(() => {
     if (!acupunctureRecords || !acupunctures) return {};
@@ -78,6 +79,10 @@ function AcupunctureShowPage() {
       return { ...prev, [key]: newSet };
     });
   };
+
+  if (acupunctureRecordsLoading || acupuncturesLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <PageShell className="p-8">
