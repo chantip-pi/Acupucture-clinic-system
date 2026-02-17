@@ -9,11 +9,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useGetAppointmentById } from "~/presentation/hooks/appointment/useGetAppointmentById";
 import LoadingPage from "./components/common/LoadingPage";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
+import { useGetMedicalRecordIllnessById } from "~/presentation/hooks/medicalRecordIllness/useGetMedicalRecordIllnessById";
 
 const MedicalRecordDetail = () => {
   const { state } = useLocation();
   const { medicalRecordId } = (state as { medicalRecordId?: number }) || {};
   const { acupunctureRecords } = useGetMedicalRecordAcupunctureById( medicalRecordId || null );
+  const { illnessRecords } = useGetMedicalRecordIllnessById( medicalRecordId || null );
 
   if (!medicalRecordId) {
     return (
@@ -203,7 +205,18 @@ const MedicalRecordDetail = () => {
         </div>
 
         <div className="py-4">
-          {acupunctureRecords && acupunctureRecords.length > 0 && (
+          {illnessRecords && illnessRecords.length > 0 ? (
+            <Button
+              variant="secondary"
+              onClick={() =>
+                navigate("/medicalRecordIllnessShowPage", {
+                  state: { recordId: medicalRecord.recordId },
+                })
+              }
+            >
+              Show Acupuncture
+            </Button>
+          ) : acupunctureRecords && acupunctureRecords.length > 0 && (
             <Button
               variant="secondary"
               onClick={() =>
