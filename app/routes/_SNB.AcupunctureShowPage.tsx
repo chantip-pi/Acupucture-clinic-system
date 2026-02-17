@@ -111,11 +111,11 @@ function AcupunctureShowPage() {
             </h3>
             <Table
               headers={[
-                "Region",
-                "Side",
                 "Acupuncture Code",
                 "Acupuncture Name",
                 "Meridian",
+                "Region",
+                "Side",
               ]}
             >
               {selectedAcupunctures.map((point) => (
@@ -123,6 +123,15 @@ function AcupunctureShowPage() {
                   key={`${point.region}-${point.side}-${point.acupunctureId}`}
                   className="hover:bg-slate-50"
                 >
+                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                    {point.acupointCode}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.acupointName}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.meridianName}
+                  </td>
                   <td className="px-4 py-2 text-sm text-slate-900">
                     {point.region && typeof point.region === "string"
                       ? point.region.charAt(0).toUpperCase() +
@@ -133,15 +142,6 @@ function AcupunctureShowPage() {
                     {point.side && typeof point.side === "string"
                       ? point.side.charAt(0).toUpperCase() + point.side.slice(1)
                       : ""}
-                  </td>
-                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                    {point.acupointCode}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.acupointName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.meridianName}
                   </td>
                 </tr>
               ))}

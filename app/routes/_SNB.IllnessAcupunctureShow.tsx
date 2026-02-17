@@ -111,25 +111,19 @@ function IllnessAcupunctureShow() {
         <p className="pb-4">{illness.description}</p>
         <h1 className="font-semibold">Category: {illness.category}</h1>
 
-        <AcupunctureShowCard
-          illnessId={illnessId}
-          visibleMeridians={toggledMeridians}
-          onMeridianToggle={toggleMeridianVisibility}
-        />
-
         {/* All points summary table */}
         {illnessAcupunctures.length > 0 && (
-          <div className="mt-6">
+          <div className="my-4">
             <h3 className="mb-3 text-lg font-semibold text-slate-900">
               Acupuncture Points
             </h3>
             <Table
               headers={[
-                "Region",
-                "Side",
                 "Acupuncture Code",
                 "Acupuncture Name",
                 "Meridian",
+                "Region",
+                "Side",
               ]}
             >
               {selectedAcupunctures.map((point) => (
@@ -137,6 +131,15 @@ function IllnessAcupunctureShow() {
                   key={`${point.region}-${point.side}-${point.acupunctureId}`}
                   className="hover:bg-slate-50"
                 >
+                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                    {point.acupointCode}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.acupointName}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-slate-600">
+                    {point.meridianName}
+                  </td>
                   <td className="px-4 py-2 text-sm text-slate-900">
                     {point.region && typeof point.region === "string"
                       ? point.region.charAt(0).toUpperCase() +
@@ -148,20 +151,18 @@ function IllnessAcupunctureShow() {
                       ? point.side.charAt(0).toUpperCase() + point.side.slice(1)
                       : ""}
                   </td>
-                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                    {point.acupointCode}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.acupointName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.meridianName}
-                  </td>
                 </tr>
               ))}
             </Table>
           </div>
         )}
+
+        <AcupunctureShowCard
+          illnessId={illnessId}
+          visibleMeridians={toggledMeridians}
+          onMeridianToggle={toggleMeridianVisibility}
+        />
+
       </Card>
     </PageShell>
   );
