@@ -1,8 +1,9 @@
 import { MedicalRecordAcupuncture } from "~/domain/entities/MedicalRecordAcupuncture";
+import { BackendErrorService } from "~/domain/services/ErrorService";
+import { MEDICAL_RECORD_ACUPUNCTURE_ENDPOINT } from "~/constants/api";
 
 export class MedicalRecordAcupunctureDataSource {
-  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/medicalRecordAcupunctures") {}
-  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/medicalRecordAcupunctures") {}
+  constructor(private readonly baseUrl: string = MEDICAL_RECORD_ACUPUNCTURE_ENDPOINT) {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {
