@@ -6,6 +6,6 @@ export class GetAllImagesUseCase {
 
   async execute(): Promise<Image[]> {
     const images = await this.imageRepository.getAll();
-    return images.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+    return images
   }
 }

@@ -1,9 +1,8 @@
-import { Image } from "../entities/Image";
 
 export interface IImageRepository {
-  getAll(): Promise<Image[]>;
-  getByFilename(filename: string): Promise<Image | null>;
-  create(file: File): Promise<Image>;
-  update(filename: string, file: File): Promise<Image>;
+  getAll(): Promise<string[]>;
+  getByFilename(filename: string): Promise<string | null>;
+  create(file: File): Promise<string>;
+  update(filename: string, file: File): Promise<string>;
   delete(filename: string): Promise<void>;
 }

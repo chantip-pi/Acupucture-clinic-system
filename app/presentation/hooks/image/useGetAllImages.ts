@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { getAllImagesUseCase } from "~/infrastructure/di/container";
-import { Image } from "~/domain/entities/Image";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetAllImages() {
-  const [images, setImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
