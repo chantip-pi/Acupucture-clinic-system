@@ -1,5 +1,4 @@
 export interface CreateMeridianDTO {
-  meridianId: number;
   meridianName: string;
   region: string;
   side: string;

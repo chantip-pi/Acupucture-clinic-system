@@ -1,4 +1,3 @@
-import { Image } from "~/domain/entities/Image";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 import { IMAGE_BASE_URL } from "~/constants/api";
 
@@ -12,20 +11,22 @@ export class ImageDataSource {
     return (await res.json()) as T;
   }
 
-  async getAll(): Promise<Image[]> {
+  async getAll(): Promise<string[]> {
     const res = await fetch(this.baseUrl, { method: "GET" });
-    return this.handleResponse<Image[]>(res);
+    const data = await this.handleResponse<{ images: string[] }>(res);
+    return data.images;
   }
+  
 
-  async getByFilename(filename: string): Promise<Image | null> {
+  async getByFilename(filename: string): Promise<string | null> {
     const res = await fetch(`${this.baseUrl}/${filename}`, {
       method: "GET",
     });
     if (res.status === 404) return null;
-    return this.handleResponse<Image>(res);
+    return this.handleResponse<string>(res);
   }
 
-  async create(file: File): Promise<Image> {
+  async create(file: File): Promise<string> {
     const formData = new FormData();
     formData.append('image', file);
 
@@ -33,10 +34,10 @@ export class ImageDataSource {
       method: "POST",
       body: formData,
     });
-    return this.handleResponse<Image>(res);
+    return this.handleResponse<string>(res);
   }
 
-  async update(filename: string, file: File): Promise<Image> {
+  async update(filename: string, file: File): Promise<string> {
     const formData = new FormData();
     formData.append('image', file);
 
@@ -44,7 +45,7 @@ export class ImageDataSource {
       method: "PUT",
       body: formData,
     });
-    return this.handleResponse<Image>(res);
+    return this.handleResponse<string>(res);
   }
 
   async delete(filename: string): Promise<void> {
