@@ -1,8 +1,9 @@
 import { Acupoint } from "~/domain/entities/Acupoint";
+import { BackendErrorService } from "~/domain/services/ErrorService";
+import { ACUPOINT_ENDPOINT } from "~/constants/api";
 
 export class AcupointDataSource {
-  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/acupoints") {}
-  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/acupoints") {}
+  constructor(private readonly baseUrl: string = ACUPOINT_ENDPOINT) {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {

@@ -1,5 +1,6 @@
 import { AcupuncturePoint } from "~/domain/entities/AcupuncturePoint";
 import { Card, Table } from "~/presentation/designSystem";
+import { IMAGE_BASE_URL } from "~/constants/api";
 
 
 type MeridianShowCardProps = {
@@ -9,7 +10,7 @@ type MeridianShowCardProps = {
 
 function MeridianShowCard({
     points,
-    imageBaseUrl = "https://clinic-backend-6f5w.onrender.com/api/images/",
+    imageBaseUrl = IMAGE_BASE_URL + "/",
 }: MeridianShowCardProps) {
     // 🧠 Group points by meridian
     const meridianMap = new Map<number, AcupuncturePoint[]>();

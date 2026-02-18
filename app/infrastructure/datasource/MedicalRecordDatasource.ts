@@ -1,9 +1,10 @@
 import { StaffNameDTO } from "~/application/dtos/StaffDTO";
 import { MedicalRecord } from "~/domain/entities/MedicalRecord";
 import { BackendErrorService } from "~/domain/services/ErrorService";
+import { MEDICAL_RECORD_ENDPOINT } from "~/constants/api";
 
 export class MedicalRecordDataSource {
-    constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/medicalRecords") { }
+    constructor(private readonly baseUrl: string = MEDICAL_RECORD_ENDPOINT) { }
     //constructor(private readonly baseUrl: string = "http://localhost:3000/api/medicalRecords") {}
 
 

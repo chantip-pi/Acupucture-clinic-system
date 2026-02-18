@@ -1,8 +1,8 @@
 import { SuggestResult } from "~/domain/entities/Suggestion";
+import { GEMINI_ENDPOINT } from "~/constants/api";
 
 export class GeminiDataSource {
-  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/suggest") {}
-  //constructor(private readonly baseUrl: string = "http://localhost:3000/api/suggest") {}
+  constructor(private readonly baseUrl: string = GEMINI_ENDPOINT) {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {

@@ -1,8 +1,9 @@
 import { Illness } from "~/domain/entities/Illness";
+import { BackendErrorService } from "~/domain/services/ErrorService";
+import { ILLNESS_ENDPOINT } from "~/constants/api";
 
 export class IllnessDataSource {
-  constructor(private readonly baseUrl: string = "https://clinic-backend-6f5w.onrender.com/api/illnesses") {}
-  // constructor(private readonly baseUrl: string = "http://localhost:3000/api/illnesses") {}
+  constructor(private readonly baseUrl: string = ILLNESS_ENDPOINT) {}
 
   private async handleResponse<T>(res: Response): Promise<T> {
     if (!res.ok) {

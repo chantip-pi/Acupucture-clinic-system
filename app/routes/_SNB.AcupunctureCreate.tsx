@@ -16,18 +16,18 @@ import { useAddAcupoint } from "~/presentation/hooks/acupoint/useAddAcupoint";
 import { useAddAcupointLocation } from "~/presentation/hooks/acupointLocation/useAddAcupointLocation";
 import { useAddAcupuncture } from "~/presentation/hooks/acupuncture/useAddAcupuncture";
 import { useAddMeridian } from "~/presentation/hooks/meridian/useAddMeridian";
+import { useUploadImage } from "~/presentation/hooks/image/useUploadImage";
 import { CustomMarker } from "~/domain/entities/CustomMarker";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import { IMAGE_BASE_URL } from "~/constants/api";
 
 const AcupunctureCreate: React.FC = () => {
   const [markers, setMarkers] = useState<CustomMarker[]>([]);
   const [image, setImage] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
   const [imageFilename, setImageFilename] = useState<string>("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
   const [newMarkerPoint, setNewMarkerPoint] = useState<Marker | null>(null);
   const [acupointCode, setAcupointCode] = useState<string>("");
@@ -41,10 +41,16 @@ const AcupunctureCreate: React.FC = () => {
   const { addAcupoint, loading: acupointLoading, error: acupointError } = useAddAcupoint();
   const { addAcupointLocation, loading: locationLoading, error: locationError } = useAddAcupointLocation();
   const { addAcupuncture, loading: acupunctureLoading, error: acupunctureError } = useAddAcupuncture();
+  const { uploadImage, loading: uploadingImage, error: uploadError } = useUploadImage();
 
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
 
-  const baseUrl = "https://clinic-backend-6f5w.onrender.com/api/images";
+  // Update error state when uploadError changes
+  React.useEffect(() => {
+    if (uploadError) {
+      setError(uploadError);
+    }
+  }, [uploadError]);
 
   const navigate = useNavigate();
 
@@ -88,7 +94,6 @@ const AcupunctureCreate: React.FC = () => {
   const handleImageReupload = () => {
     setImage("");
     setImageUrl("");
-    setImageFile(null);
     handleClear();
   };
 
@@ -96,43 +101,15 @@ const AcupunctureCreate: React.FC = () => {
     if (!e.target.files?.[0]) return;
     
     const file = e.target.files[0];
-    setImageFile(file);
     setError("");
-    setUploadingImage(true);
 
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      const response = await fetch(`${baseUrl}`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Failed to upload image" }));
-        throw new Error(errorData.error || "Failed to upload image");
-      }
-
-      const result = await response.json();
-      const filename = result.filename;
-
-      if (!filename) {
-        throw new Error("Image uploaded but no filename returned");
-      }
-
-      const previewUrl = `${baseUrl}/${filename}`;
-      setImageFilename(filename);
+    const result = await uploadImage(file);
+    
+    if (result) {
+      const previewUrl = `${IMAGE_BASE_URL}/${result.filename}`;
+      setImageFilename(result.filename);
       setImageUrl(previewUrl);
       setImage(previewUrl);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to upload image";
-      setError(errorMessage);
-      setImageFile(null);
-      setImage("");
-      setImageUrl("");
-    } finally {
-      setUploadingImage(false);
     }
   };
 
@@ -254,7 +231,6 @@ const AcupunctureCreate: React.FC = () => {
       } else {
         setImage("");
         setImageUrl("");
-        setImageFile(null);
         setMarkers([]);
         setMeridianName("");
         setMeridianRegion("");
