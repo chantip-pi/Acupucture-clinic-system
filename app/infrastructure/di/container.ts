@@ -11,6 +11,7 @@ import { IMedicalRecordAcupunctureRepository } from "~/domain/repositories/IMedi
 import { IMedicalRecordRepository } from "~/domain/repositories/IMedicalRecordRepository";
 import { IIllnessAcupunctureRepository } from "~/domain/repositories/IIllnessAcupunctureRepository";
 import { IMedicalRecordIllnessRepository } from "~/domain/repositories/IMedicalRecordIllnessRepository";
+import { IImageRepository } from "~/domain/repositories/IImageRepository";
 
 // ===== Application Use Cases =====
 // Patient
@@ -96,6 +97,13 @@ import { GetMedicalRecordIllnessListUseCase } from "~/application/use-cases/medi
 import { DeleteMedicalRecordIllnessUseCase } from "~/application/use-cases/medicalRecordIllness/DeleteMedicalRecordIllnessUseCase";
 import { DeleteAllIllnessForRecordUseCase } from "~/application/use-cases/medicalRecordIllness/DeleteAllIllnessForRecordUseCase";
 
+// Image
+import { GetAllImagesUseCase } from "~/application/use-cases/image/GetAllImagesUseCase";
+import { GetImageByFilenameUseCase } from "~/application/use-cases/image/GetImageByFilenameUseCase";
+import { UploadImageUseCase } from "~/application/use-cases/image/UploadImageUseCase";
+import { UpdateImageUseCase } from "~/application/use-cases/image/UpdateImageUseCase";
+import { DeleteImageUseCase } from "~/application/use-cases/image/DeleteImageUseCase";
+
 // ===== Data Sources =====
 import { MockDataSource } from "../datasource/MockDataSource";
 import { PatientDataSource } from "../datasource/PatientDataSource";
@@ -109,6 +117,7 @@ import { AppointmentDataSource } from "../datasource/AppointmentDatasource";
 import { MedicalRecordAcupunctureDataSource } from "../datasource/MedicalRecordAcupunctureDataSource";
 import { IllnessAcupunctureDataSource } from "../datasource/IllnessAcupunctureDataSource";
 import { MedicalRecordIllnessDataSource } from "../datasource/MedicalRecordIllnessDataSource";
+import { ImageDataSource } from "../datasource/ImageDataSource";
 
 // ===== Repositories (Infrastructure) =====
 import { PatientRepository } from "../repositories/PatientRepository";
@@ -130,7 +139,7 @@ import { MedicalRecordDataSource } from "../datasource/MedicalRecordDatasource";
 import { MedicalRecordRepository } from "../repositories/MedicalRecordRepository";
 import { IllnessAcupunctureRepository } from "../repositories/IllnessAcupunctureRepository";
 import { MedicalRecordIllnessRepository } from "../repositories/MedicalRecordIllnessRepository";
-
+import { ImageRepository } from "../repositories/ImageRepository";
 
 import { GetSuggestUseCase } from "~/application/use-cases/gemini/GetSuggestUseCase";
 // Initialize repositories based on datasource configuration
@@ -146,6 +155,7 @@ let medicalRecordAcupunctureRepository: IMedicalRecordAcupunctureRepository;
 let medicalRecordRepository: IMedicalRecordRepository;
 let illnessAcupunctureRepository: IIllnessAcupunctureRepository;
 let medicalRecordIllnessRepository: IMedicalRecordIllnessRepository;
+let imageRepository: IImageRepository;
 
 import { IGeminiRepository } from "~/domain/repositories/IGeminiRepository";
 import { GeminiDataSource } from "../datasource/GeminiDataSource";
@@ -169,6 +179,7 @@ const medicalRecordAcupunctureDataSource = new MedicalRecordAcupunctureDataSourc
 const illnessAcupunctureDataSource = new IllnessAcupunctureDataSource();
 const geminiDatasource = new GeminiDataSource();
 const medicalRecordIllnessDataSource = new MedicalRecordIllnessDataSource();
+const imageDatasource = new ImageDataSource();
 
 // Repositories
 patientRepository = new PatientRepository(patientDatasource);
@@ -188,7 +199,7 @@ medicalRecordRepository = new MedicalRecordRepository(medicalRecordDatasource);
 illnessAcupunctureRepository = new IllnessAcupunctureRepository(illnessAcupunctureDataSource);
 geminiRepository = new GeminiRepository(geminiDatasource);
 medicalRecordIllnessRepository = new MedicalRecordIllnessRepository(medicalRecordIllnessDataSource);
-
+imageRepository = new ImageRepository(imageDatasource);
 
 // Patient Use Cases
 export const addPatientUseCase = new AddPatientUseCase(patientRepository);
@@ -284,3 +295,10 @@ export const getMedicalRecordIllnessByRecordIdUseCase = new GetMedicalRecordIlln
 export const getMedicalRecordIllnessListUseCase = new GetMedicalRecordIllnessListUseCase(medicalRecordIllnessRepository);
 export const deleteMedicalRecordIllnessUseCase = new DeleteMedicalRecordIllnessUseCase(medicalRecordIllnessRepository);
 export const deleteAllIllnessForRecordUseCase = new DeleteAllIllnessForRecordUseCase(medicalRecordIllnessRepository);
+
+// Image Use Cases
+export const getAllImagesUseCase = new GetAllImagesUseCase(imageRepository);
+export const getImageByFilenameUseCase = new GetImageByFilenameUseCase(imageRepository);
+export const uploadImageUseCase = new UploadImageUseCase(imageRepository);
+export const updateImageUseCase = new UpdateImageUseCase(imageRepository);
+export const deleteImageUseCase = new DeleteImageUseCase(imageRepository);
