@@ -29,7 +29,6 @@ const AcupunctureCreate: React.FC = () => {
 
   const [markers, setMarkers] = useState<CustomMarker[]>([]);
   const [image, setImage] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState<string>("");
   const [imageFilename, setImageFilename] = useState<string>("");
   const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
   const [show, setShow] = useState<boolean>(false);
@@ -99,7 +98,6 @@ const AcupunctureCreate: React.FC = () => {
   const handleSelectSystemImage = (filename: string) => {
     const previewUrl = `${IMAGE_BASE_URL}/${filename}`;
     setImageFilename(filename);
-    setImageUrl(previewUrl);
     setImage(previewUrl);
     setPendingImageFile(null); // not a pending upload, it's already on the server
     setError("");
@@ -107,13 +105,12 @@ const AcupunctureCreate: React.FC = () => {
 
   const handleImageReupload = () => {
     setImage("");
-    setImageUrl("");
     setImageFilename("");
     setPendingImageFile(null);
     handleClear();
   };
 
-  // ✅ Only preview locally — no backend upload yet
+  // Only preview locally — no backend upload yet
   const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
@@ -122,7 +119,6 @@ const AcupunctureCreate: React.FC = () => {
     const localPreviewUrl = URL.createObjectURL(file);
     setPendingImageFile(file);
     setImage(localPreviewUrl);
-    setImageUrl(localPreviewUrl);
     setImageFilename(file.name); // temporary placeholder, replaced on save
   };
 
@@ -144,7 +140,7 @@ const AcupunctureCreate: React.FC = () => {
       const errors: string[] = [];
       const successes: string[] = [];
 
-      // ✅ Upload image to backend now (only if it was a local file pick)
+      // Upload image to backend now (only if it was a local file pick)
       let finalImageFilename = imageFilename;
 
       if (pendingImageFile) {
@@ -167,7 +163,6 @@ const AcupunctureCreate: React.FC = () => {
       let meridianIdNum: number;
 
       const meridianResult = await addMeridian({
-        meridianId: 0,
         meridianName,
         region: meridianRegion,
         side: meridianSide,
@@ -257,7 +252,6 @@ const AcupunctureCreate: React.FC = () => {
         setError(errors[0] || "Failed to add acupuncture markers");
       } else {
         setImage("");
-        setImageUrl("");
         setMarkers([]);
         setMeridianName("");
         setMeridianRegion("");
