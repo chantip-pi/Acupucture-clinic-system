@@ -22,12 +22,16 @@ import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
 import { IMAGE_BASE_URL } from "~/constants/api";
+import { useGetAllImages } from "~/presentation/hooks/image/useGetAllImages";
 
 const AcupunctureCreate: React.FC = () => {
+  type ImageSourceMode = "library" | "upload";
+
   const [markers, setMarkers] = useState<CustomMarker[]>([]);
   const [image, setImage] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
   const [imageFilename, setImageFilename] = useState<string>("");
+  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
   const [show, setShow] = useState<boolean>(false);
   const [newMarkerPoint, setNewMarkerPoint] = useState<Marker | null>(null);
   const [acupointCode, setAcupointCode] = useState<string>("");
@@ -36,16 +40,17 @@ const AcupunctureCreate: React.FC = () => {
   const [meridianRegion, setMeridianRegion] = useState<string>("");
   const [meridianSide, setMeridianSide] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [imageSourceMode, setImageSourceMode] = useState<ImageSourceMode>("library");
 
   const { addMeridian, loading: meridianLoading, error: meridianError } = useAddMeridian();
   const { addAcupoint, loading: acupointLoading, error: acupointError } = useAddAcupoint();
   const { addAcupointLocation, loading: locationLoading, error: locationError } = useAddAcupointLocation();
   const { addAcupuncture, loading: acupunctureLoading, error: acupunctureError } = useAddAcupuncture();
   const { uploadImage, loading: uploadingImage, error: uploadError } = useUploadImage();
+  const { images: systemImages, loading: imagesLoading } = useGetAllImages();
 
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
 
-  // Update error state when uploadError changes
   React.useEffect(() => {
     if (uploadError) {
       setError(uploadError);
@@ -91,26 +96,34 @@ const AcupunctureCreate: React.FC = () => {
 
   const handleClear = () => setMarkers([]);
 
+  const handleSelectSystemImage = (filename: string) => {
+    const previewUrl = `${IMAGE_BASE_URL}/${filename}`;
+    setImageFilename(filename);
+    setImageUrl(previewUrl);
+    setImage(previewUrl);
+    setPendingImageFile(null); // not a pending upload, it's already on the server
+    setError("");
+  };
+
   const handleImageReupload = () => {
     setImage("");
     setImageUrl("");
+    setImageFilename("");
+    setPendingImageFile(null);
     handleClear();
   };
 
-  const onImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ✅ Only preview locally — no backend upload yet
+  const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
-    
     const file = e.target.files[0];
     setError("");
 
-    const result = await uploadImage(file);
-    
-    if (result) {
-      const previewUrl = `${IMAGE_BASE_URL}/${result.filename}`;
-      setImageFilename(result.filename);
-      setImageUrl(previewUrl);
-      setImage(previewUrl);
-    }
+    const localPreviewUrl = URL.createObjectURL(file);
+    setPendingImageFile(file);
+    setImage(localPreviewUrl);
+    setImageUrl(localPreviewUrl);
+    setImageFilename(file.name); // temporary placeholder, replaced on save
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -131,20 +144,34 @@ const AcupunctureCreate: React.FC = () => {
       const errors: string[] = [];
       const successes: string[] = [];
 
-      // 1. Create Meridian
-      let meridianIdNum: number;
-      
-      if (!imageFilename) {
-        setError("Please upload an image before saving");
+      // ✅ Upload image to backend now (only if it was a local file pick)
+      let finalImageFilename = imageFilename;
+
+      if (pendingImageFile) {
+        const result = await uploadImage(pendingImageFile);
+        if (!result) {
+          setError("Image upload failed. Please try again.");
+          return;
+        }
+        finalImageFilename = result.filename;
+        setImageFilename(result.filename);
+        setPendingImageFile(null);
+      }
+
+      if (!finalImageFilename) {
+        setError("Please select an image before saving");
         return;
       }
+
+      // 1. Create Meridian
+      let meridianIdNum: number;
 
       const meridianResult = await addMeridian({
         meridianId: 0,
         meridianName,
         region: meridianRegion,
         side: meridianSide,
-        image: imageFilename,
+        image: finalImageFilename,
       });
 
       if (!meridianResult.success || !meridianResult.meridian) {
@@ -189,9 +216,10 @@ const AcupunctureCreate: React.FC = () => {
           });
 
           if (!locationResult.success) {
-            const isDuplicate = locationResult.error?.includes("409") || 
-                               locationResult.error?.toLowerCase().includes("duplicate") ||
-                               locationResult.error?.toLowerCase().includes("already exists");
+            const isDuplicate =
+              locationResult.error?.includes("409") ||
+              locationResult.error?.toLowerCase().includes("duplicate") ||
+              locationResult.error?.toLowerCase().includes("already exists");
             if (!isDuplicate) {
               errors.push(`Location for ${marker.acupointCode}: ${locationResult.error || "Failed"}`);
               continue;
@@ -206,9 +234,10 @@ const AcupunctureCreate: React.FC = () => {
           });
 
           if (!acupunctureResult.success) {
-            const isDuplicate = acupunctureResult.error?.includes("409") || 
-                               acupunctureResult.error?.toLowerCase().includes("duplicate") ||
-                               acupunctureResult.error?.toLowerCase().includes("already exists");
+            const isDuplicate =
+              acupunctureResult.error?.includes("409") ||
+              acupunctureResult.error?.toLowerCase().includes("duplicate") ||
+              acupunctureResult.error?.toLowerCase().includes("already exists");
             if (!isDuplicate) {
               errors.push(`Acupuncture for ${marker.acupointCode}: ${acupunctureResult.error || "Failed"}`);
               continue;
@@ -218,9 +247,7 @@ const AcupunctureCreate: React.FC = () => {
           successes.push(`Marker ${marker.acupointCode} saved`);
         } catch (error) {
           errors.push(
-            `Marker ${marker.acupointCode}: ${
-              error instanceof Error ? error.message : "Failed"
-            }`,
+            `Marker ${marker.acupointCode}: ${error instanceof Error ? error.message : "Failed"}`,
           );
         }
       }
@@ -238,6 +265,7 @@ const AcupunctureCreate: React.FC = () => {
         setAcupointCode("");
         setAcupointName("");
         setNewMarkerPoint(null);
+        setPendingImageFile(null);
         setError("");
         alert("Successfully saved all markers");
       }
@@ -251,31 +279,84 @@ const AcupunctureCreate: React.FC = () => {
 
   return (
     <PageShell className="p-8">
-        {/* Back Button */}
-        <div className="flex items-center gap-3 py-4">
-                <Button size="sm" variant="back" onClick={() => navigate("/meridianLibrary")}>
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full">
-                        <FontAwesomeIcon icon={faArrowLeft} />
-                    </span>
-                    Back
-                </Button>
-            </div>
-            
+      {/* Back Button */}
+      <div className="flex items-center gap-3 py-4">
+        <Button size="sm" variant="back" onClick={() => navigate("/meridianLibrary")}>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full">
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </span>
+          Back
+        </Button>
+      </div>
+
       {!image && (
         <Card>
-          <SectionHeading title="Add Marker Information" />
-          <div className="flex flex-col gap-4">
-            <h2 className="font-semibold">Upload Meridian Image</h2>
-            <input 
-              type="file" 
-              accept="image/*" 
-              onChange={onImageChange}
-              disabled={uploadingImage}
-            />
-            {uploadingImage && (
-              <p className="text-sm text-gray-600">Uploading image...</p>
-            )}
+          <SectionHeading title="Select Meridian Image" />
+
+          {/* MODE SWITCH */}
+          <div className="flex gap-3 mb-4">
+            <Button
+              type="button"
+              variant={imageSourceMode === "library" ? "primary" : "secondary"}
+              onClick={() => setImageSourceMode("library")}
+            >
+              Choose from System
+            </Button>
+
+            <Button
+              type="button"
+              variant={imageSourceMode === "upload" ? "primary" : "secondary"}
+              onClick={() => setImageSourceMode("upload")}
+            >
+              Upload New
+            </Button>
           </div>
+
+          {imageSourceMode === "library" && (
+            <>
+              {imagesLoading && (
+                <p className="text-sm text-gray-500">Loading images...</p>
+              )}
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {(Array.isArray(systemImages) ? systemImages : []).map((img) => {
+                  const previewUrl = `${IMAGE_BASE_URL}/${img}`;
+                  return (
+                    <div
+                      key={img}
+                      className="cursor-pointer border-2 border-transparent hover:border-blue-500 rounded-lg overflow-hidden transition"
+                      onClick={() => handleSelectSystemImage(img)}
+                    >
+                      <img
+                        src={previewUrl}
+                        alt={img}
+                        className="w-full h-40 object-cover"
+                      />
+                      <p className="text-xs text-center text-gray-500 p-1 truncate">
+                        {img}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {imageSourceMode === "upload" && (
+            <div className="flex flex-col gap-4">
+              <h2 className="font-semibold">Upload Meridian Image</h2>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={onImageChange}
+              />
+
+              <p className="text-sm text-gray-500">
+                Image will be uploaded when you press Save.
+              </p>
+            </div>
+          )}
         </Card>
       )}
 
@@ -363,6 +444,7 @@ const AcupunctureCreate: React.FC = () => {
                     required
                   />
                 </FormField>
+
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField label="Meridian Region">
                     <Input
