@@ -1,5 +1,3 @@
-// ~/domain/utils/getClinicHours.ts
-
 export interface TimeSlot {
   start: string;
   end: string;
