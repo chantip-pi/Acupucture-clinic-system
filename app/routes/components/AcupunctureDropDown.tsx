@@ -25,15 +25,6 @@ const AcupunctureDropDown = () => {
         <div className="ml-8 space-y-2 border-l border-white/20 pl-4">
           <button
             onClick={() => {
-              //TODO: navigate to template list page 
-              setOpen(false);
-            }}
-            className="block w-full px-3 py-2 text-left text-sm font-medium transition hover:text-white"
-          >
-            Acupuncture Template
-          </button>
-          <button
-            onClick={() => {
               navigate("/acupunctureLibrary");
               setOpen(false);
             }}

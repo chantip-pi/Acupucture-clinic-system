@@ -11,11 +11,13 @@ import {
 } from "~/presentation/session/userSession";
 import AcupunctureDropDown from "./components/AcupunctureDropDown";
 import Suggest from "./_SNB.Suggest";
+import { IoSettingsSharp } from "react-icons/io5";
 
 const navItems = [
   { label: "Home", icon: <IoMdHome size={22} />, to: "/home" },
   { label: "Manage Staff", icon: <FaUserDoctor size={18} />, to: "/staffListView" },
   { label: "Manage Patient", icon: <FaUser size={18} />, to: "/patientList" },
+  { label: "Settings", icon: <IoSettingsSharp size={18} />, to: "/clinicHoursSettingsPage" },
 ];
 
 function SideNavBar() {
