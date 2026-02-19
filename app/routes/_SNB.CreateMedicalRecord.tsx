@@ -16,6 +16,8 @@ import SelectAcupunctureSourceDialog from "./components/medicalRecord/SelectAcup
 import AcupunctureSelect from "./components/AcupunctureSelect";
 import { SelectedPoint } from "~/domain/entities/AcupuncturePoint";
 import LoadingPage from "./components/common/LoadingPage";
+import CreateMedicalRecordIllness from "./components/CreateMedicalRecordIllness";
+import { useAddMedicalRecordIllness } from "~/presentation/hooks/medicalRecordIllness/useAddMedicalRecordIllness";
 
 const CreateMedicalRecord = () => {
   const { state } = useLocation();
@@ -25,9 +27,9 @@ const CreateMedicalRecord = () => {
   const [hasAcupuncture, setHasAcupuncture] = useState(false);
   const [isSelectSourceOpen, setIsSelectSourceOpen] = useState(false);
   const [showAcupunctureSelect, setShowAcupunctureSelect] = useState(false);
-  const [selectedAcupuncturePoints, setSelectedAcupuncturePoints] = useState<
-    SelectedPoint[]
-  >([]);
+  const [selectedAcupuncturePoints, setSelectedAcupuncturePoints] = useState<SelectedPoint[]>([]);
+  const [showIllnessSelect, setShowIllnessSelect] = useState(false);
+  const [selectedIllnessIds, setSelectedIllnessIds] = useState<number[]>([]);
 
   if (!state) {
     return (
@@ -77,29 +79,18 @@ const CreateMedicalRecord = () => {
   } = useCreateMedicalRecord();
   const { addMedicalRecordAcupuncture, loading: acupunctureLoading, error: acupunctureError } =
     useAddMedicalRecordAcupuncture();
-
+  const { addMedicalRecordIllness, loading: illnessLoading, error: illnessError } =
+    useAddMedicalRecordIllness();
 
   const isLoading =
     acupunctureLoading ||
-    createMedicalRecordLoading;
+    createMedicalRecordLoading ||
+    illnessLoading;
 
   const hasError =
     acupunctureError ||
-    createMedicalRecordError;
-
-
-  if (isLoading) {
-    return <LoadingPage />;
-  }
-
-  if (hasError) {
-    return (
-      <ErrorPage
-        message="Something went wrong. please try again."
-        onRetry={() => window.history.back()}
-      />
-    );
-  }
+    createMedicalRecordError ||
+    illnessError;
 
   const [formData, setFormData] = useState({
     appointmentId: appointmentId,
@@ -149,13 +140,9 @@ const CreateMedicalRecord = () => {
       assignees: selectedStaffIds,
     });
 
-    if (result.success) {
+    if (result.success && result.recordId) {
       // If acupuncture points are selected, save them
-      if (
-        hasAcupuncture &&
-        selectedAcupuncturePoints.length > 0 &&
-        result.recordId
-      ) {
+      if (hasAcupuncture && selectedAcupuncturePoints.length > 0) {
         try {
           for (const point of selectedAcupuncturePoints) {
             await addMedicalRecordAcupuncture({
@@ -174,6 +161,24 @@ const CreateMedicalRecord = () => {
           return;
         }
       }
+
+      // If illnesses are selected, save them
+      if (hasAcupuncture && showIllnessSelect && selectedIllnessIds.length > 0) {
+        try {
+          for (const illnessId of selectedIllnessIds) {
+            await addMedicalRecordIllness({
+              recordId: result.recordId,
+              illnessId: illnessId,
+            });
+          }
+          console.log(`Saved ${selectedIllnessIds.length} illnesses`);
+        } catch (error) {
+          console.error("Error saving illnesses:", error);
+          setError("Medical record saved but failed to save illnesses");
+          return;
+        }
+      }
+
       navigate(-1);
     } else {
       setError(result.error || "Failed to create medical record");
@@ -181,7 +186,7 @@ const CreateMedicalRecord = () => {
   };
 
   const handlePickLibrary = () => {
-    //TODO: navigate to select from library
+    setShowIllnessSelect(true);
     handleCloseDialog();
   };
 
@@ -197,6 +202,23 @@ const CreateMedicalRecord = () => {
   const handleAcupuncturePointsChange = (points: SelectedPoint[]) => {
     setSelectedAcupuncturePoints(points);
   };
+
+  const handleSelectedIllnessIdsChange = (illnessIds: number[]) => {
+    setSelectedIllnessIds(illnessIds);
+  };
+
+  if (isLoading && !showAcupunctureSelect && !showIllnessSelect) {
+    return <LoadingPage />;
+  }
+
+  if (hasError && !showAcupunctureSelect && !showIllnessSelect) {
+    return (
+      <ErrorPage
+        message="Something went wrong. please try again."
+        onRetry={() => window.history.back()}
+      />
+    );
+  }
 
   return (
     <div className="p-8">
@@ -263,7 +285,6 @@ const CreateMedicalRecord = () => {
         )}
 
         {/* Visit Information section */}
-
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-4 ">
           <h3 className="text-sm font-semibold text-slate-900">
             Visit Information
@@ -347,11 +368,12 @@ const CreateMedicalRecord = () => {
             />
           </FormField>
 
-          {(error || createMedicalRecordError || acupunctureError) && (
+          {(error || createMedicalRecordError || acupunctureError || illnessError) && (
             <p className="text-md text-red-600 sm:col-span-2">
-              {error || createMedicalRecordError || acupunctureError}
+              {error || createMedicalRecordError || acupunctureError || illnessError}
             </p>
           )}
+          
           <span className="flex items-center gap-2 py-4">
             <Checkbox
               className="data-[state=checked]:bg-brand data-[state=checked]:text-white data-[state=checked]:border-0"
@@ -360,6 +382,15 @@ const CreateMedicalRecord = () => {
             />
             <span>Have Acupuncture Point</span>
           </span>
+
+          {showIllnessSelect && (
+            <div className="mt-8">
+              <CreateMedicalRecordIllness
+                selectedIllnessIds={selectedIllnessIds}
+                onSelectedIllnessIdsChange={handleSelectedIllnessIdsChange}
+              />
+            </div>
+          )}
 
           {/* Acupuncture Select Component */}
           {showAcupunctureSelect && (
@@ -378,11 +409,11 @@ const CreateMedicalRecord = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={createMedicalRecordLoading || acupunctureLoading}
+                disabled={createMedicalRecordLoading || acupunctureLoading || illnessLoading}
               >
                 {createMedicalRecordLoading ? "Saving..." : "Save"}
               </Button>
-            ) : !showAcupunctureSelect ? ( //TODO: implement this part to work with illness acupuncture too
+            ) : !(showAcupunctureSelect || showIllnessSelect) ? (
               <Button
                 type="button"
                 variant="primary"
@@ -395,9 +426,9 @@ const CreateMedicalRecord = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={createMedicalRecordLoading || acupunctureLoading}
+                disabled={createMedicalRecordLoading || acupunctureLoading || illnessLoading}
               >
-                {createMedicalRecordLoading || acupunctureLoading ? "Saving..." : "Save All"}
+                {createMedicalRecordLoading || acupunctureLoading || illnessLoading ? "Saving..." : "Save All"}
               </Button>
             )}
           </div>
