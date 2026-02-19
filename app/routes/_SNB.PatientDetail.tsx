@@ -251,7 +251,6 @@ function PatientDetail() {
 
   return (
     <div className="flex min-h-screen bg-surface-muted">
-
       <EditAppointmentDialog
         isOpen={showEditDialog}
         onEditAppointment={handleSubmitUpdateAppointment}
@@ -282,19 +281,20 @@ function PatientDetail() {
         isOpen={showAddMedicalRecordDialog}
         onClose={handleCloseDialog}
         appointments={filteredAppointments}
-        patient={{ id: patientData.patientId, nameSurname: patientData.nameSurname }}
+        patient={{
+          id: patientData.patientId,
+          nameSurname: patientData.nameSurname,
+        }}
         doctors={[]}
         onStartMedicalRecord={handleStartMedicalRecord}
       />
 
       <main className="flex-1 p-8 space-y-8">
         <div className="flex items-center gap-3">
-
           <Button
             size="sm"
             variant="back"
             onClick={() => navigate("/patientList")}
-
           >
             <span className="flex h-8 w-8 items-center justify-center rounded-full ">
               <FontAwesomeIcon icon={faArrowLeft} />
@@ -322,7 +322,10 @@ function PatientDetail() {
           <div className="mt-4">
             <InfoList
               items={[
-                { label: "Name Surname", value: patientData.nameSurname ?? "N/A" },
+                {
+                  label: "Name Surname",
+                  value: patientData.nameSurname ?? "N/A",
+                },
                 { label: "Gender", value: patientData.gender ?? "N/A" },
                 {
                   label: "Age",
@@ -330,10 +333,19 @@ function PatientDetail() {
                     ? DateTimeHelper.calculateAge(patientData.birthday)
                     : "N/A",
                 },
-                { label: "Phone Number", value: patientData.phoneNumber ?? "N/A" },
+                {
+                  label: "Phone Number",
+                  value: patientData.phoneNumber ?? "N/A",
+                },
 
-                { label: "Congenital Disease", value: patientData.congenitalDisease ?? "N/A" },
-                { label: "Surgery History", value: patientData.surgeryHistory ?? "N/A" },
+                {
+                  label: "Congenital Disease",
+                  value: patientData.congenitalDisease ?? "N/A",
+                },
+                {
+                  label: "Surgery History",
+                  value: patientData.surgeryHistory ?? "N/A",
+                },
                 {
                   label: "Remaining Course",
                   value: String(patientData.remainingCourse ?? "0"),
@@ -353,26 +365,37 @@ function PatientDetail() {
           />
         </Card>
 
-       <Card>
-  <div className="flex items-center justify-between mb-4">
-    <SectionHeading title="Medical Records" />
-    {(isManager || isDoctor) && (<Button
-      variant="secondary"
-      size="sm"
-      onClick={() => setShowAddMedicalRecordDialog(true)}
-    >
-      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
-        <FontAwesomeIcon icon={faPenToSquare} />
-      </span>
-      Add Medical Record
-    </Button>)}
-  </div>
-  
-  <MedicalRecordTable 
-    medicalRecords={medicalRecords} 
-    onRowClick={(medicalRecord: MedicalRecord)=>navigate("/medicalRecordDetail", { state: { medicalRecordId: medicalRecord.recordId } })}
-  />
-</Card>
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <SectionHeading title="Medical Records" />
+            {(isManager || isDoctor) && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowAddMedicalRecordDialog(true)}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+                  <FontAwesomeIcon icon={faPenToSquare} />
+                </span>
+                Add Medical Record
+              </Button>
+            )}
+          </div>
+
+          <MedicalRecordTable
+            medicalRecords={medicalRecords}
+            onRowClick={(medicalRecord) =>
+              navigate("/medicalRecordDetail", {
+                state: { medicalRecordId: medicalRecord.recordId },
+              })
+            }
+            onEdit={(medicalRecord) =>
+              navigate("/medicalRecordDetail", {
+                state: { medicalRecordId: medicalRecord.recordId },
+              })
+            }
+          />
+        </Card>
       </main>
     </div>
   );
