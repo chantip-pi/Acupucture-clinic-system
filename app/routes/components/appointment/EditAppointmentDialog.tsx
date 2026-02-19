@@ -1,7 +1,24 @@
 import { faX } from "@fortawesome/free-solid-svg-icons/faX";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import DatePicker from "react-datepicker";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "~/lib/utils";
+import { Button } from "~/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "~/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
+import { getAvailableTimeSlotsForDate, getClinicSchedule } from "~/presentation/hooks/getClinicHours";
 
 interface EditAppointmentDialogProps {
   isOpen: boolean;
@@ -32,17 +49,74 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
   onDateChange,
   onReasonChange,
 }) => {
-  if (!isOpen) return null;
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<string>("");
 
-  const handleDateTimeChange = (date: Date | null) => {
-    onDateChange(date);
+  // Extract time from selectedDate when component mounts or selectedDate changes
+  useEffect(() => {
+    if (selectedDate) {
+      const hours = selectedDate.getHours();
+      const minutes = selectedDate.getMinutes();
+      const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+      setSelectedTime(timeString);
+    } else {
+      setSelectedTime("");
+    }
+  }, [selectedDate]);
+
+  // Get available time slots based on clinic schedule
+  const availableTimeSlots = useMemo(() => {
+    if (!selectedDate) return [];
+    
+    try {
+      return getAvailableTimeSlotsForDate(selectedDate);
+    } catch (error) {
+      console.error("Error getting time slots:", error);
+      return [];
+    }
+  }, [selectedDate]);
+
+  // Filter available dates (only show days that clinic is open)
+  const isDateAvailable = (date: Date) => {
+    try {
+      const schedule = getClinicSchedule();
+      const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const dayName = dayNames[date.getDay()];
+      const daySchedule = schedule.find(d => d.dayName === dayName);
+      return daySchedule?.isOpen || false;
+    } catch (error) {
+      console.error("Error checking date availability:", error);
+      return false;
+    }
   };
 
-  const minTime = new Date();
-  minTime.setHours(9, 0, 0, 0);
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      // Reset time when date changes
+      setSelectedTime("");
+      // Set date without time
+      const dateOnly = new Date(date);
+      dateOnly.setHours(0, 0, 0, 0);
+      onDateChange(dateOnly);
+    } else {
+      setSelectedTime("");
+      onDateChange(null);
+    }
+  };
 
-  const maxTime = new Date();
-  maxTime.setHours(17, 0, 0, 0);
+  const handleTimeChange = (time: string) => {
+    setSelectedTime(time);
+    
+    if (selectedDate && time) {
+      const [hours, minutes] = time.split(':').map(Number);
+      const newDate = new Date(selectedDate);
+      newDate.setHours(hours, minutes, 0, 0);
+      onDateChange(newDate);
+    }
+    setTimeOpen(false);
+  };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -86,30 +160,74 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
             </div>
           </div>
 
-          {/* Date and Time Selection (Editable) */}
+          {/* Date Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Appointment Date & Time <span className="text-red-500">*</span>
+              Appointment Date <span className="text-red-500">*</span>
             </label>
             <DatePicker
               selected={selectedDate}
-              onChange={handleDateTimeChange}
-              showTimeSelect
-              timeFormat="HH:mm"
-              timeIntervals={30}
-              dateFormat="EEE, d MMM yyyy, HH:mm"
+              onChange={handleDateChange}
+              dateFormat="EEE, d MMM yyyy"
               className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 focus:border-[#2F919C] focus:ring-2 focus:ring-[#2F919C]/20 focus:outline-none"
-              placeholderText="Select date and time"
+              placeholderText="Select date"
               isClearable
               showYearDropdown
               showMonthDropdown
               dropdownMode="select"
-              minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
-              timeCaption="Time"
-              minTime={minTime}
-              maxTime={maxTime}
+              minDate={new Date()}
+              filterDate={isDateAvailable}
               disabled={isLoading}
             />
+          </div>
+
+          {/* Time Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Appointment Time <span className="text-red-500">*</span>
+            </label>
+            <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={timeOpen}
+                  className="w-full justify-between"
+                  disabled={!selectedDate || isLoading}
+                >
+                  {selectedTime || "Select time..."}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[402px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search time..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No time slot available.</CommandEmpty>
+                    <CommandGroup>
+                      {availableTimeSlots.map((time) => (
+                        <CommandItem
+                          key={time}
+                          value={time}
+                          onSelect={() => handleTimeChange(time)}
+                        >
+                          {time}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              selectedTime === time ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {!selectedDate && (
+              <p className="mt-1 text-xs text-gray-500">Please select a date first</p>
+            )}
           </div>
 
           {/* Reason Input (Editable) */}
@@ -141,7 +259,7 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
 
           {/* Close and Save Buttons (Right side) */}
           <div className="flex gap-3">
-          <button
+            <button
               onClick={onEditAppointment}
               disabled={isLoading}
               className="px-4 py-2 rounded-md text-white bg-[#2F919C] hover:bg-[#257882] disabled:opacity-50 transition-colors text-sm font-medium"
@@ -156,8 +274,6 @@ const EditAppointmentDialog: React.FC<EditAppointmentDialogProps> = ({
             >
               Close
             </button>
-
-           
           </div>
         </div>
       </div>
