@@ -1,4 +1,4 @@
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ErrorPage from "./components/common/ErrorPage";
 import { useGetStaffList } from "~/presentation/hooks/staff/useGetStaffList";
@@ -199,13 +199,13 @@ const CreateMedicalRecord = () => {
     setIsSelectSourceOpen(false);
   };
 
-  const handleAcupuncturePointsChange = (points: SelectedPoint[]) => {
+  const handleAcupuncturePointsChange = useCallback((points: SelectedPoint[]) => {
     setSelectedAcupuncturePoints(points);
-  };
+  }, []);
 
-  const handleSelectedIllnessIdsChange = (illnessIds: number[]) => {
+  const handleSelectedIllnessIdsChange = useCallback((illnessIds: number[]) => {
     setSelectedIllnessIds(illnessIds);
-  };
+  }, []);
 
   if (isLoading && !showAcupunctureSelect && !showIllnessSelect) {
     return <LoadingPage />;
