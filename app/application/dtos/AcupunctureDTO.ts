@@ -1,5 +1,4 @@
 export interface CreateAcupunctureDTO {
-  acupunctureId: number;
   acupointCode: string;
   meridianId: number;
 }
