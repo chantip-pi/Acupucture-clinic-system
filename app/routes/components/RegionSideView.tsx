@@ -4,6 +4,7 @@ import AcupunctureCard from "./AcupunctureCard";
 import { useGetAcupunctureByRegionAndSide } from "~/presentation/hooks/acupuncture/useGetAcupunctureByRegionAndSide";
 import { useGetMeridiansByRegionAndSide } from "~/presentation/hooks/meridian/useGetMeridiansByRegionAndSide";
 import { AcupuncturePoint, RegionSideViewProps } from "~/domain/entities/AcupuncturePoint";
+import { IMAGE_BASE_URL } from "~/constants/api";
 
 export default function RegionSideView({
   region,
@@ -17,7 +18,6 @@ export default function RegionSideView({
   const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(region, side);
   const { meridians: meridiansForView } = useGetMeridiansByRegionAndSide(region, side);
 
-  const baseUrl = "https://clinic-backend-6f5w.onrender.com/api";
 
   // group points by meridianId
   const pointsByMeridian = useMemo(() => {
@@ -53,7 +53,7 @@ export default function RegionSideView({
     if (visibleMeridianIds.has(mid)) visiblePoints.push(...pts);
   });
 
-  const fullImageUrl = `${baseUrl}/images/${meridiansForView[0]?.image}`;
+  const fullImageUrl = `${IMAGE_BASE_URL}/${meridiansForView[0]?.image}`;
 
   const handleRemovePoint = (pointKey: string) => {
     const newPoints = selectedPoints.filter((p) => p.key !== pointKey);

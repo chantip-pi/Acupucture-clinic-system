@@ -1,10 +1,9 @@
 import { IImageRepository } from "~/domain/repositories/IImageRepository";
-import { Image } from "~/domain/entities/Image";
 
 export class UpdateImageUseCase {
   constructor(private readonly imageRepository: IImageRepository) {}
 
-  async execute(filename: string, file: File): Promise<Image> {
+  async execute(filename: string, file: File): Promise<string> {
     if (!file) {
       throw new Error("No file provided");
     }
