@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { getImageByFilenameUseCase } from "~/infrastructure/di/container";
-import { Image } from "~/domain/entities/Image";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useGetImageByFilename(filename: string) {
-  const [image, setImage] = useState<Image | null>(null);
+  const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

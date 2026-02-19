@@ -1,5 +1,6 @@
 import { BackendErrorService } from "~/domain/services/ErrorService";
 import { IMAGE_BASE_URL } from "~/constants/api";
+import { ImageUploadResponse, ImageUpdateResponse, ImageListResponse } from "~/domain/entities/Image";
 
 export class ImageDataSource {
   constructor(private readonly baseUrl: string = IMAGE_BASE_URL) {}
@@ -13,7 +14,7 @@ export class ImageDataSource {
 
   async getAll(): Promise<string[]> {
     const res = await fetch(this.baseUrl, { method: "GET" });
-    const data = await this.handleResponse<{ images: string[] }>(res);
+    const data = await this.handleResponse<ImageListResponse>(res);
     return data.images;
   }
   
@@ -23,10 +24,13 @@ export class ImageDataSource {
       method: "GET",
     });
     if (res.status === 404) return null;
+    if (res.redirected) {
+      return res.url; // Return the Cloudinary URL after redirect
+    }
     return this.handleResponse<string>(res);
   }
 
-  async create(file: File): Promise<string> {
+  async create(file: File): Promise<ImageUploadResponse> {
     const formData = new FormData();
     formData.append('image', file);
 
@@ -34,10 +38,10 @@ export class ImageDataSource {
       method: "POST",
       body: formData,
     });
-    return this.handleResponse<string>(res);
+    return this.handleResponse<ImageUploadResponse>(res);
   }
 
-  async update(filename: string, file: File): Promise<string> {
+  async update(filename: string, file: File): Promise<ImageUpdateResponse> {
     const formData = new FormData();
     formData.append('image', file);
 
@@ -45,7 +49,7 @@ export class ImageDataSource {
       method: "PUT",
       body: formData,
     });
-    return this.handleResponse<string>(res);
+    return this.handleResponse<ImageUpdateResponse>(res);
   }
 
   async delete(filename: string): Promise<void> {
@@ -57,6 +61,3 @@ export class ImageDataSource {
     }
   }
 }
-
-// optional default instance
-export const imageDatasource = new ImageDataSource();

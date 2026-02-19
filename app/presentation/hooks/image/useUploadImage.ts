@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { uploadImageUseCase } from "~/infrastructure/di/container";
-import { Image } from "~/domain/entities/Image";
 import { BackendErrorService } from "~/domain/services/ErrorService";
+import { ImageUploadResponse } from "~/domain/entities/Image";
 
 export function useUploadImage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const uploadImage = async (file: File): Promise<Image | null> => {
+  const uploadImage = async (file: File): Promise<ImageUploadResponse | null> => {
     setLoading(true);
     setError(null);
     setSuccess(false);
