@@ -195,10 +195,10 @@ function IllnessAcupunctureShowCard({ recordId }: IllnessAcupunctureShowCardProp
       {/* Show acupuncture cards for each illness */}
       {illnessRecords.map((illness) => (
         <div key={illness.illnessId} className="mb-6">
-          <h4 className="text-md font-semibold text-slate-900 mb-3">
+          <div className="inline-block px-4 py-2 mb-2 bg-[#DCE8E9] text-[#2F919C] font-semibold rounded-md w-full">
             {illnessMap.get(illness.illnessId) ??
               `Illness ${illness.illnessId}`}
-          </h4>
+          </div>
           <AcupunctureShowCard
             illnessId={illness.illnessId}
             visibleMeridians={toggledMeridians}
