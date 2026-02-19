@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { updateImageUseCase } from "~/infrastructure/di/container";
-import { Image } from "~/domain/entities/Image";
 import { BackendErrorService } from "~/domain/services/ErrorService";
 
 export function useUpdateImage() {
@@ -8,7 +7,7 @@ export function useUpdateImage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const updateImage = async (filename: string, file: File): Promise<Image | null> => {
+  const updateImage = async (filename: string, file: File): Promise<string | null> => {
     setLoading(true);
     setError(null);
     setSuccess(false);

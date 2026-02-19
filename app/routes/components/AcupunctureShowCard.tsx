@@ -4,6 +4,7 @@ import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medical
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import { AcupuncturePoint, AcupunctureShowCardProps, ShowCardRegionViewProps } from "~/domain/entities/AcupuncturePoint";
 import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupuncture/useGetIllnessAcupunctureById";
+import { IMAGE_BASE_URL } from "~/constants/api";
 
 function RegionView({
   region,
@@ -13,8 +14,7 @@ function RegionView({
   onMeridianToggle,
 }: ShowCardRegionViewProps) {
   // Get the image from first point (all points in same region/side view have same image)
-  const baseUrl = "https://clinic-backend-6f5w.onrender.com/api";
-  const fullImageUrl = `${baseUrl}/images/${allPoints[0]?.image}`;
+  const fullImageUrl = `${IMAGE_BASE_URL}/${allPoints[0]?.image}`;
 
   const handleMeridianToggle = (toggledMeridianId: number) => {
     onMeridianToggle(region, side, toggledMeridianId);
