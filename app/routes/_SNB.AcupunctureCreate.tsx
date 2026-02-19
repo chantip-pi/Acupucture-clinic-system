@@ -1,16 +1,11 @@
-import React, { useState, FormEvent, ChangeEvent } from "react";
-import ImageMarker, { Marker, MarkerComponentProps } from "react-image-marker";
-import { Tooltip } from "react-tooltip";
-import "react-tooltip/dist/react-tooltip.css";
-import HistoryTable from "./components/HistoryTable";
-import Modal from "./components/Modal";
+import React, { useState, FormEvent } from "react";
 import {
   Button,
   Card,
-  FormField,
-  Input,
   SectionHeading,
-  PageShell
+  PageShell,
+  FormField,
+  Input
 } from "~/presentation/designSystem";
 import { useAddAcupoint } from "~/presentation/hooks/acupoint/useAddAcupoint";
 import { useAddAcupointLocation } from "~/presentation/hooks/acupointLocation/useAddAcupointLocation";
@@ -18,28 +13,29 @@ import { useAddAcupuncture } from "~/presentation/hooks/acupuncture/useAddAcupun
 import { useAddMeridian } from "~/presentation/hooks/meridian/useAddMeridian";
 import { useUploadImage } from "~/presentation/hooks/image/useUploadImage";
 import { CustomMarker } from "~/domain/entities/CustomMarker";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
-import { IMAGE_BASE_URL } from "~/constants/api";
 import { useGetAllImages } from "~/presentation/hooks/image/useGetAllImages";
+import ImageSelector from "./components/meridian/ImageSelector";
+import AcupunctureArea from "./components/meridian/AcupunctureArea";
+import { useGetAcupointList } from "~/presentation/hooks/acupoint/useGetAcupointList";
+import ConfirmDialog from "./components/common/ConfirmDialog";
 
 const AcupunctureCreate: React.FC = () => {
-  type ImageSourceMode = "library" | "upload";
-
-  const [markers, setMarkers] = useState<CustomMarker[]>([]);
-  const [image, setImage] = useState<string>("");
-  const [imageFilename, setImageFilename] = useState<string>("");
-  const [pendingImageFile, setPendingImageFile] = useState<File | null>(null);
-  const [show, setShow] = useState<boolean>(false);
-  const [newMarkerPoint, setNewMarkerPoint] = useState<Marker | null>(null);
-  const [acupointCode, setAcupointCode] = useState<string>("");
-  const [acupointName, setAcupointName] = useState<string>("");
+  const [acupunctureAreas, setAcupunctureAreas] = useState<Array<{
+    id: string;
+    image: string;
+    side: string;
+    region: string;
+    imageFilename: string;
+    pendingImageFile: File | null;
+    markers: CustomMarker[];
+  }>>([]);
   const [meridianName, setMeridianName] = useState<string>("");
-  const [meridianRegion, setMeridianRegion] = useState<string>("");
-  const [meridianSide, setMeridianSide] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [imageSourceMode, setImageSourceMode] = useState<ImageSourceMode>("library");
+  const [showImageSelector, setShowImageSelector] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const { addMeridian, loading: meridianLoading, error: meridianError } = useAddMeridian();
   const { addAcupoint, loading: acupointLoading, error: acupointError } = useAddAcupoint();
@@ -47,6 +43,7 @@ const AcupunctureCreate: React.FC = () => {
   const { addAcupuncture, loading: acupunctureLoading, error: acupunctureError } = useAddAcupuncture();
   const { uploadImage, loading: uploadingImage, error: uploadError } = useUploadImage();
   const { images: systemImages, loading: imagesLoading } = useGetAllImages();
+  const { acupoints: systemAcupoints } = useGetAcupointList(null);
 
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
 
@@ -58,221 +55,219 @@ const AcupunctureCreate: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const MarkerView: React.FC<
-    MarkerComponentProps & {
-      acupointCode?: string;
-      acupointName?: string;
-    }
-  > = ({ top, left, acupointCode, acupointName, itemNumber }) => {
-    const label = acupointCode ?? acupointName;
-
-    return (
-      <>
-        <div
-          data-tooltip-id={`marker_${itemNumber}`}
-          data-tooltip-content={String(label)}
-          style={{
-            position: "absolute",
-            top: `${top}%`,
-            left: `${left}%`,
-            width: 16,
-            height: 16,
-            borderRadius: "50%",
-            backgroundColor: "#ef4444",
-            border: "2px solid white",
-            transform: "translate(-50%, -50%)",
-            cursor: "pointer",
-          }}
-        />
-        <Tooltip id={`marker_${itemNumber}`} place="top" />
-      </>
+  // Check if acupoint already exists in system
+  const acupointExistsInSystem = (code: string): boolean => {
+    return systemAcupoints.some(point =>
+      point.acupointCode.toLowerCase() === code.toLowerCase()
     );
   };
 
-  const codeExists = markers.some(
-    (m) => m.acupointCode?.toLowerCase() === acupointCode.toLowerCase(),
-  );
-
-  const handleClear = () => setMarkers([]);
-
-  const handleSelectSystemImage = (filename: string) => {
-    const previewUrl = `${IMAGE_BASE_URL}/${filename}`;
-    setImageFilename(filename);
-    setImage(previewUrl);
-    setPendingImageFile(null); // not a pending upload, it's already on the server
-    setError("");
+  const handleAddArea = (filename: string, previewUrl: string, file?: File) => {
+    const newArea = {
+      id: Date.now().toString(),
+      side: "",
+      region: "",
+      image: previewUrl,
+      imageFilename: filename,
+      pendingImageFile: file || null,
+      markers: []
+    };
+    setAcupunctureAreas([...acupunctureAreas, newArea]);
+    setShowImageSelector(false);
   };
 
-  const handleImageReupload = () => {
-    setImage("");
-    setImageFilename("");
-    setPendingImageFile(null);
-    handleClear();
+  const capitalizeFirstLetter = (string: string) => {
+    if (!string) return "";
+    return string.charAt(0).toUpperCase() + string.slice(1);
   };
 
-  // Only preview locally — no backend upload yet
-  const onImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files?.[0]) return;
-    const file = e.target.files[0];
-    setError("");
-
-    const localPreviewUrl = URL.createObjectURL(file);
-    setPendingImageFile(file);
-    setImage(localPreviewUrl);
-    setImageFilename(file.name); // temporary placeholder, replaced on save
+  const handleRemoveArea = (areaId: string) => {
+    setAcupunctureAreas(acupunctureAreas.filter(area => area.id !== areaId));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleUpdateAreaMarkers = (areaId: string, markers: CustomMarker[]) => {
+    setAcupunctureAreas(acupunctureAreas.map(area =>
+      area.id === areaId ? { ...area, markers } : area
+    ));
+  };
+
+  const handleUpdateAreaRegion = (areaId: string, region: string) => {
+    setAcupunctureAreas(acupunctureAreas.map(area =>
+      area.id === areaId ? { ...area, region } : area
+    ));
+  };
+
+  const handleUpdateAreaSide = (areaId: string, side: string) => {
+    setAcupunctureAreas(acupunctureAreas.map(area =>
+      area.id === areaId ? { ...area, side } : area
+    ));
+  };
+
+  const handleSubmit = async (e?: FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     setError("");
 
-    if (markers.length === 0) {
+    if (acupunctureAreas.length === 0) {
+      setError("Please add at least one acupuncture area before saving");
+      return;
+    }
+
+    const totalMarkers = acupunctureAreas.reduce((sum, area) => sum + area.markers.length, 0);
+    if (totalMarkers === 0) {
       setError("Please add at least one marker before saving");
       return;
     }
 
-    if (!meridianName || !meridianRegion || !meridianSide) {
+    if (!meridianName) {
       setError("Please fill in all meridian information");
       return;
     }
 
+    const errors: string[] = [];
+    // Track acupoints created/confirmed during this session to avoid duplicate addAcupoint calls
+    const processedAcupoints = new Set<string>();
+
     try {
-      const errors: string[] = [];
-      const successes: string[] = [];
-
-      // Upload image to backend now (only if it was a local file pick)
-      let finalImageFilename = imageFilename;
-
-      if (pendingImageFile) {
-        const result = await uploadImage(pendingImageFile);
-        if (!result) {
-          setError("Image upload failed. Please try again.");
-          return;
+      for (const area of acupunctureAreas) {
+        // --- Step 1: Upload image if pending ---
+        let finalImageFilename = area.imageFilename;
+        if (area.pendingImageFile) {
+          const result = await uploadImage(area.pendingImageFile);
+          if (!result) {
+            errors.push(`Failed to upload image for area "${area.imageFilename}"`);
+            continue;
+          }
+          finalImageFilename = result.filename;
         }
-        finalImageFilename = result.filename;
-        setImageFilename(result.filename);
-        setPendingImageFile(null);
-      }
 
-      if (!finalImageFilename) {
-        setError("Please select an image before saving");
-        return;
-      }
+        // --- Step 2: Create Meridian for this area ---
+        const meridianResult = await addMeridian({
+          meridianName: capitalizeFirstLetter(meridianName),
+          region: capitalizeFirstLetter(area.region),
+          side: capitalizeFirstLetter(area.side),
+          image: finalImageFilename,
+        });
 
-      // 1. Create Meridian
-      let meridianIdNum: number;
-
-      const meridianResult = await addMeridian({
-        meridianName,
-        region: meridianRegion,
-        side: meridianSide,
-        image: finalImageFilename,
-      });
-
-      if (!meridianResult.success || !meridianResult.meridian) {
-        const errorMessage = meridianResult.error || "Failed to create meridian";
-        setError(errorMessage);
-        return;
-      }
-
-      meridianIdNum = meridianResult.meridian.meridianId;
-      if (!meridianIdNum) {
-        setError("Meridian created but no ID returned from backend");
-        return;
-      }
-      successes.push("Meridian created");
-
-      // 2. Process each marker
-      for (const marker of markers) {
-        if (!marker.acupointCode || !marker.acupointName) {
-          errors.push(`Marker missing code or name`);
+        if (!meridianResult.success || !meridianResult.meridian?.meridianId) {
+          errors.push(
+            `Area "${area.imageFilename}": ${meridianResult.error || "Failed to create meridian"}`
+          );
           continue;
         }
 
-        try {
-          // 3a. Create Acupoint
-          const acupointResult = await addAcupoint({
-            acupointCode: marker.acupointCode,
-            acupointName: marker.acupointName,
-          });
+        const meridianId = meridianResult.meridian.meridianId;
 
-          if (!acupointResult.success) {
-            errors.push(`Acupoint ${marker.acupointCode}: ${acupointResult.error || "Failed to create acupoint"}`);
+        // --- Step 3: Process each marker in this area ---
+        for (const marker of area.markers) {
+          if (!marker.acupointCode || !marker.acupointName) {
+            errors.push(`Marker missing code or name in area "${area.imageFilename}"`);
             continue;
           }
 
-          // 3b. Create AcupointLocation
+          const { acupointCode, acupointName, top, left } = marker;
+
+          // Step 3a: Create acupoint only if it doesn't exist anywhere (system or this session)
+          const alreadyExists = acupointExistsInSystem(acupointCode) || processedAcupoints.has(acupointCode);
+
+          if (!alreadyExists) {
+            const acupointResult = await addAcupoint({ acupointCode, acupointName });
+            if (!acupointResult.success) {
+              errors.push(`Acupoint "${acupointCode}": ${acupointResult.error || "Failed to create acupoint"}`);
+              continue;
+            }
+          }
+
+          // Mark as processed regardless of source (new or existing)
+          processedAcupoints.add(acupointCode);
+
+          // Step 3b: Create AcupointLocation (per meridian + acupoint pair)
           const locationResult = await addAcupointLocation({
-            locationId: 0,
-            meridianId: meridianIdNum,
-            acupointCode: marker.acupointCode,
-            pointTop: marker.top,
-            pointLeft: marker.left,
+            meridianId,
+            acupointCode,
+            pointTop: top,
+            pointLeft: left,
           });
 
-          if (!locationResult.success) {
-            const isDuplicate =
-              locationResult.error?.includes("409") ||
-              locationResult.error?.toLowerCase().includes("duplicate") ||
-              locationResult.error?.toLowerCase().includes("already exists");
-            if (!isDuplicate) {
-              errors.push(`Location for ${marker.acupointCode}: ${locationResult.error || "Failed"}`);
-              continue;
-            }
+          if (!locationResult.success && !isDuplicateError(locationResult.error)) {
+            errors.push(`Location for "${acupointCode}": ${locationResult.error || "Failed"}`);
+            continue;
           }
 
-          // 3c. Create Acupuncture record
-          const acupunctureResult = await addAcupuncture({
-            acupunctureId: 0,
-            acupointCode: marker.acupointCode,
-            meridianId: meridianIdNum,
-          });
+          // Step 3c: Link acupoint to meridian via Acupuncture record (per meridian + acupoint pair)
+          const acupunctureResult = await addAcupuncture({ acupointCode, meridianId });
 
-          if (!acupunctureResult.success) {
-            const isDuplicate =
-              acupunctureResult.error?.includes("409") ||
-              acupunctureResult.error?.toLowerCase().includes("duplicate") ||
-              acupunctureResult.error?.toLowerCase().includes("already exists");
-            if (!isDuplicate) {
-              errors.push(`Acupuncture for ${marker.acupointCode}: ${acupunctureResult.error || "Failed"}`);
-              continue;
-            }
+          if (!acupunctureResult.success && !isDuplicateError(acupunctureResult.error)) {
+            errors.push(`Acupuncture for "${acupointCode}": ${acupunctureResult.error || "Failed"}`);
+            continue;
           }
-
-          successes.push(`Marker ${marker.acupointCode} saved`);
-        } catch (error) {
-          errors.push(
-            `Marker ${marker.acupointCode}: ${error instanceof Error ? error.message : "Failed"}`,
-          );
         }
       }
 
       if (errors.length > 0) {
-        console.error("Errors:", errors);
-        setError(errors[0] || "Failed to add acupuncture markers");
+        console.error("Submission errors:", errors);
+        setError(errors[0]);
       } else {
-        setImage("");
-        setMarkers([]);
+        setAcupunctureAreas([]);
         setMeridianName("");
-        setMeridianRegion("");
-        setMeridianSide("");
-        setAcupointCode("");
-        setAcupointName("");
-        setNewMarkerPoint(null);
-        setPendingImageFile(null);
         setError("");
-        alert("Successfully saved all markers");
+        alert("Successfully saved all acupuncture areas and markers");
+        navigate("/meridianLibrary");
       }
     } catch (error) {
       console.error("Save error:", error);
-      setError(
-        error instanceof Error ? error.message : "Unknown error occurred",
-      );
+      setError(error instanceof Error ? error.message : "Unknown error occurred");
     }
+  };
+
+  const handleShowConfirmDialog = (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (acupunctureAreas.length === 0) {
+      setError("Please add at least one acupuncture area before saving");
+      return;
+    }
+
+    const totalMarkers = acupunctureAreas.reduce((sum, area) => sum + area.markers.length, 0);
+    if (totalMarkers === 0) {
+      setError("Please add at least one marker before saving");
+      return;
+    }
+
+    if (!meridianName) {
+      setError("Please fill in all meridian information");
+      return;
+    }
+
+    setShowConfirmDialog(true);
+  };
+
+  // Helper to avoid repeating duplicate-check logic
+  const isDuplicateError = (error?: string): boolean => {
+    if (!error) return false;
+    const lower = error.toLowerCase();
+    return error.includes("409") || lower.includes("duplicate") || lower.includes("already exists");
   };
 
   return (
     <PageShell className="p-8">
+
+      <ConfirmDialog 
+        isOpen={showConfirmDialog} 
+        title={"Confirm Save"} 
+        message={"Are you sure you want to save this meridian?"} 
+        onConfirm={() => {
+          setShowConfirmDialog(false);
+          handleSubmit();
+        }} 
+        onCancel={() => {
+          setShowConfirmDialog(false);
+        }} 
+        isLoading={loading}
+      />  
+
       {/* Back Button */}
       <div className="flex items-center gap-3 py-4">
         <Button size="sm" variant="back" onClick={() => navigate("/meridianLibrary")}>
@@ -283,244 +278,83 @@ const AcupunctureCreate: React.FC = () => {
         </Button>
       </div>
 
-      {!image && (
-        <Card>
-          <SectionHeading title="Select Meridian Image" />
 
-          {/* MODE SWITCH */}
-          <div className="flex gap-3 mb-4">
-            <Button
-              type="button"
-              variant={imageSourceMode === "library" ? "primary" : "secondary"}
-              onClick={() => setImageSourceMode("library")}
-            >
-              Choose from System
-            </Button>
 
-            <Button
-              type="button"
-              variant={imageSourceMode === "upload" ? "primary" : "secondary"}
-              onClick={() => setImageSourceMode("upload")}
-            >
-              Upload New
-            </Button>
-          </div>
+      {/* Meridian Form */}
+      {acupunctureAreas.length > 0 && (
+        <Card className="mb-6">
+          <SectionHeading title="Meridian Information" />
+          <form onSubmit={handleShowConfirmDialog} className="gap-4 flex flex-col">
+              <FormField label="Meridian Name">
+        <Input
+          type="text"
+          name="meridianName"
+          value={meridianName}
+          onChange={(e) => setMeridianName(e.target.value)}
+          placeholder="Meridian Name"
+          className="h-14"
+          required
+        />
+      </FormField>
 
-          {imageSourceMode === "library" && (
-            <>
-              {imagesLoading && (
-                <p className="text-sm text-gray-500">Loading images...</p>
-              )}
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {(Array.isArray(systemImages) ? systemImages : []).map((img) => {
-                  const previewUrl = `${IMAGE_BASE_URL}/${img}`;
-                  return (
-                    <div
-                      key={img}
-                      className="cursor-pointer border-2 border-transparent hover:border-blue-500 rounded-lg overflow-hidden transition"
-                      onClick={() => handleSelectSystemImage(img)}
-                    >
-                      <img
-                        src={previewUrl}
-                        alt={img}
-                        className="w-full h-40 object-cover"
-                      />
-                      <p className="text-xs text-center text-gray-500 p-1 truncate">
-                        {img}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {imageSourceMode === "upload" && (
-            <div className="flex flex-col gap-4">
-              <h2 className="font-semibold">Upload Meridian Image</h2>
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={onImageChange}
+            {/* Acupuncture Areas */}
+            {acupunctureAreas.map((area) => (
+              <AcupunctureArea
+                key={area.id}
+                areaId={area.id}
+                image={area.image}
+                markers={area.markers}
+                onMarkersChange={(markers) => handleUpdateAreaMarkers(area.id, markers)}
+                onAreaRegionChange={(region) => handleUpdateAreaRegion(area.id, region)}
+                onAreaSideChange={(side) => handleUpdateAreaSide(area.id, side)}
+                onRemove={() => handleRemoveArea(area.id)}
               />
+            ))}
 
-              <p className="text-sm text-gray-500">
-                Image will be uploaded when you press Save.
+            {/* Error Display */}
+            {(error || meridianError || acupointError || locationError || acupunctureError) && (
+              <p className="text-md text-red-600">
+                {error || meridianError || acupointError || locationError || acupunctureError}
               </p>
+            )}
+
+            {/* Submit Button */}
+            <div className="sm:col-span-2 flex justify-end">
+              <Button type="submit" variant="primary" disabled={loading}>
+                {loading ? "Saving..." : "Save All Areas"}
+              </Button>
             </div>
-          )}
+          </form>
         </Card>
       )}
 
-      {image && (
-        <>
-          <Modal
-            title="Add Marker Information"
-            show={show}
-            onClose={() => {
-              setShow(false);
-              setAcupointCode("");
-              setAcupointName("");
-            }}
-            onAdd={() => {
-              if (!newMarkerPoint) return;
-
-              if (!acupointCode && !acupointName) return;
-
-              if (!acupointCode.trim()) {
-                alert("Acupuncture code is required");
-                return;
-              }
-
-              if (codeExists) {
-                alert("This acupuncture code already exists");
-                return;
-              }
-
-              const newMarker: CustomMarker = {
-                top: Number(newMarkerPoint.top),
-                left: Number(newMarkerPoint.left),
-              };
-
-              if (acupointCode) {
-                newMarker.acupointCode = acupointCode.toUpperCase();
-              }
-
-              if (acupointName) {
-                newMarker.acupointName = acupointName;
-              }
-
-              setMarkers((prev) => [...prev, newMarker]);
-              setAcupointCode("");
-              setAcupointName("");
-              setShow(false);
-              setNewMarkerPoint(null);
-            }}
-          >
-            <div className="flex flex-col gap-3">
-              <FormField label="Acupuncture Code">
-                <Input
-                  type="text"
-                  value={acupointCode}
-                  onChange={(e) => setAcupointCode(e.target.value)}
-                  placeholder="Acupuncture Code"
-                />
-              </FormField>
-
-              <FormField label="Acupuncture Name">
-                <Input
-                  type="text"
-                  value={acupointName}
-                  onChange={(e) => setAcupointName(e.target.value)}
-                  placeholder="Acupuncture Name"
-                />
-              </FormField>
-            </div>
-          </Modal>
-
-          <Card>
-            <div className="gap-2 mb-4 flex flex-col">
-              <SectionHeading title="Add Acupuncture Template" />
-
-              <form onSubmit={handleSubmit} className="gap-4 flex flex-col">
-                <FormField label="Meridian Name">
-                  <Input
-                    type="text"
-                    name="meridianName"
-                    value={meridianName}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                      setMeridianName(e.target.value)
-                    }
-                    placeholder="Meridian Name"
-                    className="h-14"
-                    required
-                  />
-                </FormField>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <FormField label="Meridian Region">
-                    <Input
-                      type="text"
-                      name="meridianRegion"
-                      value={meridianRegion}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setMeridianRegion(e.target.value)
-                      }
-                      placeholder="Region (e.g., Head, Torso, Arms)"
-                      className="h-14"
-                      required
-                    />
-                  </FormField>
-
-                  <FormField label="Meridian Side">
-                    <Input
-                      type="text"
-                      name="meridianSide"
-                      value={meridianSide}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setMeridianSide(e.target.value)
-                      }
-                      placeholder="Side (e.g., front, back, left, right)"
-                      className="h-14"
-                      required
-                    />
-                  </FormField>
-                </div>
-
-                <div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handleImageReupload}
-                  >
-                    Reupload Image
-                  </Button>
-                </div>
-
-                <FormField label="Click on the image to add markers">
-                  <ImageMarker
-                    key={image}
-                    src={image}
-                    markers={markers}
-                    markerComponent={MarkerView}
-                    onAddMarker={(marker) => {
-                      console.log("clicked:", marker);
-                      setNewMarkerPoint(marker);
-                      setShow(true);
-                    }}
-                  />
-                </FormField>
-
-                <div>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={handleClear}
-                  >
-                    Clear All Markers
-                  </Button>
-                </div>
-
-                <HistoryTable markers={markers} setMarkers={setMarkers} />
-
-                {(error || meridianError || acupointError || locationError || acupunctureError) && (
-                  <p className="text-md text-red-600">
-                    {error || meridianError || acupointError || locationError || acupunctureError}
-                  </p>
-                )}
-
-                <div className="sm:col-span-2 flex justify-end">
-                  <Button type="submit" variant="primary" disabled={loading}>
-                    {loading ? "Saving..." : "Save"}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </Card>
-        </>
+      {/* Image Selector Modal */}
+      {showImageSelector && (
+        <ImageSelector
+          systemImages={systemImages}
+          imagesLoading={imagesLoading}
+          onImageSelect={(filename, previewUrl) => handleAddArea(filename, previewUrl)}
+          onImageUpload={(file) => {
+            const previewUrl = URL.createObjectURL(file);
+            handleAddArea(file.name, previewUrl, file);
+          }}
+        />
       )}
+
+      {/* Add Area Button */}
+      <Card className="mb-6">
+        <div className="flex justify-between items-center">
+          <SectionHeading title="Acupuncture Areas" />
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => setShowImageSelector(true)}
+          >
+            <FontAwesomeIcon icon={faPlus} className="mr-2" />
+            Add Area
+          </Button>
+        </div>
+      </Card>
     </PageShell>
   );
 };

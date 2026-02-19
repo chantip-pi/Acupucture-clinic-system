@@ -2,17 +2,11 @@ import React from "react";
 import {
   Table,
 } from "~/presentation/designSystem";
-
-interface Marker {
-  top: number;
-  left: number;
-  acupointCode?: string;
-  acupointName?: string;
-}
+import { CustomMarker } from "~/domain/entities/CustomMarker";
 
 interface HistoryTableProps {
-  markers: Marker[];
-  setMarkers: React.Dispatch<React.SetStateAction<Marker[]>>;
+  markers: CustomMarker[];
+  setMarkers: (markers: CustomMarker[]) => void;
 }
 
 function HistoryTable({ markers, setMarkers }: HistoryTableProps) {

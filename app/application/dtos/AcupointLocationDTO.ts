@@ -1,5 +1,4 @@
 export interface CreateAcupointLocationDTO {
-  locationId: number;
   meridianId: number;
   acupointCode: string;
   pointTop: number;
