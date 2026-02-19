@@ -1,6 +1,6 @@
 import { faX } from "@fortawesome/free-solid-svg-icons/faX";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "~/lib/utils";
@@ -18,6 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import {
+  getAvailableTimeSlotsForDate,
+  getClinicSchedule,
+} from "~/presentation/hooks/getClinicHours";
 
 interface AddAppointmentDialogProps {
   isOpen: boolean;
@@ -56,22 +60,73 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
 }) => {
   const [patientOpen, setPatientOpen] = useState(false);
   const [doctorOpen, setDoctorOpen] = useState(false);
+  const [timeOpen, setTimeOpen] = useState(false);
+  const [selectedTime, setSelectedTime] = useState<string>("");
 
-  if (!isOpen) return null;
+  // Get available time slots based on clinic schedule
+  const availableTimeSlots = useMemo(() => {
+    if (!selectedDate) return [];
 
-  const handleDateTimeChange = (date: Date | null) => {
-    onDateChange(date);
+    try {
+      return getAvailableTimeSlotsForDate(selectedDate);
+    } catch (error) {
+      console.error("Error getting time slots:", error);
+      return [];
+    }
+  }, [selectedDate]);
+
+  // Filter available dates (only show days that clinic is open)
+  const isDateAvailable = (date: Date) => {
+    try {
+      const schedule = getClinicSchedule();
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+      const dayName = dayNames[date.getDay()];
+      const daySchedule = schedule.find((d) => d.dayName === dayName);
+      return daySchedule?.isOpen || false;
+    } catch (error) {
+      console.error("Error checking date availability:", error);
+      return false;
+    }
   };
 
-  const selectedPatientName = patients.find(p => p.id === selectedPatient)?.nameSurname || "";
-  const selectedDoctorName = doctors.find(d => d.id === selectedDoctor)?.nameSurname || "";
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      setSelectedTime("");
+      const dateOnly = new Date(date);
+      dateOnly.setHours(0, 0, 0, 0);
+      onDateChange(dateOnly);
+    } else {
+      setSelectedTime("");
+      onDateChange(null);
+    }
+  };
 
-  const minTime = new Date();
-  minTime.setHours(9, 0, 0, 0);
+  const handleTimeChange = (time: string) => {
+    setSelectedTime(time);
 
-  const maxTime = new Date();
-  maxTime.setHours(17, 0, 0, 0);
+    if (selectedDate && time) {
+      const [hours, minutes] = time.split(":").map(Number);
+      const newDate = new Date(selectedDate);
+      newDate.setHours(hours, minutes, 0, 0);
+      onDateChange(newDate);
+    }
+    setTimeOpen(false);
+  };
 
+  const selectedPatientName =
+    patients.find((p) => p.id === selectedPatient)?.nameSurname || "";
+  const selectedDoctorName =
+    doctors.find((d) => d.id === selectedDoctor)?.nameSurname || "";
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -114,7 +169,10 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
               </PopoverTrigger>
               <PopoverContent className="w-[402px] p-0">
                 <Command>
-                  <CommandInput placeholder="Search patient..." className="h-9" />
+                  <CommandInput
+                    placeholder="Search patient..."
+                    className="h-9"
+                  />
                   <CommandList>
                     <CommandEmpty>No patient found.</CommandEmpty>
                     <CommandGroup>
@@ -123,7 +181,11 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
                           key={patient.id}
                           value={patient.nameSurname}
                           onSelect={() => {
-                            onPatientChange(selectedPatient === patient.id ? null : patient.id);
+                            onPatientChange(
+                              selectedPatient === patient.id
+                                ? null
+                                : patient.id,
+                            );
                             setPatientOpen(false);
                           }}
                         >
@@ -131,7 +193,9 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
                           <Check
                             className={cn(
                               "ml-auto",
-                              selectedPatient === patient.id ? "opacity-100" : "opacity-0"
+                              selectedPatient === patient.id
+                                ? "opacity-100"
+                                : "opacity-0",
                             )}
                           />
                         </CommandItem>
@@ -162,7 +226,10 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
               </PopoverTrigger>
               <PopoverContent className="w-[402px] p-0">
                 <Command>
-                  <CommandInput placeholder="Search doctor..." className="h-9" />
+                  <CommandInput
+                    placeholder="Search doctor..."
+                    className="h-9"
+                  />
                   <CommandList>
                     <CommandEmpty>No doctor found.</CommandEmpty>
                     <CommandGroup>
@@ -171,7 +238,9 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
                           key={doctor.id}
                           value={doctor.nameSurname}
                           onSelect={() => {
-                            onDoctorChange(selectedDoctor === doctor.id ? null : doctor.id);
+                            onDoctorChange(
+                              selectedDoctor === doctor.id ? null : doctor.id,
+                            );
                             setDoctorOpen(false);
                           }}
                         >
@@ -179,7 +248,9 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
                           <Check
                             className={cn(
                               "ml-auto",
-                              selectedDoctor === doctor.id ? "opacity-100" : "opacity-0"
+                              selectedDoctor === doctor.id
+                                ? "opacity-100"
+                                : "opacity-0",
                             )}
                           />
                         </CommandItem>
@@ -191,29 +262,81 @@ const AddAppointmentDialog: React.FC<AddAppointmentDialogProps> = ({
             </Popover>
           </div>
 
-          {/* Date and Time Selection */}
+          {/* Date Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Appointment Date & Time <span className="text-red-500">*</span>
+              Appointment Date <span className="text-red-500">*</span>
             </label>
-            <DatePicker
-              selected={selectedDate}
-              onChange={handleDateTimeChange}
-              showTimeSelect
-              timeFormat="HH:mm"
-              timeIntervals={30}
-              dateFormat="EEE, d MMM yyyy, HH:mm"
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 focus:border-[#2F919C] focus:ring-2 focus:ring-[#2F919C]/20 focus:outline-none"
-              placeholderText="Select date and time"
-              isClearable
-              showYearDropdown
-              showMonthDropdown
-              dropdownMode="select"
-              minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
-              timeCaption="Time"
-              minTime={minTime}
-              maxTime={maxTime}
-            />
+            <div className="relative">
+              <DatePicker
+                selected={selectedDate}
+                onChange={handleDateChange}
+                dateFormat="EEE, d MMM yyyy"
+                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm text-slate-900 focus:border-[#2F919C] focus:ring-2 focus:ring-[#2F919C]/20 focus:outline-none"
+                placeholderText="Select date"
+                isClearable
+                showYearDropdown
+                showMonthDropdown
+                dropdownMode="select"
+                minDate={new Date()}
+                filterDate={isDateAvailable}
+                onCalendarOpen={() => console.log("Calendar opened")}
+                onCalendarClose={() => console.log("Calendar closed")}
+              />
+            </div>
+          </div>
+
+          {/* Time Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Appointment Time <span className="text-red-500">*</span>
+            </label>
+            <Popover open={timeOpen} onOpenChange={setTimeOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={timeOpen}
+                  className="w-full justify-between"
+                  disabled={!selectedDate}
+                >
+                  {selectedTime || "Select time..."}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[402px] p-0">
+                <Command>
+                  <CommandInput placeholder="Search time..." className="h-9" />
+                  <CommandList>
+                    <CommandEmpty>No time slot available.</CommandEmpty>
+                    <CommandGroup>
+                      {availableTimeSlots.map((time) => (
+                        <CommandItem
+                          key={time}
+                          value={time}
+                          onSelect={() => handleTimeChange(time)}
+                        >
+                          {time}
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              selectedTime === time
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            {!selectedDate && (
+              <p className="mt-1 text-xs text-gray-500">
+                Please select a date first
+              </p>
+            )}
           </div>
 
           {/* Reason Input */}
