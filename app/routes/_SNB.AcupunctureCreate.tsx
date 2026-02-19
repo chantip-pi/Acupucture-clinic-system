@@ -20,6 +20,7 @@ import { useGetAllImages } from "~/presentation/hooks/image/useGetAllImages";
 import ImageSelector from "./components/meridian/ImageSelector";
 import AcupunctureArea from "./components/meridian/AcupunctureArea";
 import { useGetAcupointList } from "~/presentation/hooks/acupoint/useGetAcupointList";
+import ConfirmDialog from "./components/common/ConfirmDialog";
 
 const AcupunctureCreate: React.FC = () => {
   const [acupunctureAreas, setAcupunctureAreas] = useState<Array<{
@@ -34,6 +35,7 @@ const AcupunctureCreate: React.FC = () => {
   const [meridianName, setMeridianName] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [showImageSelector, setShowImageSelector] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const { addMeridian, loading: meridianLoading, error: meridianError } = useAddMeridian();
   const { addAcupoint, loading: acupointLoading, error: acupointError } = useAddAcupoint();
@@ -101,8 +103,10 @@ const AcupunctureCreate: React.FC = () => {
     ));
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     setError("");
 
     if (acupunctureAreas.length === 0) {
@@ -217,6 +221,29 @@ const AcupunctureCreate: React.FC = () => {
     }
   };
 
+  const handleShowConfirmDialog = (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (acupunctureAreas.length === 0) {
+      setError("Please add at least one acupuncture area before saving");
+      return;
+    }
+
+    const totalMarkers = acupunctureAreas.reduce((sum, area) => sum + area.markers.length, 0);
+    if (totalMarkers === 0) {
+      setError("Please add at least one marker before saving");
+      return;
+    }
+
+    if (!meridianName) {
+      setError("Please fill in all meridian information");
+      return;
+    }
+
+    setShowConfirmDialog(true);
+  };
+
   // Helper to avoid repeating duplicate-check logic
   const isDuplicateError = (error?: string): boolean => {
     if (!error) return false;
@@ -226,6 +253,21 @@ const AcupunctureCreate: React.FC = () => {
 
   return (
     <PageShell className="p-8">
+
+      <ConfirmDialog 
+        isOpen={showConfirmDialog} 
+        title={"Confirm Save"} 
+        message={"Are you sure you want to save this meridian?"} 
+        onConfirm={() => {
+          setShowConfirmDialog(false);
+          handleSubmit();
+        }} 
+        onCancel={() => {
+          setShowConfirmDialog(false);
+        }} 
+        isLoading={loading}
+      />  
+
       {/* Back Button */}
       <div className="flex items-center gap-3 py-4">
         <Button size="sm" variant="back" onClick={() => navigate("/meridianLibrary")}>
@@ -242,7 +284,7 @@ const AcupunctureCreate: React.FC = () => {
       {acupunctureAreas.length > 0 && (
         <Card className="mb-6">
           <SectionHeading title="Meridian Information" />
-          <form onSubmit={handleSubmit} className="gap-4 flex flex-col">
+          <form onSubmit={handleShowConfirmDialog} className="gap-4 flex flex-col">
               <FormField label="Meridian Name">
         <Input
           type="text"
