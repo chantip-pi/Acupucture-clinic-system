@@ -309,7 +309,7 @@ function EditStaff() {
               />
             </FormField>
 
-            <FormField label="Telephone">
+            <FormField label="Phone number">
               <Input
                 type="text"
                 id="phoneNumber"

@@ -302,7 +302,7 @@ function PatientDetail() {
             Back
           </Button>
         </div>
-        <Card>
+        <Card className="fade-in">
           <div className="flex items-center justify-between">
             <SectionHeading title="Patient Detail" />
             <div className="flex items-center gap-3">
@@ -355,7 +355,7 @@ function PatientDetail() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="fade-in">
           <SectionHeading title="Appointment History" />
           <AppointmentTable
             appointments={filteredAppointments}
@@ -365,7 +365,7 @@ function PatientDetail() {
           />
         </Card>
 
-        <Card>
+        <Card className="fade-in">
           <div className="flex items-center justify-between mb-4">
             <SectionHeading title="Medical Records" />
             {(isManager || isDoctor) && (

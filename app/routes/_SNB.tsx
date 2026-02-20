@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import React from "react";
 import { IoMdHome } from "react-icons/io";
 import { FaUser, FaWrench } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
-import { Outlet, useNavigate } from "@remix-run/react";
+import { Outlet, useNavigate, useLocation } from "@remix-run/react";
 import { useRequireAuth } from "~/presentation/hooks/staff/useRequireAuth";
 import { FaClipboardList } from "react-icons/fa";
 import {
@@ -10,6 +11,8 @@ import {
   getUserSession,
 } from "~/presentation/session/userSession";
 import AcupunctureDropDown from "./components/AcupunctureDropDown";
+import NavigationItem from "./components/NavigationItem";
+import SettingsButton from "./components/SettingsButton";
 import Suggest from "./_SNB.Suggest";
 import { IoSettingsSharp } from "react-icons/io5";
 
@@ -25,6 +28,7 @@ const navItems = [
 
 function SideNavBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   useRequireAuth();
   const [currentUser, setCurrentUser] = useState("Guest");
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
@@ -75,9 +79,9 @@ function SideNavBar() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-surface-muted">
+    <div className="flex h-screen bg-surface-muted">
       <aside
-        className="flex min-h-screen w-72 flex-col justify-between bg-brand text-white"
+        className="fixed left-0 top-0 h-screen w-72 flex flex-col justify-between bg-brand text-white z-10"
         style={{ boxShadow: "4px 0 20px rgba(0,0,0,0.1)" }}
       >
         <div className="px-6 py-8">
@@ -89,37 +93,26 @@ function SideNavBar() {
           </h1>
         </div>
 
-        <nav className="flex-1 px-4">
-          <ul className="space-y-3">
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <button
-                  onClick={() => navigate(item.to)}
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold transition hover:!bg-white hover:text-brand"
-                  style={{ backgroundColor: "transparent" }}
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
-                </button>
-              </li>
-            ))}
-            <AcupunctureDropDown />
-            {isManager && (
-              <button
-                onClick={() => navigate("/clinicHoursSettingsPage")}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold transition hover:!bg-white hover:text-brand"
-                style={{ backgroundColor: "transparent" }}
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                  <IoSettingsSharp size={18} />
-                </span>
-                <span>Settings</span>
-              </button>
-            )}
-          </ul>
-        </nav>
+        <div className="flex-1 px-4 flex flex-col">
+          <nav className="flex-1">
+            <ul className="space-y-3">
+              {navItems.map((item) => (
+                <NavigationItem
+                  key={item.to}
+                  label={item.label}
+                  icon={item.icon}
+                  to={item.to}
+                  isActive={location.pathname === item.to}
+                />
+              ))}
+              <AcupunctureDropDown currentPath={location.pathname} />
+              <SettingsButton
+                isActive={location.pathname === "/clinicHoursSettingsPage"}
+                isManager={isManager}
+              />
+            </ul>
+          </nav>
+        </div>
 
         <div className="px-4 pb-8">
           <button
@@ -130,7 +123,7 @@ function SideNavBar() {
           </button>
         </div>
       </aside>
-      <div className="flex-1 relative">
+      <div className="flex-1 relative ml-72">
         <Outlet />
 
         {/* Floating Suggest Assistant Button */}
@@ -187,4 +180,4 @@ function SideNavBar() {
   );
 }
 
-export default SideNavBar;
+export default React.memo(SideNavBar);

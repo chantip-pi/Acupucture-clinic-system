@@ -118,6 +118,20 @@ const StaffListView: React.FC = () => {
     );
   }
 
+  if (loading) {
+    return <LoadingPage />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-surface-muted">
+        <div className="flex-1 p-8">
+          <ErrorPage message={error} />
+        </div>
+      </div>
+    );
+  }
+
   // If user is not a manager, show an access-denied error page with a back button
 
   return (
@@ -152,11 +166,7 @@ const StaffListView: React.FC = () => {
             </div>
           </div>
 
-          {loading ? (
-            <LoadingPage />
-          ) : error ? (
-            <ErrorPage message={error} />
-          ) : (
+         
             <Table
               headers={[
                 "Username",
@@ -201,7 +211,7 @@ const StaffListView: React.FC = () => {
                 </tr>
               ))}
             </Table>
-          )}
+          
         </Card>
       </main>
     </div>

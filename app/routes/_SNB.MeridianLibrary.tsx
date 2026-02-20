@@ -252,7 +252,7 @@ function MeridianLibrary() {
           </>
         ) : (
           /* Show all letters with their meridians (filtered by category) */
-          <div className="space-y-6">
+          <div className="space-y-6 fade-in">
             {alphabetLetters.map((letter) => {
               const meridiansForLetter = filteredMeridianData[letter] || [];
 

@@ -40,7 +40,7 @@ function RegionView({
   }, [allPoints]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 fade-in">
       <Card padding="sm">
         <p className="mb-2 text-sm font-medium text-slate-600">
           {region.charAt(0).toUpperCase() + region.slice(1)} {side.toLowerCase()} view
