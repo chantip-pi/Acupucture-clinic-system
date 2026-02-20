@@ -15,7 +15,7 @@ import { getUserSession } from "~/presentation/session/userSession";
 import LoadingPage from "./components/common/LoadingPage";
 import { illnessCategoryOptions } from "~/domain/entities/IlllnessCategoryEnum";
 
-function AcupunctureLibrary() {
+function IllnessLibrary() {
   const { illnesses, loading: illnessesLoading } = useGetIllnessList();
   const [selectedLetter, setSelectedLetter] = useState("A");
   const [illnessData, setIllnessData] = useState<Record<string, Illness[]>>({});
@@ -344,4 +344,4 @@ function AcupunctureLibrary() {
   );
 }
 
-export default AcupunctureLibrary;
+export default IllnessLibrary;
