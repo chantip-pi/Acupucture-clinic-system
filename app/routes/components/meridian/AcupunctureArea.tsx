@@ -43,6 +43,7 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
   const [searchCode, setSearchCode] = useState<string>("");
   const [useExistingPoint, setUseExistingPoint] = useState<boolean>(false);
   const [clearCount, setClearCount] = useState(0);
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   const { acupoints, loading: acupointsLoading } = useGetAcupointList(null);
 
@@ -53,10 +54,10 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
   );
 
   // Check if acupoint already exists in the system
-  const acupointExistsInSystem = (code: string): boolean => {
+  const acupointExistsInSystem = (code: string, name: string): boolean => {
     return acupoints.some(
       (point) => point.acupointCode.toLowerCase() === code.toLowerCase(),
-    );
+    ) || acupoints.some((point) => point.acupointName.toLowerCase() === name.toLowerCase());
   };
 
   const MarkerView: React.FC<
@@ -117,6 +118,10 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
 
   const handleAddMarker = () => {
     if (!newMarkerPoint) return;
+    if (acupointExistsInSystem(acupointCode, acupointName)) {
+      setErrorMessage("Acupoint already exists in the system");
+      return;
+    }
     if (!acupointCode && !acupointName) return;
     if (!acupointCode.trim()) {
       alert("Acupuncture code is required");
@@ -171,6 +176,7 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
           setShow(false);
           setAcupointCode("");
           setAcupointName("");
+          setErrorMessage("");
           setSearchCode("");
           setUseExistingPoint(false);
         }}
@@ -183,7 +189,13 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
               <input
                 type="radio"
                 checked={!useExistingPoint}
-                onChange={() => setUseExistingPoint(false)}
+                onChange={() => {
+                  setUseExistingPoint(false);
+                  setAcupointCode("");
+                  setAcupointName("");
+                  setErrorMessage("");
+                  setSearchCode("");
+                }}
                 className="mr-2"
               />
               Manual Entry
@@ -192,7 +204,13 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
               <input
                 type="radio"
                 checked={useExistingPoint}
-                onChange={() => setUseExistingPoint(true)}
+                onChange={() => {
+                  setUseExistingPoint(true);
+                  setAcupointCode("");
+                  setAcupointName("");
+                  setErrorMessage("");
+                  setSearchCode("");
+                }}
                 className="mr-2"
               />
               Select Existing Point
@@ -254,7 +272,10 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
                 <Input
                   type="text"
                   value={acupointCode}
-                  onChange={(e) => setAcupointCode(e.target.value)}
+                  onChange={(e) => {
+                    setAcupointCode(e.target.value);
+                    setErrorMessage("");
+                  }}
                   placeholder="Acupuncture Code"
                 />
               </FormField>
@@ -263,10 +284,15 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
                 <Input
                   type="text"
                   value={acupointName}
-                  onChange={(e) => setAcupointName(e.target.value)}
+                  onChange={(e) => {
+                    setAcupointName(e.target.value);
+                    setErrorMessage("");
+                  }}
                   placeholder="Acupuncture Name"
                 />
               </FormField>
+              {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
             </div>
           )}
         </div>
