@@ -7,7 +7,7 @@ import {
   Card,
   FormField,
   Input,
-  SectionHeading
+  SectionHeading,
 } from "~/presentation/designSystem";
 import Modal from "../Modal";
 import { CustomMarker } from "~/domain/entities/CustomMarker";
@@ -32,7 +32,7 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
   onMarkersChange,
   onAreaRegionChange,
   onAreaSideChange,
-  onRemove
+  onRemove,
 }) => {
   const [show, setShow] = useState<boolean>(false);
   const [newMarkerPoint, setNewMarkerPoint] = useState<Marker | null>(null);
@@ -42,18 +42,20 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
   const [areaSide, setAreaSide] = useState<string>("");
   const [searchCode, setSearchCode] = useState<string>("");
   const [useExistingPoint, setUseExistingPoint] = useState<boolean>(false);
-  
+  const [clearCount, setClearCount] = useState(0);
+
   const { acupoints, loading: acupointsLoading } = useGetAcupointList(null);
-  
-  const filteredAcupoints = acupoints.filter(point =>
-    point.acupointCode.toLowerCase().includes(searchCode.toLowerCase()) ||
-    point.acupointName.toLowerCase().includes(searchCode.toLowerCase())
+
+  const filteredAcupoints = acupoints.filter(
+    (point) =>
+      point.acupointCode.toLowerCase().includes(searchCode.toLowerCase()) ||
+      point.acupointName.toLowerCase().includes(searchCode.toLowerCase()),
   );
 
   // Check if acupoint already exists in the system
   const acupointExistsInSystem = (code: string): boolean => {
-    return acupoints.some(point => 
-      point.acupointCode.toLowerCase() === code.toLowerCase()
+    return acupoints.some(
+      (point) => point.acupointCode.toLowerCase() === code.toLowerCase(),
     );
   };
 
@@ -100,8 +102,7 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
 
   const handleClear = () => {
     onMarkersChange([]);
-    onAreaRegionChange("");
-    onAreaSideChange("");
+    setClearCount((c) => c + 1);
   };
 
   const handleAreaRegionChange = (value: string) => {
@@ -121,12 +122,11 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
       alert("Acupuncture code is required");
       return;
     }
-    
+
     // Check if acupoint already exists in current area
     if (codeExists) {
       return; // Silently skip duplicate in same area
     }
-
 
     const newMarker: CustomMarker = {
       top: Number(newMarkerPoint.top),
@@ -223,19 +223,27 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
                         onClick={() => handleSelectExistingAcupoint(point)}
                       >
                         <div className="font-medium">{point.acupointCode}</div>
-                        <div className="text-sm text-gray-600">{point.acupointName}</div>
+                        <div className="text-sm text-gray-600">
+                          {point.acupointName}
+                        </div>
                       </div>
                     ))
                   ) : (
-                    <div className="p-3 text-gray-500">No matching acupoints found</div>
+                    <div className="p-3 text-gray-500">
+                      No matching acupoints found
+                    </div>
                   )}
                 </div>
               )}
 
               {acupointCode && (
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <div className="text-sm font-medium text-blue-800">Selected:</div>
-                  <div className="font-medium">{acupointCode} - {acupointName}</div>
+                  <div className="text-sm font-medium text-blue-800">
+                    Selected:
+                  </div>
+                  <div className="font-medium">
+                    {acupointCode} - {acupointName}
+                  </div>
                 </div>
               )}
             </div>
@@ -263,7 +271,7 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
           )}
         </div>
       </Modal>
-  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label="Region">
           <Input
             type="text"
@@ -283,14 +291,14 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
             value={areaSide}
             onChange={(e) => handleAreaSideChange(e.target.value)}
             placeholder="Side (e.g., front, back, left, right)"
-            className="h-14"
+            className="h-14 mb-4"
             required
           />
         </FormField>
       </div>
       <FormField label="Click on the image to add markers">
         <ImageMarker
-          key={`${areaId}_${image}`}
+          key={`${areaId}_${image}_${clearCount}`}
           src={image}
           markers={markers}
           markerComponent={MarkerView}
@@ -306,16 +314,16 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
         <Button
           type="button"
           variant="secondary"
-          onClick={handleClear}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClear();
+          }}
         >
           Clear All Markers
         </Button>
       </div>
 
-      <HistoryTable 
-        markers={markers} 
-        setMarkers={onMarkersChange} 
-      />
+      <HistoryTable markers={markers} setMarkers={onMarkersChange} />
     </Card>
   );
 };
