@@ -80,9 +80,11 @@ const StaffListView: React.FC = () => {
   };
 
   const handleClickList = (username: string) => {
-    navigate("/staffDetail", {
-      state: { username },
-    });
+    if (isManager) {
+      navigate("/staffDetail", {
+        state: { username },
+      });
+    }
   };
   // If we haven't checked the session yet, show loading
   if (!hasCheckedSession) {
