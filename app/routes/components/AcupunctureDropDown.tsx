@@ -25,12 +25,12 @@ const AcupunctureDropDown = () => {
         <div className="ml-8 space-y-2 border-l border-white/20 pl-4">
           <button
             onClick={() => {
-              navigate("/acupunctureLibrary");
+              navigate("/illnessLibrary");
               setOpen(false);
             }}
             className="block w-full px-3 py-2 text-left text-sm font-medium transition hover:text-white"
           >
-            Acupuncture Library
+            Illness Library
           </button>
           <button
             onClick={() => {
