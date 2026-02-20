@@ -65,7 +65,7 @@ function SideNavBar() {
   return (
     <div className="flex min-h-screen bg-surface-muted">
       <aside
-        className="flex h-full min-h-screen w-72 flex-col justify-between bg-brand text-white"
+        className="flex min-h-screen w-72 flex-col justify-between bg-brand text-white"
         style={{ boxShadow: "4px 0 20px rgba(0,0,0,0.1)" }}
       >
         <div className="px-6 py-8">

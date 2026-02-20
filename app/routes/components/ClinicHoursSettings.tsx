@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  PageShell,
   Card,
   SectionHeading,
   Button,
 } from "~/presentation/designSystem";
-import { faArrowLeft, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Checkbox } from "app/components/ui/checkbox";
 
@@ -294,13 +293,6 @@ const ClinicHoursSettings = () => {
         </Button>
 
         <div className="flex gap-3">
-          <Button
-            variant="secondary"
-            onClick={() => navigate(-1)}
-            disabled={hasChanges}
-          >
-            Cancel
-          </Button>
           <Button
             variant="primary"
             onClick={handleSave}

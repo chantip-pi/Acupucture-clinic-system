@@ -6,6 +6,7 @@ import {
   Card,
   FormField,
   Input,
+  PageShell,
   SectionHeading,
   Select,
 } from "~/presentation/designSystem";
@@ -254,17 +255,12 @@ function EditStaff() {
     }
   };
 
-
   return (
-    <div className="flex min-h-screen bg-surface-muted">
-      <main className="flex-1 p-8">
-        <Card className="max-w-3xl">
+    <PageShell className="p-8">
+        <Card className="w-full">
           <div className="flex items-center justify-between">
             <SectionHeading title="Edit Staff" />
             <div className="flex items-center gap-3">
-              <span className="text-brand text-lg font-semibold">
-                {formData.nameSurname}
-              </span>
               <Button
                 type="button"
                 variant="danger"
@@ -391,8 +387,7 @@ function EditStaff() {
             </div>
           </form>
         </Card>
-      </main>
-    </div>
+      </PageShell>
   );
 }
 

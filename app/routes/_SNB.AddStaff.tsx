@@ -1,11 +1,11 @@
 import { useNavigate } from "@remix-run/react";
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import SideNavBar from "./_SNB";
 import {
   Button,
   Card,
   FormField,
   Input,
+  PageShell,
   SectionHeading,
   Select,
 } from "~/presentation/designSystem";
@@ -158,10 +158,8 @@ function SignUp() {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface-muted">
-  
-      <main className="flex-1 p-8">
-        <Card className="max-w-3xl">
+    <PageShell className="p-8">
+        <Card className="w-full">
           <SectionHeading title="Sign up new staff" />
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label="Username">
@@ -282,8 +280,7 @@ function SignUp() {
             </div>
           </form>
         </Card>
-      </main>
-    </div>
+      </PageShell>
   );
 }
 
