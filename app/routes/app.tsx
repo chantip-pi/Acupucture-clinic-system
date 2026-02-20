@@ -11,7 +11,7 @@ import PatientDetail from './_SNB.PatientDetail';
 import LogIn from './LogIn';
 import AddStaff from './_SNB.AddStaff';
 import AcupunctureCreate from './_SNB.AcupunctureCreate';
-import AcupunctureLibrary from './_SNB.AcupunctureLibrary';
+import IllnessLibrary from './_SNB.IllnessLibrary';
 import AcupunctureShowPage from './_SNB.AcupunctureShowPage';
 import CreateMedicalRecord from './_SNB.CreateMedicalRecord';
 import MedicalRecordDetail from './_SNB.MedicalRecordDetail';
@@ -38,7 +38,7 @@ function App() {
         <Route path="/logIn" element={<LogIn/>}/>
         <Route path="/addStaff" element={<AddStaff/>}/>
         <Route path="/acupunctureCreate" element={<AcupunctureCreate/>}/>
-        <Route path="/acupunctureLibrary" element={<AcupunctureLibrary/>}/>
+        <Route path="/illnessLibrary" element={<IllnessLibrary/>}/>
         <Route path="/acupunctureShowPage" element={<AcupunctureShowPage/>}/>
         <Route path="/createMedicalRecord" element={<CreateMedicalRecord/>}/>
         <Route path="/medicalRecordDetail" element={<MedicalRecordDetail/>}/>
