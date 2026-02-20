@@ -14,6 +14,7 @@ import { DateTimeHelper } from "~/domain/value-objects/DateOfBirth";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons/faPenToSquare";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
 function StaffDetail() {
   const navigate = useNavigate();
@@ -129,10 +130,16 @@ function StaffDetail() {
     <div className="flex min-h-screen bg-surface-muted">
 
       <main className="flex-1 p-8">
-        <Card>
-        <div className="flex items-center justify-between">
-          <SectionHeading title="Staff Details" />
-          <div className="flex items-center gap-3">
+        <Button className="mb-4" size="sm" variant="back" onClick={() => navigate(-1)}>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full">
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </span>
+          Back
+        </Button>
+        <Card className="fade-in">
+          <div className="flex items-center justify-between">
+            <SectionHeading title="Staff Details" />
+            <div className="flex items-center gap-3">
               {isManager && (<Button
                 variant="secondary"
                 size="sm"
@@ -143,8 +150,8 @@ function StaffDetail() {
                 </span>
                 Edit
               </Button>)}
-              </div>
-              </div>
+            </div>
+          </div>
           <div className="mt-4">
             {loading && !errorMessage ? (
               <p>Loading...</p>
