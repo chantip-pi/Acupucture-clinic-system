@@ -47,10 +47,10 @@ const Modal: React.FC<ModalProps> = ({
       <ModalBody>{children}</ModalBody>
       
       <ModalFooter>
-        <Button variant="primary" onClick={onAdd}>
+        <Button variant="primary" onClick={onAdd} type="button">
           {addButtonText}
         </Button>
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="secondary" onClick={onClose} type="button">
           Close
         </Button>
       </ModalFooter>

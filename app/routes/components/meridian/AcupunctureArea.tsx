@@ -118,13 +118,13 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
 
   const handleAddMarker = () => {
     if (!newMarkerPoint) return;
-    if (acupointExistsInSystem(acupointCode, acupointName)) {
+    if (!useExistingPoint && acupointExistsInSystem(acupointCode, acupointName)) {
       setErrorMessage("Acupoint already exists in the system");
       return;
     }
     if (!acupointCode && !acupointName) return;
-    if (!acupointCode.trim()) {
-      alert("Acupuncture code is required");
+    if (!acupointCode.trim() || !acupointName.trim()) {
+      alert("Acupuncture code and name is required");
       return;
     }
 
