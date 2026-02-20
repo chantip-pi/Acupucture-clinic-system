@@ -21,11 +21,6 @@ const navItems = [
     to: "/staffListView",
   },
   { label: "Manage Patient", icon: <FaUser size={18} />, to: "/patientList" },
-  {
-    label: "Settings",
-    icon: <IoSettingsSharp size={18} />,
-    to: "/clinicHoursSettingsPage",
-  },
 ];
 
 function SideNavBar() {
@@ -111,6 +106,18 @@ function SideNavBar() {
               </li>
             ))}
             <AcupunctureDropDown />
+            {isManager && (
+              <button
+                onClick={() => navigate("/clinicHoursSettingsPage")}
+                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold transition hover:!bg-white hover:text-brand"
+                style={{ backgroundColor: "transparent" }}
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                  <IoSettingsSharp size={18} />
+                </span>
+                <span>Settings</span>
+              </button>
+            )}
           </ul>
         </nav>
 
