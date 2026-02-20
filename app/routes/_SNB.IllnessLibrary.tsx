@@ -277,7 +277,7 @@ function IllnessLibrary() {
           </>
         ) : (
           /* Show all letters with their illnesses (filtered by category) */
-          <div className="space-y-6">
+          <div className="space-y-6 fade-in">
             {alphabetLetters.map((letter) => {
               const illnessesForLetter = filteredIllnessData[letter] || [];
 

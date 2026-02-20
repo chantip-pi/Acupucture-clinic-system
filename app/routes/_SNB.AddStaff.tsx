@@ -161,7 +161,7 @@ function SignUp() {
     <PageShell className="p-8">
         <Card className="w-full">
           <SectionHeading title="Sign up new staff" />
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 fade-in">
             <FormField label="Username">
               <Input
                 type="text"
@@ -184,7 +184,7 @@ function SignUp() {
               />
             </FormField>
 
-            <FormField label="Telephone">
+            <FormField label="Phone number">
               <Input
                 type="tel"
                 id="phoneNumber"

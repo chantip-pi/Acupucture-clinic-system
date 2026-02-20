@@ -366,7 +366,7 @@ const AppointmentList: React.FC = () => {
             onConfirm={handleCancelAppointment}
             onCancel={() => setShowConfirmDialog(false)}
           />
-        <Card>
+        <Card className="fade-in">
           <div className="flex items-center justify-between mb-6">
             <SectionHeading title="Appointment List" />
             <Button

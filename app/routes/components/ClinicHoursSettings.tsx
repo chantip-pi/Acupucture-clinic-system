@@ -160,7 +160,7 @@ const ClinicHoursSettings = () => {
   };
 
   return (
-    <Card>
+    <Card className="fade-in">
       <SectionHeading
         title="Clinic Hours Settings"
         description="Configure your clinic's operating hours for each day of the week"
