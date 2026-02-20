@@ -79,9 +79,9 @@ function SideNavBar() {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-surface-muted">
+    <div className="flex h-screen bg-surface-muted">
       <aside
-        className="flex min-h-screen w-72 flex-col justify-between bg-brand text-white"
+        className="fixed left-0 top-0 h-screen w-72 flex flex-col justify-between bg-brand text-white z-10"
         style={{ boxShadow: "4px 0 20px rgba(0,0,0,0.1)" }}
       >
         <div className="px-6 py-8">
@@ -93,24 +93,26 @@ function SideNavBar() {
           </h1>
         </div>
 
-        <nav className="flex-1 px-4">
-          <ul className="space-y-3">
-            {navItems.map((item) => (
-              <NavigationItem
-                key={item.to}
-                label={item.label}
-                icon={item.icon}
-                to={item.to}
-                isActive={location.pathname === item.to}
+        <div className="flex-1 px-4 flex flex-col">
+          <nav className="flex-1">
+            <ul className="space-y-3">
+              {navItems.map((item) => (
+                <NavigationItem
+                  key={item.to}
+                  label={item.label}
+                  icon={item.icon}
+                  to={item.to}
+                  isActive={location.pathname === item.to}
+                />
+              ))}
+              <AcupunctureDropDown currentPath={location.pathname} />
+              <SettingsButton
+                isActive={location.pathname === "/clinicHoursSettingsPage"}
+                isManager={isManager}
               />
-            ))}
-            <AcupunctureDropDown currentPath={location.pathname} />
-            <SettingsButton
-              isActive={location.pathname === "/clinicHoursSettingsPage"}
-              isManager={isManager}
-            />
-          </ul>
-        </nav>
+            </ul>
+          </nav>
+        </div>
 
         <div className="px-4 pb-8">
           <button
@@ -121,7 +123,7 @@ function SideNavBar() {
           </button>
         </div>
       </aside>
-      <div className="flex-1 relative">
+      <div className="flex-1 relative ml-72">
         <Outlet />
 
         {/* Floating Suggest Assistant Button */}
