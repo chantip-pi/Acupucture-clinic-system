@@ -47,7 +47,11 @@ const StaffListView: React.FC = () => {
   };
 
   const getStaffName = (staff: Staff): string => {
-    return staff.nameSurname || (staff as unknown as { staff_name?: string }).staff_name || "";
+    return (
+      staff.nameSurname ||
+      (staff as unknown as { staff_name?: string }).staff_name ||
+      ""
+    );
   };
 
   const filteredStaff = useMemo(() => {
@@ -72,7 +76,6 @@ const StaffListView: React.FC = () => {
     action();
   };
 
-
   const handleAddNewStaff = () => {
     ensureManager(() => {
       navigate("/addStaff");
@@ -90,7 +93,6 @@ const StaffListView: React.FC = () => {
   if (!hasCheckedSession) {
     return (
       <div className="flex min-h-screen bg-surface-muted">
-    
         <div className="flex-1 p-8">
           <LoadingPage />
         </div>
@@ -106,7 +108,6 @@ const StaffListView: React.FC = () => {
 
     return (
       <div className="flex min-h-screen bg-surface-muted">
-    
         <div className="flex-1 p-8">
           <ErrorPage
             message="You don't have access to this page."
@@ -118,7 +119,6 @@ const StaffListView: React.FC = () => {
   }
 
   // If user is not a manager, show an access-denied error page with a back button
-  
 
   return (
     <div className="flex min-h-screen bg-surface-muted">
@@ -172,48 +172,30 @@ const StaffListView: React.FC = () => {
               {filteredStaff.map((staff) => (
                 <tr
                   key={staff.staffId}
-                  className="cursor-pointer hover:bg-slate-50"
+                  className={
+                    isManager ? "cursor-pointer hover:bg-slate-50" : ""
+                  }
+                  onClick={() => handleClickList(staff.username)}
                 >
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {staff.username}
                   </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {getStaffName(staff)}
                   </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {DateTimeHelper.calculateAge(staff.birthday)}
                   </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {staff.gender}
                   </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {staff.title}
                   </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {staff.phoneNumber}
                   </td>
-                  <td
-                    className="px-4 py-3 text-md text-slate-900"
-                    onClick={() => handleClickList(staff.username)}
-                  >
+                  <td className="px-4 py-3 text-md text-slate-900">
                     {staff.email}
                   </td>
                 </tr>
