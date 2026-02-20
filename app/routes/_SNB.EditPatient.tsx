@@ -138,9 +138,6 @@ function EditPatient() {
           <div className="flex items-center justify-between">
             <SectionHeading title="Edit Patient" />
             <div className="flex items-center gap-3">
-              <span className="text-brand text-lg font-semibold">
-                {formData.nameSurname}
-              </span>
               <Button
                 type="button"
                 variant="danger"
