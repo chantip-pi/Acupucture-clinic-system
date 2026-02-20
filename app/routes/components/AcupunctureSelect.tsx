@@ -10,7 +10,10 @@ import MultiSelectDropdown from "./MultiSelectDropdown";
 import { useGetMeridianRegion } from "~/presentation/hooks/meridian/useGetMeridianRegion";
 import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
 import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGetMeridianSidesByRegion";
-import { AcupuncturePoint, SelectedPoint } from "~/domain/entities/AcupuncturePoint";
+import {
+  AcupuncturePoint,
+  SelectedPoint,
+} from "~/domain/entities/AcupuncturePoint";
 
 interface AcupunctureSelectProps {
   selectedPoints: SelectedPoint[];
@@ -19,11 +22,11 @@ interface AcupunctureSelectProps {
   hideSaveButton?: boolean;
 }
 
-function AcupunctureSelect({ 
-  selectedPoints, 
+function AcupunctureSelect({
+  selectedPoints,
   onSelectedPointsChange,
   hideShell = false,
-  hideSaveButton = false 
+  hideSaveButton = false,
 }: AcupunctureSelectProps) {
   const { meridians, loading: meridiansLoading } = useGetMeridianList();
   const { regions, loading: regionsLoading } = useGetMeridianRegion();
@@ -42,7 +45,9 @@ function AcupunctureSelect({
 
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
 
-  const [visibleMeridians, setVisibleMeridians] = useState<Record<string, Set<number>>>({});
+  const [visibleMeridians, setVisibleMeridians] = useState<
+    Record<string, Set<number>>
+  >({});
 
   useEffect(() => {
     if (meridians.length > 0) {
@@ -56,12 +61,20 @@ function AcupunctureSelect({
     }
   }, [meridians]);
 
-  const [viewsByRegion, setViewsByRegion] = useState<Record<string, Record<string, boolean>>>({});
+  const [viewsByRegion, setViewsByRegion] = useState<
+    Record<string, Record<string, boolean>>
+  >({});
 
   const { sidesByRegion } = useGetMeridianSidesByRegion(selectedRegions);
 
   const toggleRegion = (region: string) => {
     const normalized = region.toLowerCase();
+
+    if (selectedRegions.includes(normalized)) {
+      onSelectedPointsChange(
+        selectedPoints.filter((p) => p.region?.toLowerCase() !== normalized),
+      );
+    }
 
     setSelectedRegions((prev) =>
       prev.includes(normalized)
@@ -71,6 +84,20 @@ function AcupunctureSelect({
   };
 
   const toggleView = (region: string, side: string) => {
+    const isCurrentlyVisible = viewsByRegion[region]?.[side];
+
+    if (isCurrentlyVisible) {
+      onSelectedPointsChange(
+        selectedPoints.filter(
+          (p) =>
+            !(
+              p.region?.toLowerCase() === region.toLowerCase() &&
+              p.side?.toLowerCase() === side.toLowerCase()
+            ),
+        ),
+      );
+    }
+
     setViewsByRegion((prev) => ({
       ...prev,
       [region]: {
@@ -106,7 +133,9 @@ function AcupunctureSelect({
     const existingIndex = selectedPoints.findIndex((p) => p.key === pointKey);
 
     if (existingIndex >= 0) {
-      onSelectedPointsChange(selectedPoints.filter((_, i) => i !== existingIndex));
+      onSelectedPointsChange(
+        selectedPoints.filter((_, i) => i !== existingIndex),
+      );
     } else {
       onSelectedPointsChange([
         ...selectedPoints,
@@ -126,7 +155,7 @@ function AcupunctureSelect({
         </div>
       </div>
     );
-    
+
     return hideShell ? content : <PageShell>{content}</PageShell>;
   }
 
@@ -270,7 +299,13 @@ function AcupunctureSelect({
 
       {!hideSaveButton && (
         <div className="mt-8 flex justify-end">
-          <Button type="button" variant="primary" onClick={() => console.log("Save button - implement parent handler")}>
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() =>
+              console.log("Save button - implement parent handler")
+            }
+          >
             Save
           </Button>
         </div>

@@ -368,17 +368,32 @@ const CreateMedicalRecord = () => {
             />
           </FormField>
 
-          {(error || createMedicalRecordError || acupunctureError || illnessError) && (
+          {(error ||
+            createMedicalRecordError ||
+            acupunctureError ||
+            illnessError) && (
             <p className="text-md text-red-600 sm:col-span-2">
-              {error || createMedicalRecordError || acupunctureError || illnessError}
+              {error ||
+                createMedicalRecordError ||
+                acupunctureError ||
+                illnessError}
             </p>
           )}
-          
+
           <span className="flex items-center gap-2 py-4">
             <Checkbox
               className="data-[state=checked]:bg-brand data-[state=checked]:text-white data-[state=checked]:border-0"
               checked={hasAcupuncture}
-              onCheckedChange={(checked) => setHasAcupuncture(checked === true)}
+              onCheckedChange={(checked) => {
+                const isChecked = checked === true;
+                setHasAcupuncture(isChecked);
+                if (!isChecked) {
+                  setSelectedAcupuncturePoints([]);
+                  setSelectedIllnessIds([]);
+                  setShowAcupunctureSelect(false);
+                  setShowIllnessSelect(false);
+                }
+              }}
             />
             <span>Have Acupuncture Point</span>
           </span>
@@ -409,7 +424,11 @@ const CreateMedicalRecord = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={createMedicalRecordLoading || acupunctureLoading || illnessLoading}
+                disabled={
+                  createMedicalRecordLoading ||
+                  acupunctureLoading ||
+                  illnessLoading
+                }
               >
                 {createMedicalRecordLoading ? "Saving..." : "Save"}
               </Button>
@@ -426,9 +445,17 @@ const CreateMedicalRecord = () => {
               <Button
                 type="submit"
                 variant="primary"
-                disabled={createMedicalRecordLoading || acupunctureLoading || illnessLoading}
+                disabled={
+                  createMedicalRecordLoading ||
+                  acupunctureLoading ||
+                  illnessLoading
+                }
               >
-                {createMedicalRecordLoading || acupunctureLoading || illnessLoading ? "Saving..." : "Save All"}
+                {createMedicalRecordLoading ||
+                acupunctureLoading ||
+                illnessLoading
+                  ? "Saving..."
+                  : "Save All"}
               </Button>
             )}
           </div>

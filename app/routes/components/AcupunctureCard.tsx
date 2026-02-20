@@ -46,8 +46,8 @@ function AcupunctureCard({
                       className={`absolute cursor-pointer transition-all
                         ${
                           selected
-                            ? "bg-teal-500 ring-2 ring-teal-600"
-                            : "bg-gray-400 hover:bg-gray-500"
+                            ? "bg-blue-500 ring-2 ring-blue-600"
+                            : "bg-red-500 hover:bg-red-600"
                         }
                         rounded-full w-2 h-2
                         -translate-x-1/2 -translate-y-1/2
