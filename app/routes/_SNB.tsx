@@ -15,9 +15,17 @@ import { IoSettingsSharp } from "react-icons/io5";
 
 const navItems = [
   { label: "Home", icon: <IoMdHome size={22} />, to: "/home" },
-  { label: "Manage Staff", icon: <FaUserDoctor size={18} />, to: "/staffListView" },
+  {
+    label: "Manage Staff",
+    icon: <FaUserDoctor size={18} />,
+    to: "/staffListView",
+  },
   { label: "Manage Patient", icon: <FaUser size={18} />, to: "/patientList" },
-  { label: "Settings", icon: <IoSettingsSharp size={18} />, to: "/clinicHoursSettingsPage" },
+  {
+    label: "Settings",
+    icon: <IoSettingsSharp size={18} />,
+    to: "/clinicHoursSettingsPage",
+  },
 ];
 
 function SideNavBar() {
@@ -26,6 +34,8 @@ function SideNavBar() {
   const [currentUser, setCurrentUser] = useState("Guest");
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
   const [assistantWidth, setAssistantWidth] = useState(420);
+  const [isDoctor, setIsDoctor] = useState(false);
+  const [isManager, setIsManager] = useState(false);
 
   const handleToggleSuggest = () => {
     setIsSuggestOpen((prev) => !prev);
@@ -59,6 +69,13 @@ function SideNavBar() {
 
   useEffect(() => {
     const session = getUserSession();
+    if (!session) {
+      setIsDoctor(false);
+      setIsManager(false);
+      return;
+    }
+    setIsDoctor(session.title?.toLowerCase() === "doctor");
+    setIsManager(session.title?.toLowerCase() === "manager");
     setCurrentUser(session?.nameSurname ?? "Guest");
   }, []);
 
@@ -69,8 +86,12 @@ function SideNavBar() {
         style={{ boxShadow: "4px 0 20px rgba(0,0,0,0.1)" }}
       >
         <div className="px-6 py-8">
-          <p className="text-md uppercase tracking-widest text-white/80">Clinic Application</p>
-          <h1 className="mt-2 text-2xl font-semibold text-white">{currentUser}</h1>
+          <p className="text-md uppercase tracking-widest text-white/80">
+            Clinic Application
+          </p>
+          <h1 className="mt-2 text-2xl font-semibold text-white">
+            {currentUser}
+          </h1>
         </div>
 
         <nav className="flex-1 px-4">
@@ -89,7 +110,7 @@ function SideNavBar() {
                 </button>
               </li>
             ))}
-            <AcupunctureDropDown/>
+            <AcupunctureDropDown />
           </ul>
         </nav>
 
@@ -106,16 +127,18 @@ function SideNavBar() {
         <Outlet />
 
         {/* Floating Suggest Assistant Button */}
-        <button
-          type="button"
-          onClick={handleToggleSuggest}
-          className="fixed bottom-6 right-6 z-40 rounded-full bg-[#1FA1AF] text-white shadow-lg px-5 py-3 flex items-center gap-2 hover:bg-[#178995] transition-colors"
-        >
-          <FaClipboardList size={18} />
-          <span className="font-semibold text-sm">
-            {isSuggestOpen ? "Hide Suggest" : "Suggest Assistant"}
-          </span>
-        </button>
+        {(isDoctor || isManager) && (
+          <button
+            type="button"
+            onClick={handleToggleSuggest}
+            className="fixed bottom-6 right-6 z-40 rounded-full bg-[#1FA1AF] text-white shadow-lg px-5 py-3 flex items-center gap-2 hover:bg-[#178995] transition-colors"
+          >
+            <FaClipboardList size={18} />
+            <span className="font-semibold text-sm">
+              {isSuggestOpen ? "Hide Suggest" : "Suggest Assistant"}
+            </span>
+          </button>
+        )}
 
         {/* Right-side Suggest Panel */}
         {isSuggestOpen && (
