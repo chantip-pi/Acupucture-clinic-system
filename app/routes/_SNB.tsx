@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import React from "react";
 import { IoMdHome } from "react-icons/io";
 import { FaUser, FaWrench } from "react-icons/fa";
 import { FaUserDoctor } from "react-icons/fa6";
-import { Outlet, useNavigate } from "@remix-run/react";
+import { Outlet, useNavigate, useLocation } from "@remix-run/react";
 import { useRequireAuth } from "~/presentation/hooks/staff/useRequireAuth";
 import { FaClipboardList } from "react-icons/fa";
 import {
@@ -10,6 +11,8 @@ import {
   getUserSession,
 } from "~/presentation/session/userSession";
 import AcupunctureDropDown from "./components/AcupunctureDropDown";
+import NavigationItem from "./components/NavigationItem";
+import SettingsButton from "./components/SettingsButton";
 import Suggest from "./_SNB.Suggest";
 import { IoSettingsSharp } from "react-icons/io5";
 
@@ -25,6 +28,7 @@ const navItems = [
 
 function SideNavBar() {
   const navigate = useNavigate();
+  const location = useLocation();
   useRequireAuth();
   const [currentUser, setCurrentUser] = useState("Guest");
   const [isSuggestOpen, setIsSuggestOpen] = useState(false);
@@ -92,32 +96,19 @@ function SideNavBar() {
         <nav className="flex-1 px-4">
           <ul className="space-y-3">
             {navItems.map((item) => (
-              <li key={item.to}>
-                <button
-                  onClick={() => navigate(item.to)}
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold transition hover:!bg-white hover:text-brand"
-                  style={{ backgroundColor: "transparent" }}
-                >
-                  <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
-                </button>
-              </li>
+              <NavigationItem
+                key={item.to}
+                label={item.label}
+                icon={item.icon}
+                to={item.to}
+                isActive={location.pathname === item.to}
+              />
             ))}
-            <AcupunctureDropDown />
-            {isManager && (
-              <button
-                onClick={() => navigate("/clinicHoursSettingsPage")}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left font-semibold transition hover:!bg-white hover:text-brand"
-                style={{ backgroundColor: "transparent" }}
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
-                  <IoSettingsSharp size={18} />
-                </span>
-                <span>Settings</span>
-              </button>
-            )}
+            <AcupunctureDropDown currentPath={location.pathname} />
+            <SettingsButton
+              isActive={location.pathname === "/clinicHoursSettingsPage"}
+              isManager={isManager}
+            />
           </ul>
         </nav>
 
@@ -187,4 +178,4 @@ function SideNavBar() {
   );
 }
 
-export default SideNavBar;
+export default React.memo(SideNavBar);
