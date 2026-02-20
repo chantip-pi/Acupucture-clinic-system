@@ -31,6 +31,10 @@ export const ImageSelector: React.FC<ImageSelectorProps> = ({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
+    if(file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB");
+      return;
+    }
     onImageUpload(file);
   };
 
