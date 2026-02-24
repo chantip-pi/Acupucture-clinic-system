@@ -138,7 +138,7 @@ function IllnessLibrary() {
     <PageShell className="p-8">
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <SectionHeading title="Acupuncture Library" />
+          <SectionHeading title="Illness Library" />
           {(isManager) && (<Button
             variant="secondary"
             size="sm"

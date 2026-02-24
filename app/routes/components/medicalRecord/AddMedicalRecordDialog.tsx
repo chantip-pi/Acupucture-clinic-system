@@ -484,7 +484,6 @@ const AddMedicalRecordDialog: React.FC<AddMedicalRecordDialogProps> = ({
                   showYearDropdown
                   showMonthDropdown
                   dropdownMode="select"
-                  minDate={new Date()}
                   timeCaption="Time"
                   filterDate={isClinicOpenOnDate}
                   filterTime={isTimeWithinClinicHours}
