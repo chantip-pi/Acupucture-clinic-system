@@ -12,6 +12,7 @@ import ConfirmDialog from "./components/common/ConfirmDialog";
 import { IllnessCategoryEnum, illnessCategoryOptions } from "~/domain/entities/IlllnessCategoryEnum";
 import { AcupuncturePoint, SelectedPoint } from "~/domain/entities/AcupuncturePoint";
 import MultiSelectDropdown from "./components/MultiSelectDropdown";
+import AcupunctureSelect from "./components/AcupunctureSelect";
 import RegionSideView from "./components/RegionSideView";
 
 const CreateIllness = () => {
@@ -252,147 +253,13 @@ const CreateIllness = () => {
                         </FormField>
                     </div>
 
-                    {/* Acupuncture Points Selection  */}
-
-                    <h2 className="text-xl font-semibold text-gray-800 py-4">
-                        Select Acupuncture Points (Optional)
-                    </h2>
-
-                    {meridiansLoading || regionsLoading ? (
-                        <div className="py-8 text-center text-gray-500">
-                            Loading acupuncture data...
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {/* Region multi-select dropdown */}
-                            <div className="mb-6">
-                                <MultiSelectDropdown
-                                    choices={regions}
-                                    selectedChoices={selectedRegions}
-                                    onToggleChoice={toggleRegion}
-                                    getChoiceName={getRegionName}
-                                    dropdownPlaceholder="body parts"
-                                />
-                            </div>
-
-                            {/* Selected regions */}
-                            {selectedRegions.map((region) => {
-                                const sidesForRegion = sidesByRegion[region] || [];
-                                return (
-                                    <div key={region} className="space-y-4 border-t pt-4">
-                                        <h3 className="text-lg font-medium text-gray-700">
-                                            {region.charAt(0).toUpperCase() + region.slice(1)}
-                                        </h3>
-
-                                        {/* Side selector */}
-                                        <div className="mb-4 flex flex-wrap gap-2">
-                                            {sidesForRegion.map((side) => (
-                                                <Button
-                                                type="button"
-                                                    key={side}
-                                                    size="sm"
-                                                    variant={
-                                                        viewsByRegion[region]?.[side] ? "primary" : "secondary"
-                                                    }
-                                                    onClick={() => toggleView(region, side)}
-                                                >
-                                                    {side && typeof side === "string"
-                                                        ? side.charAt(0).toUpperCase() + side.slice(1)
-                                                        : ""}
-                                                </Button>
-                                            ))}
-                                        </div>
-
-
-                                        {/* Images with meridian selection */}
-                                        <div className="flex flex-col gap-4">
-                                            {sidesForRegion
-                                                .filter((side) => viewsByRegion[region]?.[side])
-                                                .map((side) => (
-                                                    <div key={side} className="space-y-4">
-                                                        <RegionSideView
-                                                            region={region}
-                                                            side={side}
-                                                            selectedPoints={selectedPoints}
-                                                            visibleMeridians={visibleMeridians}
-                                                            handlePointClick={handlePointClick}
-                                                            setSelectedPoints={setSelectedPoints}
-                                                            toggleMeridianVisibility={toggleMeridianVisibility}
-                                                        />
-                                                    </div>
-                                                ))}
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {/* Selected points indicator */}
-                            {selectedPoints.length > 0 && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                    <p className="text-blue-800 font-medium">
-                                        {selectedPoints.length} Acupuncture point{selectedPoints.length !== 1 ? "s" : ""} selected
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* All selected points summary table */}
-                            {selectedPoints.length > 0 && (
-                                <div>
-                                    <h3 className="mb-3 text-lg font-semibold text-slate-900">
-                                        All Selected Points
-                                    </h3>
-                                    <Table
-                                        headers={[
-                                            "Region",
-                                            "Side",
-                                            "Acupuncture Code",
-                                            "Acupuncture Name",
-                                            "Meridian",
-                                            "Actions",
-                                        ]}
-                                    >
-                                        {selectedPoints.map((point) => (
-                                            <tr key={point.key} className="hover:bg-slate-50">
-                                                <td className="px-4 py-2 text-sm text-slate-900">
-                                                    {point.region && typeof point.region === "string"
-                                                        ? point.region.charAt(0).toUpperCase() +
-                                                        point.region.slice(1)
-                                                        : ""}
-                                                </td>
-                                                <td className="px-4 py-2 text-sm text-slate-600 capitalize">
-                                                    {point.side && typeof point.side === "string"
-                                                        ? point.side.charAt(0).toUpperCase() + point.side.slice(1)
-                                                        : ""}
-                                                </td>
-                                                <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                                                    {point.acupointCode}
-                                                </td>
-                                                <td className="px-4 py-2 text-sm text-slate-600">
-                                                    {point.acupointName}
-                                                </td>
-                                                <td className="px-4 py-2 text-sm text-slate-600">
-                                                    {point.meridianName}
-                                                </td>
-                                                <td className="px-4 py-2 text-sm">
-                                                    <button
-                                                        onClick={() =>
-                                                            setSelectedPoints(
-                                                                selectedPoints.filter((p) => p.key !== point.key),
-                                                            )
-                                                        }
-                                                        className="text-red-600 hover:text-red-800"
-                                                    >
-                                                        Remove
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </Table>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
+                    {/* Acupuncture Points Selection */}
+                    <AcupunctureSelect
+                        selectedPoints={selectedPoints}
+                        onSelectedPointsChange={setSelectedPoints}
+                        hideShell={true}
+                        hideSaveButton={true}
+                    />
                           {/* Error Display */}
                 {(error || illnessError) && (
                     <p className="text-md text-red-600">{error || illnessError}</p>
