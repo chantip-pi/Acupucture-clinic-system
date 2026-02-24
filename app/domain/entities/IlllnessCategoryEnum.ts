@@ -1,11 +1,16 @@
 export enum IllnessCategoryEnum {
-    EXTERNAL_PATHOGEN = "External pathogen",
-    INTERNAL_ORGAN_DISORDER = "Internal organ disorder",
-    DEFICIENCY_SYNDROME = "Deficiency syndrome",
-    EXCESS_SYNDROME = "Excess syndrome",
-    CONGENITAL_CONDITION = "Congenital condition",
-    TRAUMA_INJURY = "Trauma / Injury",
-  }
+  CARDIOVASCULAR = "Cardiovascular",
+  NEURO_PSYCHIATRIC = "Neuro - Psychiatric",
+  LOCOMOTOR = "Locomotor",
+  RESPIRATORY_SYSTEM = "Respiratory system",
+  DIGESTIVE_SYSTEM = "Digestive system",
+  URINARY_SYSTEM = "Urinary system",
+  OBSTETRICS_GYNECOLOGY = "Obstetrics and Gynecology",
+  ENT = "ENT / Otolaryngology",
+  ENDOCRINE_SYSTEM = "Endocrine system",
+  INFECTION = "Infection",
+  OTHERS = "Others"
+}
   
   export const illnessCategoryOptions = Object.values(
     IllnessCategoryEnum
