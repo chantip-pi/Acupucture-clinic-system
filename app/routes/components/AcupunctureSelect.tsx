@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   PageShell,
   SectionHeading,
   Button,
   Table,
+  Input,
 } from "~/presentation/designSystem";
 import RegionSideView from "./RegionSideView";
-import MultiSelectDropdown from "./MultiSelectDropdown";
-import { useGetMeridianRegion } from "~/presentation/hooks/meridian/useGetMeridianRegion";
 import { useGetMeridianList } from "~/presentation/hooks/meridian/useGetMeridianList";
 import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGetMeridianSidesByRegion";
+import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
 import {
   AcupuncturePoint,
   SelectedPoint,
@@ -29,7 +29,10 @@ function AcupunctureSelect({
   hideSaveButton = false,
 }: AcupunctureSelectProps) {
   const { meridians, loading: meridiansLoading } = useGetMeridianList();
-  const { regions, loading: regionsLoading } = useGetMeridianRegion();
+  const { acupunctures, loading: acupuncturesLoading } = useGetAcupunctureList();
+
+  const [searchMode, setSearchMode] = useState<'meridian' | 'point'>('meridian');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getRegionName = (regionObj: any): string | null => {
     if (typeof regionObj === "string") return regionObj;
@@ -41,7 +44,26 @@ function AcupunctureSelect({
     return null;
   };
 
-  const loading = meridiansLoading || regionsLoading;
+  const loading = meridiansLoading || acupuncturesLoading;
+
+
+  // Filter meridians based on search
+  const filteredMeridians = useMemo(() => {
+    if (!searchQuery || searchMode !== 'meridian') return meridians;
+    return meridians.filter((m) =>
+      m.meridianName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [meridians, searchQuery, searchMode]);
+
+  // Filter acupoints based on search
+  const filteredAcupoints = useMemo(() => {
+    if (!searchQuery || searchMode !== 'point') return [];
+    return acupunctures.filter(
+      (acu) =>
+        acu.acupointCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        acu.acupointName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [acupunctures, searchQuery, searchMode]);
 
   const [selectedRegions, setSelectedRegions] = useState<string[]>([]);
 
@@ -67,21 +89,6 @@ function AcupunctureSelect({
 
   const { sidesByRegion } = useGetMeridianSidesByRegion(selectedRegions);
 
-  const toggleRegion = (region: string) => {
-    const normalized = region.toLowerCase();
-
-    if (selectedRegions.includes(normalized)) {
-      onSelectedPointsChange(
-        selectedPoints.filter((p) => p.region?.toLowerCase() !== normalized),
-      );
-    }
-
-    setSelectedRegions((prev) =>
-      prev.includes(normalized)
-        ? prev.filter((r) => r !== normalized)
-        : [...prev, normalized],
-    );
-  };
 
   const toggleView = (region: string, side: string) => {
     const isCurrentlyVisible = viewsByRegion[region]?.[side];
@@ -163,19 +170,148 @@ function AcupunctureSelect({
     <div>
       <SectionHeading
         title="Acupuncture Point Selection"
-        description="Choose body part for acupuncture"
       />
 
-      {/* Region multi-select dropdown */}
-      <div className="mb-6">
-        <MultiSelectDropdown
-          choices={regions}
-          selectedChoices={selectedRegions}
-          onToggleChoice={toggleRegion}
-          getChoiceName={getRegionName}
-          dropdownPlaceholder="body parts"
-        />
+      {/* Search Mode Toggle */}
+      <div className="mb-4">
+        <div className="flex gap-2 mb-3">
+          <Button
+            variant={searchMode === 'meridian' ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => {
+              setSearchMode('meridian');
+              setSearchQuery('');
+            }}
+          >
+            Search by Meridian
+          </Button>
+          <Button
+            variant={searchMode === 'point' ? 'primary' : 'secondary'}
+            size="sm"
+            onClick={() => {
+              setSearchMode('point');
+              setSearchQuery('');
+            }}
+          >
+            Search by Point
+          </Button>
+        </div>
+
+        {/* Search Input */}
+        <div className="mb-4">
+          <Input
+            type="text"
+            placeholder={
+              searchMode ===  'meridian'
+                ? 'Search meridians...'
+                : 'Search acupoint codes or names...'
+            }
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
       </div>
+
+
+      {/* Meridian Search Results */}
+      {searchMode === 'meridian' && (
+        <div className="mb-6">
+          <h3 className="mb-3 text-lg font-semibold text-slate-900">
+            Select Meridian
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-64 overflow-y-auto">
+            {filteredMeridians.map((meridian) => (
+              <div
+                key={meridian.meridianId}
+                className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer"
+                onClick={() => {
+                  // Auto-select region and side for this meridian
+                  const region = meridian.region.toLowerCase();
+                  const side = meridian.side.toLowerCase();
+                  if (!selectedRegions.includes(region)) {
+                    setSelectedRegions([...selectedRegions, region]);
+                  }
+                  setViewsByRegion(prev => ({
+                    ...prev,
+                    [region]: {
+                      ...prev[region],
+                      [side]: true,
+                    },
+                  }));
+                }}
+              >
+                <div className="font-medium text-slate-900">
+                  {meridian.meridianName}
+                </div>
+                <div className="text-sm text-slate-600">
+                  {meridian.region} - {meridian.side}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Point Search Results */}
+      {searchMode === 'point' && (
+        <div className="mb-6">
+          <h3 className="mb-3 text-lg font-semibold text-slate-900">
+            Select Acupoint
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+            {filteredAcupoints.map((point) => {
+              const pointKey = `${point.region}-${point.side}-${point.acupunctureId}`;
+              const isSelected = selectedPoints.some(p => p.key === pointKey);
+              return (
+                <div
+                  key={point.acupunctureId}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    isSelected 
+                      ? 'border-teal-500 bg-teal-50' 
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                  onClick={() => {
+                    const region = point.region.toLowerCase();
+                    const side = point.side.toLowerCase();
+                    
+                    // Auto-select region and show view
+                    if (!selectedRegions.includes(region)) {
+                      setSelectedRegions([...selectedRegions, region]);
+                    }
+                    setViewsByRegion(prev => ({
+                      ...prev,
+                      [region]: {
+                        ...prev[region],
+                        [side]: true,
+                      },
+                    }));
+                    
+                    // Toggle point selection
+                    handlePointClick(point, region, side);
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-slate-900">
+                        {point.acupointCode}
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        {point.acupointName}
+                      </div>
+                      <div className="text-xs text-slate-500">
+                        {point.meridianName} • {point.region} {point.side}
+                      </div>
+                    </div>
+                    <div className={`w-3 h-3 rounded-full ${
+                      isSelected ? 'bg-teal-500' : 'bg-slate-300'
+                    }`} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Selected regions */}
       <div className="space-y-4">
