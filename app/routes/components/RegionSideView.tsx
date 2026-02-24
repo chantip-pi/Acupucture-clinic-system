@@ -1,112 +1,73 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Table } from "~/presentation/designSystem";
 import AcupunctureCard from "./AcupunctureCard";
-import { useGetAcupunctureByRegionAndSide } from "~/presentation/hooks/acupuncture/useGetAcupunctureByRegionAndSide";
-import { useGetMeridiansByRegionAndSide } from "~/presentation/hooks/meridian/useGetMeridiansByRegionAndSide";
-import { AcupuncturePoint, RegionSideViewProps } from "~/domain/entities/AcupuncturePoint";
+import {
+  AcupuncturePoint,
+  RegionSideViewProps,
+} from "~/domain/entities/AcupuncturePoint";
 import { IMAGE_BASE_URL } from "~/constants/api";
 
 export default function RegionSideView({
   region,
   side,
+  meridianId,
+  meridianName,
+  points,
   selectedPoints,
-  visibleMeridians,
   handlePointClick,
-  toggleMeridianVisibility,
-  setSelectedPoints,
 }: RegionSideViewProps) {
-  const { acupunctures: acupsForView } = useGetAcupunctureByRegionAndSide(region, side);
-  const { meridians: meridiansForView } = useGetMeridiansByRegionAndSide(region, side);
+  if (!points.length) return null;
 
+  const imageUrl = `${IMAGE_BASE_URL}/${points[0].image}`;
 
-  // group points by meridianId
-  const pointsByMeridian = useMemo(() => {
-    const map = new Map<number, AcupuncturePoint[]>();
-    (acupsForView || []).forEach((a) => {
-      const p: AcupuncturePoint = {
-        acupunctureId: a.acupunctureId,
-        acupointCode: a.acupointCode,
-        acupointName: a.acupointName,
-        locationId: a.locationId,
-        pointLeft: a.pointLeft,
-        pointTop: a.pointTop,
-        meridianId: a.meridianId,
-        meridianName: a.meridianName,
-        region: a.region,
-        side: a.side,
-        image: a.image,
-      };
-      if (!map.has(p.meridianId)) map.set(p.meridianId, []);
-      map.get(p.meridianId)!.push(p);
-    });
-    return map;
-  }, [acupsForView]);
+  const meridianSelectedPoints = selectedPoints.filter(
+    (p) => p.meridianId === meridianId,
+  );
 
-  const regionKey = `${region.toLowerCase()}-${side.toLowerCase()}`;
-  const visibleMeridianIds = visibleMeridians[regionKey] || new Set<number>();
-
-  const allPoints: AcupuncturePoint[] = [];
-  pointsByMeridian.forEach((pts) => allPoints.push(...pts));
-
-  const visiblePoints: AcupuncturePoint[] = [];
-  pointsByMeridian.forEach((pts, mid) => {
-    if (visibleMeridianIds.has(mid)) visiblePoints.push(...pts);
-  });
-
-  const fullImageUrl = `${IMAGE_BASE_URL}/${meridiansForView[0]?.image}`;
-
-  const handleRemovePoint = (pointKey: string) => {
-    const newPoints = selectedPoints.filter((p) => p.key !== pointKey);
-    setSelectedPoints(newPoints);
-  };
+  const visibleMeridianIds = new Set<number>([meridianId]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 grid grid-cols-2 gap-2">
       <AcupunctureCard
         bodyPart={region}
         side={side}
-        label={side && typeof side === "string" ? side : ""}
-        meridiansForView={meridiansForView}
-        visiblePoints={visiblePoints}
-        allPoints={allPoints}
+        label={`${meridianName} – ${region} ${side}`}
+        meridiansForView={[
+          {
+            meridianId,
+            meridianName,
+            region,
+            side,
+            image: points[0].image,
+          },
+        ]}
+        visiblePoints={points}
+        allPoints={points}
         selectedPoints={selectedPoints}
         visibleMeridianIds={visibleMeridianIds}
-        imageUrl={fullImageUrl}
+        imageUrl={imageUrl}
         onPointClick={(point: AcupuncturePoint) =>
           handlePointClick(point, region, side)
         }
-        onMeridianToggle={(meridianId: number) =>
-          toggleMeridianVisibility(region, side, meridianId)
-        }
       />
 
-      {/* Selected points table for this view */}
-      {selectedPoints.filter((p) => visibleMeridianIds.has(p.meridianId)).length > 0 && (
+      {meridianSelectedPoints.length > 0 && (
         <div className="mt-3">
-          <Table headers={["Acupuncture Code", "Acupuncture Name", "Meridian", "Actions"]}>
-            {selectedPoints
-              .filter((p) => visibleMeridianIds.has(p.meridianId))
-              .map((point) => (
-                <tr key={point.key} className="hover:bg-slate-50">
-                  <td className="px-4 py-2 text-sm font-medium text-slate-900">
-                    {point.acupointCode}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.acupointName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-slate-600">
-                    {point.meridianName}
-                  </td>
-                  <td className="px-4 py-2 text-sm">
-                    <button
-                      onClick={() => handleRemovePoint(point.key)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
+          <Table headers={["Acupuncture Code", "Acupuncture Name", "Actions"]}>
+            {meridianSelectedPoints.map((point) => (
+              <tr key={point.key} className="hover:bg-slate-50">
+                <td className="px-4 py-2">{point.acupointCode}</td>
+                <td className="px-4 py-2">{point.acupointName}</td>
+                <td className="px-4 py-2">
+                  <button
+                    onClick={() => handlePointClick(point, region, side)}
+                    className="text-red-600"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            ))}
           </Table>
         </div>
       )}
