@@ -29,7 +29,7 @@ function MeridianShowCard({
                 const viewMap = new Map<string, AcupuncturePoint[]>();
 
                 meridianPoints.forEach((p) => {
-                    const key = `${p.region}-${p.side}-${p.image}`;
+                    const key = `${p.region}-${p.side}`;
                     if (!viewMap.has(key)) viewMap.set(key, []);
                     viewMap.get(key)!.push(p);
                 });
