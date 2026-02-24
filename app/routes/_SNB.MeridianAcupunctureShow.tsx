@@ -15,8 +15,6 @@ import LoadingPage from "./components/common/LoadingPage";
 import { useGetMeridianById } from "~/presentation/hooks/meridian/useGetMeridianById";
 import { useGetAcupunctureByMeridianName } from "~/presentation/hooks/acupuncture/useGetAcupunctureByMeridianName";
 import MeridianShowCard from "./components/meridian/MeridianShowCard";
-import { useGetMeridianRegion } from "~/presentation/hooks/meridian/useGetMeridianRegion";
-import { useGetMeridianSidesByRegion } from "~/presentation/hooks/meridian/useGetMeridianSidesByRegion";
 
 function MeridianAcupunctureShow() {
     const { state } = useLocation();
