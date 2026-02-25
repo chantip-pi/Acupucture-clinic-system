@@ -4,14 +4,13 @@ import { IMAGE_BASE_URL } from "~/constants/api";
 
 type MeridianShowCardProps = {
   points: AcupuncturePoint[];
-  imageBaseUrl?: string; 
+  imageBaseUrl?: string;
 };
 
 function MeridianShowCard({
   points,
   imageBaseUrl = IMAGE_BASE_URL + "/",
 }: MeridianShowCardProps) {
-
   const viewMap = new Map<string, AcupuncturePoint[]>();
 
   points.forEach((p) => {
@@ -29,6 +28,13 @@ function MeridianShowCard({
       {[...viewMap.entries()].map(([viewKey, viewPoints]) => {
         const sample = viewPoints[0];
         const imageUrl = imageBaseUrl + sample.image;
+
+        const sortedPoints = [...viewPoints].sort((a, b) =>
+          a.acupointCode.localeCompare(b.acupointCode, undefined, {
+            numeric: true,
+            sensitivity: "base",
+          }),
+        );
 
         return (
           <Card key={viewKey} padding="sm">
@@ -66,7 +72,7 @@ function MeridianShowCard({
               {/* Point List */}
               <div className="py-4">
                 <Table headers={["Code", "Name"]}>
-                  {viewPoints.map((acupuncture) => (
+                  {sortedPoints.map((acupuncture) => (
                     <tr
                       key={acupuncture.acupunctureId}
                       className="hover:bg-slate-50"

@@ -32,10 +32,17 @@ function MeridianAcupunctureShow() {
         );
     }
 
-    const {
-        acupunctures = [],
-        loading: meridianAcupunctureLoading,
-    } = useGetAcupunctureByMeridianName(meridianName);
+    const { acupunctures = [], loading: meridianAcupunctureLoading } =
+      useGetAcupunctureByMeridianName(meridianName);
+
+    const sortedAcupunctures = useMemo(() => {
+      return [...acupunctures].sort((a, b) =>
+        a.acupointCode.localeCompare(b.acupointCode, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
+    }, [acupunctures]);
 
     // Loading
     if (meridianAcupunctureLoading) {
@@ -69,7 +76,7 @@ function MeridianAcupunctureShow() {
                                 "Side",
                             ]}
                         >
-                            {acupunctures.map((acupuncture) => (
+                            {sortedAcupunctures.map((acupuncture) => (
                                 <tr
                                     key={`${acupuncture.region}-${acupuncture.side}-${acupuncture.acupunctureId}`}
                                     className="hover:bg-slate-50"
