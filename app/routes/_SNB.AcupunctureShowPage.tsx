@@ -54,6 +54,18 @@ function AcupunctureShowPage() {
     return acupunctures.filter((acu) => recordedIds.has(acu.acupunctureId));
   }, [acupunctureRecords, acupunctures]);
 
+  const sortedSelectedAcupunctures = useMemo(() => {
+    return [...selectedAcupunctures].sort((a, b) => {
+      const codeA = a.acupointCode ?? "";
+      const codeB = b.acupointCode ?? "";
+
+      return codeA.localeCompare(codeB, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      });
+    });
+  }, [selectedAcupunctures]);
+
   useEffect(() => {
     setToggledMeridians(
       Object.entries(visibleMeridians).reduce((acc, [key, meridianIds]) => {
@@ -118,7 +130,7 @@ function AcupunctureShowPage() {
                 "Side",
               ]}
             >
-              {selectedAcupunctures.map((point) => (
+              {sortedSelectedAcupunctures.map((point) => (
                 <tr
                   key={`${point.region}-${point.side}-${point.acupunctureId}`}
                   className="hover:bg-slate-50"
