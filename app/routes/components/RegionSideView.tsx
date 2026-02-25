@@ -1,4 +1,4 @@
-import React from "react";
+import { useMemo } from "react";
 import { Table } from "~/presentation/designSystem";
 import AcupunctureCard from "./AcupunctureCard";
 import {
@@ -20,9 +20,16 @@ export default function RegionSideView({
 
   const imageUrl = `${IMAGE_BASE_URL}/${points[0].image}`;
 
-  const meridianSelectedPoints = selectedPoints.filter(
-    (p) => p.meridianId === meridianId,
-  );
+  const meridianSelectedPoints = useMemo(() => {
+    return selectedPoints
+      .filter((p) => p.meridianId === meridianId)
+      .sort((a, b) =>
+        a.acupointCode.localeCompare(b.acupointCode, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
+  }, [selectedPoints, meridianId]);
 
   const visibleMeridianIds = new Set<number>([meridianId]);
 

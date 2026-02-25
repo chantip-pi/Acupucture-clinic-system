@@ -21,13 +21,23 @@ function RegionView({
   };
 
   // Filter points based on visible meridians
-  const visiblePoints = allPoints.filter((point) =>
-    visibleMeridianIds.has(point.meridianId)
-  );
+  const visiblePoints = useMemo(() => {
+    return allPoints
+      .filter((point) => visibleMeridianIds.has(point.meridianId))
+      .sort((a, b) =>
+        a.acupointCode.localeCompare(b.acupointCode, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      );
+  }, [allPoints, visibleMeridianIds]);
 
   // Group all unique meridians in this view
   const meridiansInView = useMemo(() => {
-    const meridianMap = new Map<number, { meridianId: number; meridianName: string }>();
+    const meridianMap = new Map<
+      number,
+      { meridianId: number; meridianName: string }
+    >();
     allPoints.forEach((point) => {
       if (!meridianMap.has(point.meridianId)) {
         meridianMap.set(point.meridianId, {
@@ -43,7 +53,8 @@ function RegionView({
     <div className="space-y-4 fade-in">
       <Card padding="sm">
         <p className="mb-2 text-sm font-medium text-slate-600">
-          {region.charAt(0).toUpperCase() + region.slice(1)} {side.toLowerCase()} view
+          {region.charAt(0).toUpperCase() + region.slice(1)}{" "}
+          {side.toLowerCase()} view
         </p>
 
         <div className="flex flex-row gap-4">
@@ -62,7 +73,10 @@ function RegionView({
                     <div
                       key={point.acupunctureId}
                       className={`absolute w-2 h-2 rounded-full -translate-x-1/2 -translate-y-1/2 bg-teal-500 ring-2 ring-teal-600`}
-                      style={{ left: `${point.pointLeft}%`, top: `${point.pointTop}%` }}
+                      style={{
+                        left: `${point.pointLeft}%`,
+                        top: `${point.pointTop}%`,
+                      }}
                       title={`${point.acupointCode} - ${point.acupointName} (${point.meridianName})`}
                     />
                   ))}
@@ -83,7 +97,7 @@ function RegionView({
                 {meridiansInView.map((m) => {
                   const isVisible = visibleMeridianIds.has(m.meridianId);
                   const pointCount = allPoints.filter(
-                    (p) => p.meridianId === m.meridianId
+                    (p) => p.meridianId === m.meridianId,
                   ).length;
 
                   return (

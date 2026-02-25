@@ -178,6 +178,15 @@ function AcupunctureSelect({
     cleanupMeridianIfEmpty(nextPoints);
   };
 
+  const sortedSelectedPoints = useMemo(() => {
+    return [...selectedPoints].sort((a, b) =>
+      a.acupointCode.localeCompare(b.acupointCode, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+  }, [selectedPoints]);
+
   if (loading) {
     const content = (
       <div className="flex min-h-screen items-center justify-center bg-surface-muted">
@@ -407,7 +416,7 @@ function AcupunctureSelect({
               "Actions",
             ]}
           >
-            {selectedPoints.map((point) => (
+            {sortedSelectedPoints.map((point) => (
               <tr key={point.key} className="hover:bg-slate-50">
                 <td className="px-4 py-2 text-sm font-medium text-slate-900">
                   {point.acupointCode}
