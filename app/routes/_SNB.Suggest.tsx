@@ -1,7 +1,10 @@
 import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useGetSuggest } from "~/presentation/hooks/gemini/useGetSuggest";
 import { renderText } from "~/domain/value-objects/MarkDownHelper";
 import { SuggestAcupoint, SuggestResult } from "~/domain/entities/Suggestion";
+import { Button } from "~/presentation/designSystem";
+import { useGetMeridianNames } from "~/presentation/hooks/meridian/useGetMeridianNames";
 
 type ChatMessage =
   | {
@@ -21,12 +24,14 @@ type ChatMessage =
 const HISTORY_STORAGE_KEY = "suggestAssistantHistory";
 
 function Suggest() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     symptoms: "",
   });
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const { getSuggest, loading, error: hookError } = useGetSuggest();
+  const { getSuggest, loading: suggestLoading, error: suggestError } = useGetSuggest();
   const [error, setError] = useState("");
+  const {meridians, loading: meridiansLoading, error: meridiansError} = useGetMeridianNames();
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -109,6 +114,15 @@ function Suggest() {
     }
   };
 
+ const normalize = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/\s+/g, "")        // remove spaces
+    .replace(/[-/\\.,]/g, "");  // remove dashes, slashes, dots, commas
+
+const isMeridianExist = (name: string) =>
+  meridians.some((meridian) => normalize(meridian) === normalize(name));
+
   const hasMessages = messages.length > 0;
 
   return (
@@ -135,7 +149,7 @@ function Suggest() {
 
       {/* Chat area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {!hasMessages && !hookError && !error && (
+        {!hasMessages && !suggestError && !error && (
          <div className="max-w-md w-full bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
     
          <p className="text-gray-600 font-medium">
@@ -152,9 +166,9 @@ function Suggest() {
        </div>
         )}
 
-        {(error || hookError) && (
+        {(error || suggestError) && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error || hookError}
+            {error || suggestError}
           </div>
         )}
 
@@ -174,11 +188,50 @@ function Suggest() {
                 {message.acupoints && message.acupoints.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <h4 className="font-semibold text-sm mb-2">Suggested acupoints</h4>
-                    <ul className="space-y-1 text-sm">
+                    <ul className="space-y-2 text-sm">
                       {message.acupoints.map((item: SuggestAcupoint, index: number) => (
-                        <li key={index}>
-                          <strong>{item.acupoint}</strong>
-                          {` – Meridian: ${item.meridian}, Illness: ${item.illness}`}
+                        <li key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div>
+                              <strong className="text-gray-900">{item.acupoint}</strong>
+                              <div className="text-xs text-gray-600 mt-1">
+                                Meridian: {item.meridian} 
+                              </div>
+                              {item.illness_id && (
+                                <div className="text-xs text-gray-600 mt-1">
+                                Illness: {item.illness}
+                              </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2 mt-2">
+                            {item.illness_id && (
+                              <Button
+                                onClick={() =>
+                                  navigate("/illnessAcupunctureShow", {
+                                    state: { illnessId: item.illness_id },
+                                  })
+                                }
+                              variant="primary"
+                              size="sm"
+                              >
+                                View Illness
+                              </Button>
+                            )}
+                            {isMeridianExist(item.meridian) && (
+                            <Button
+                              onClick={() =>
+                                navigate("/meridianAcupunctureShow", {
+                                  state: { meridianName: item.meridian },
+                                })
+                              }
+                              variant="primary"
+                              size="sm"
+                              >
+                              View Meridian
+                            </Button>
+                            )}
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -199,18 +252,18 @@ function Suggest() {
             placeholder="Describe symptoms..."
             className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-[#1FA1AF] focus:border-transparent"
             rows={3}
-            disabled={loading}
+            disabled={suggestLoading}
           />
           <div className="flex justify-end items-center gap-3">
-            {loading && (
+            {suggestLoading && (
               <span className="text-xs text-gray-500">Analyzing symptoms...</span>
             )}
             <button
               type="submit"
-              disabled={loading || !formData.symptoms.trim()}
+              disabled={suggestLoading || !formData.symptoms.trim()}
               className="px-4 py-1.5 rounded-full bg-[#1FA1AF] text-white text-sm font-semibold hover:bg-[#178995] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Sending..." : "Send"}
+              {suggestLoading ? "Sending..." : "Send"}
             </button>
           </div>
         </form>

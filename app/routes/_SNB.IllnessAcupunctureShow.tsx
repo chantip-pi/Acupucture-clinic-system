@@ -59,6 +59,15 @@ function IllnessAcupunctureShow() {
     return acupunctures.filter((acu) => recordedIds.has(acu.acupunctureId));
   }, [illnessAcupunctures, acupunctures]);
 
+  const sortedSelectedAcupunctures = useMemo(() => {
+    return [...selectedAcupunctures].sort((a, b) =>
+      a.acupointCode.localeCompare(b.acupointCode, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+  }, [selectedAcupunctures]);
+
   useEffect(() => {
     setToggledMeridians(
       Object.entries(visibleMeridians).reduce((acc, [key, meridianIds]) => {
@@ -126,7 +135,7 @@ function IllnessAcupunctureShow() {
                 "Side",
               ]}
             >
-              {selectedAcupunctures.map((point) => (
+              {sortedSelectedAcupunctures.map((point) => (
                 <tr
                   key={`${point.region}-${point.side}-${point.acupunctureId}`}
                   className="hover:bg-slate-50"

@@ -5,14 +5,10 @@ function AcupunctureCard({
   bodyPart,
   side,
   label,
-  meridiansForView,
   visiblePoints,
-  allPoints,
   selectedPoints,
-  visibleMeridianIds,
   imageUrl,
   onPointClick,
-  onMeridianToggle,
 }: AcupunctureCardProps) {
   const isPointSelected = (acupunctureId: number): boolean => {
     const pointKey = `${bodyPart}-${side}-${acupunctureId}`;
@@ -68,42 +64,6 @@ function AcupunctureCard({
             </div>
           )}
         </div>
-
-        {/* Meridian selection card */}
-        {meridiansForView.length > 0 && (
-          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 w-1/5">
-            <p className="mb-2 text-md font-semibold text-center">Meridian</p>
-            <div className="flex flex-col gap-2">
-              {meridiansForView.map((meridian) => {
-                const isVisible = visibleMeridianIds.has(meridian.meridianId);
-                const pointsForMeridian = allPoints.filter(
-                  (p) => p.meridianId === meridian.meridianId,
-                );
-                const selectedCountForMeridian = selectedPoints.filter(
-                  (p) => p.meridianId === meridian.meridianId,
-                ).length;
-
-                return (
-                  <label key={meridian.meridianId}>
-                    <input
-                      type="checkbox"
-                      checked={isVisible}
-                      onChange={() => onMeridianToggle(meridian.meridianId)}
-                      title={`${pointsForMeridian.length} points, ${selectedCountForMeridian} selected`}
-                    ></input>
-
-                    {meridian.meridianName}
-                    {selectedCountForMeridian > 0 && !isVisible && (
-                      <span className="ml-1 text-red-600">
-                        ({selectedCountForMeridian})
-                      </span>
-                    )}
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        )}
       </div>
     </Card>
   );

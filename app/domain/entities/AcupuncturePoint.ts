@@ -31,7 +31,6 @@ export interface AcupunctureCardProps {
   visibleMeridianIds: Set<number>;
   imageUrl: string | null;
   onPointClick: (point: AcupuncturePoint) => void;
-  onMeridianToggle: (meridianId: number) => void;
 }
 
 export interface AcupunctureShowCardProps {
@@ -53,9 +52,13 @@ export interface ShowCardRegionViewProps {
 export interface RegionSideViewProps {
   region: string;
   side: string;
+  meridianId: number;
+  meridianName: string;
+  points: AcupuncturePoint[];
   selectedPoints: SelectedPoint[];
-  visibleMeridians: Record<string, Set<number>>;
-  handlePointClick: (point: AcupuncturePoint, region: string, side: string) => void;
-  toggleMeridianVisibility: (region: string, side: string, meridianId: number) => void;
-  setSelectedPoints: (points: SelectedPoint[]) => void;
+  handlePointClick: (
+    point: AcupuncturePoint,
+    region: string,
+    side: string
+  ) => void;
 }
