@@ -9,6 +9,7 @@ import {
   Input,
   SectionHeading,
 } from "~/presentation/designSystem";
+import { Checkbox } from "app/components/ui/checkbox";
 import Modal from "../Modal";
 import { CustomMarker } from "~/domain/entities/CustomMarker";
 import { useGetAcupointList } from "~/presentation/hooks/acupoint/useGetAcupointList";
@@ -44,8 +45,9 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
   const [useExistingPoint, setUseExistingPoint] = useState<boolean>(false);
   const [clearCount, setClearCount] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isBilateral, setIsBilateral] = useState<boolean>(false);
 
-  const { acupoints, loading: acupointsLoading } = useGetAcupointList(null);
+  const { acupoints, loading: acupointsLoading } = useGetAcupointList();
 
   const filteredAcupoints = acupoints.filter(
     (point) =>
@@ -146,11 +148,16 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
       newMarker.acupointName = acupointName;
     }
 
+    if (isBilateral) {
+      newMarker.isBilateral = isBilateral;
+    }
+
     onMarkersChange([...markers, newMarker]);
     setAcupointCode("");
     setAcupointName("");
     setSearchCode("");
     setUseExistingPoint(false);
+    setIsBilateral(false);
     setShow(false);
     setNewMarkerPoint(null);
   };
@@ -179,6 +186,7 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
           setErrorMessage("");
           setSearchCode("");
           setUseExistingPoint(false);
+          setIsBilateral(false);
         }}
         onAdd={handleAddMarker}
       >
@@ -291,8 +299,18 @@ export const AcupunctureArea: React.FC<AcupunctureAreaProps> = ({
                   placeholder="Acupuncture Name"
                 />
               </FormField>
-              {errorMessage && <p className="text-red-500">{errorMessage}</p>}
 
+              <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                <Checkbox
+                  checked={isBilateral}
+                  onCheckedChange={(checked) =>
+                    setIsBilateral(checked === true)
+                  }
+                  className="data-[state=checked]:bg-brand data-[state=checked]:text-white data-[state=checked]:border-0"
+                  />
+                <span>Bilateral Point</span>
+              </label>
+              {errorMessage && <p className="text-red-500">{errorMessage}</p>}
             </div>
           )}
         </div>

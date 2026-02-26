@@ -34,7 +34,7 @@ function HistoryTable({ markers, setMarkers }: HistoryTableProps) {
     <div style={{ margin: "2rem 0" }}>
       <h3>Marker History</h3>
       <Table
-        headers={["Top", "Left", "Acupuncture Code", "Acupuncture Name", ""]}
+        headers={["Top", "Left", "Acupuncture Code", "Acupuncture Name", "Is Bilateral", ""]}
       >
         {sortedMarkers.map((marker, index) => (
           <tr
@@ -51,6 +51,8 @@ function HistoryTable({ markers, setMarkers }: HistoryTableProps) {
             <td className="px-4 py-3">{marker.acupointCode ?? "-"}</td>
 
             <td className="px-4 py-3">{marker.acupointName ?? "-"}</td>
+
+            <td className="px-4 py-3">{marker.isBilateral ? "Yes" : "No"}</td>
 
             <td className="px-4 py-3">
               <button
