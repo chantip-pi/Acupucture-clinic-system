@@ -7,9 +7,9 @@ import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupun
 import { IMAGE_BASE_URL } from "~/constants/api";
 
 const LATERAL_CONFIG = {
-  LEFT:  { label: "Left",  short: "L", ring: "ring-blue-500",   bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-teal-500" },
-  RIGHT: { label: "Right", short: "R", ring: "ring-amber-500",  bg: "bg-amber-50",  text: "text-amber-700",  dot: "bg-teal-500" },
-  BOTH:  { label: "Both",  short: "B", ring: "ring-purple-500", bg: "bg-purple-50", text: "text-purple-700", dot: "bg-teal-500" },
+  LEFT:  { label: "Left",  short: "L", ring: "ring-[#FF0000]",   bg: "bg-red-50",   text: "text-red-700",   dot: "bg-teal-500" },
+  RIGHT: { label: "Right", short: "R", ring: "ring-[#0000FF]",  bg: "bg-blue-50",  text: "text-blue-700",  dot: "bg-teal-500" },
+  BOTH:  { label: "Both",  short: "B", ring: "ring-[#00FF00]", bg: "bg-green-50", text: "text-green-700", dot: "bg-teal-500" },
 } as const;
 
 type LateralSide = keyof typeof LATERAL_CONFIG;
@@ -28,7 +28,7 @@ function LateralBadge({ side }: { side: string | undefined }) {
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          side === "LEFT" ? "bg-blue-500" : side === "RIGHT" ? "bg-amber-500" : "bg-purple-500"
+          side === "LEFT" ? "bg-red-500" : side === "RIGHT" ? "bg-blue-500" : "bg-green-500"
         }`}
       />
       {cfg.label}
@@ -78,10 +78,6 @@ function RegionView({
               </div>
             );
           })}
-          <div className="flex items-center gap-1.5 text-xs text-slate-500">
-            <span className="w-3 h-3 rounded-full bg-teal-500 ring-2 ring-teal-600" />
-            Not bilateral
-          </div>
         </div>
 
         <div className="flex flex-row gap-4">

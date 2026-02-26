@@ -52,7 +52,7 @@ function HistoryTable({ markers, setMarkers }: HistoryTableProps) {
 
             <td className="px-4 py-3">{marker.acupointName ?? "-"}</td>
 
-            <td className="px-4 py-3">{marker.isBilateral ? "True" : "False"}</td>
+            <td className="px-4 py-3">{marker.isBilateral ? "Yes" : "No"}</td>
 
             <td className="px-4 py-3">
               <button

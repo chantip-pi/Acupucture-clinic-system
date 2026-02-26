@@ -453,7 +453,9 @@ function AcupunctureSelect({
                       <option value="BOTH">Both</option>
                     </select>
                   ) : (
-                    "None"
+                    <div className="px-3 py-1 text-sm">
+                      <span>None</span>
+                    </div>
                   )}
                 </td>
                 <td className="px-4 py-2 text-sm">
