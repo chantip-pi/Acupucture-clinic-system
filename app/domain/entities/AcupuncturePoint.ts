@@ -12,6 +12,8 @@ export interface AcupuncturePoint {
   region: string;
   side: string;
   image: string;
+  isBilateral?: boolean;
+  lateralSide?: string;
 }
 
 export interface SelectedPoint extends AcupuncturePoint {

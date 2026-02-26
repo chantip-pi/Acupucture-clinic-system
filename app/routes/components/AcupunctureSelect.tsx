@@ -13,6 +13,7 @@ import {
   AcupuncturePoint,
   SelectedPoint,
 } from "~/domain/entities/AcupuncturePoint";
+import { useGetAcupointList } from "~/presentation/hooks/acupoint/useGetAcupointList";
 
 interface AcupunctureSelectProps {
   selectedPoints: SelectedPoint[];
@@ -37,6 +38,7 @@ function AcupunctureSelect({
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMeridians, setSelectedMeridians] = useState<number[]>([]);
   const loading = meridiansLoading || acupuncturesLoading;
+  const { acupoints } = useGetAcupointList();
 
   // Filter meridians based on search
   const filteredMeridians = useMemo(() => {
@@ -78,6 +80,16 @@ function AcupunctureSelect({
     Record<string, Record<string, boolean>>
   >({});
 
+  const acupointMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+
+    acupoints.forEach((ap) => {
+      map.set(ap.acupointCode, ap.isBilateral);
+    });
+
+    return map;
+  }, [acupoints]);
+
   const pointsByMeridian = useMemo(() => {
     const map = new Map<number, AcupuncturePoint[]>();
 
@@ -94,6 +106,7 @@ function AcupunctureSelect({
         region: a.region,
         side: a.side,
         image: a.image,
+        isBilateral: acupointMap.get(a.acupointCode) ?? false
       };
 
       if (!map.has(p.meridianId)) map.set(p.meridianId, []);
@@ -102,30 +115,6 @@ function AcupunctureSelect({
 
     return map;
   }, [acupunctures]);
-
-  const toggleView = (region: string, side: string) => {
-    const isCurrentlyVisible = viewsByRegion[region]?.[side];
-
-    if (isCurrentlyVisible) {
-      onSelectedPointsChange(
-        selectedPoints.filter(
-          (p) =>
-            !(
-              p.region?.toLowerCase() === region.toLowerCase() &&
-              p.side?.toLowerCase() === side.toLowerCase()
-            ),
-        ),
-      );
-    }
-
-    setViewsByRegion((prev) => ({
-      ...prev,
-      [region]: {
-        ...prev[region],
-        [side]: !prev[region]?.[side],
-      },
-    }));
-  };
 
   const cleanupMeridianIfEmpty = (nextPoints: SelectedPoint[]) => {
     setSelectedMeridians((prev) =>
@@ -170,6 +159,9 @@ function AcupunctureSelect({
 
           region,
           side,
+
+          isBilateral: point.isBilateral,
+          lateralSide: point.isBilateral ? "BOTH" : undefined,
         },
       ];
     }
@@ -412,7 +404,8 @@ function AcupunctureSelect({
               "Acupuncture Name",
               "Meridian",
               "Region",
-              "Side",
+              "Body Side",
+              "Lateral Side",
               "Actions",
             ]}
           >
@@ -437,6 +430,31 @@ function AcupunctureSelect({
                   {point.side && typeof point.side === "string"
                     ? point.side.charAt(0).toUpperCase() + point.side.slice(1)
                     : ""}
+                </td>
+                <td className="px-4 py-2 text-sm text-slate-600 capitalize">
+                  {point.isBilateral ? (
+                    <select
+                      value={point.lateralSide || ""}
+                      onChange={(e) => {
+                        const newSide = e.target.value;
+
+                        const nextPoints = selectedPoints.map((p) =>
+                          p.key === point.key
+                            ? { ...p, lateralSide: newSide }
+                            : p,
+                        );
+
+                        onSelectedPointsChange(nextPoints);
+                      }}
+                      className="border rounded px-2 py-1 text-sm"
+                    >
+                      <option value="LEFT">Left</option>
+                      <option value="RIGHT">Right</option>
+                      <option value="BOTH">Both</option>
+                    </select>
+                  ) : (
+                    "None"
+                  )}
                 </td>
                 <td className="px-4 py-2 text-sm">
                   <button

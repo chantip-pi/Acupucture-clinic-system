@@ -148,6 +148,7 @@ const CreateMedicalRecord = () => {
             await addMedicalRecordAcupuncture({
               recordId: result.recordId,
               acupunctureId: point.acupunctureId,
+              lateralSide: point.lateralSide ?? "NONE",
             });
           }
           console.log(

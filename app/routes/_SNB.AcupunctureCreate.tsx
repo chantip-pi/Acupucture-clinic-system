@@ -43,7 +43,7 @@ const AcupunctureCreate: React.FC = () => {
   const { addAcupuncture, loading: acupunctureLoading, error: acupunctureError } = useAddAcupuncture();
   const { uploadImage, loading: uploadingImage, error: uploadError } = useUploadImage();
   const { images: systemImages, loading: imagesLoading } = useGetAllImages();
-  const { acupoints: systemAcupoints } = useGetAcupointList(null);
+  const { acupoints: systemAcupoints } = useGetAcupointList();
 
   const loading = meridianLoading || acupointLoading || locationLoading || acupunctureLoading || uploadingImage;
 
@@ -166,13 +166,13 @@ const AcupunctureCreate: React.FC = () => {
             continue;
           }
 
-          const { acupointCode, acupointName, top, left } = marker;
+          const { acupointCode, acupointName, top, left, isBilateral } = marker;
 
           // Step 3a: Create acupoint only if it doesn't exist anywhere (system or this session)
           const alreadyExists = acupointExistsInSystem(acupointCode) || processedAcupoints.has(acupointCode);
 
           if (!alreadyExists) {
-            const acupointResult = await addAcupoint({ acupointCode, acupointName });
+            const acupointResult = await addAcupoint({ acupointCode, acupointName, isBilateral: isBilateral ?? false });
             if (!acupointResult.success) {
               errors.push(`Acupoint "${acupointCode}": ${acupointResult.error || "Failed to create acupoint"}`);
               continue;
