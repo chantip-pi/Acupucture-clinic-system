@@ -3,4 +3,5 @@ export interface CustomMarker {
   left: number;
   acupointCode?: string;
   acupointName?: string;
+  isBilateral?: boolean;
 }
