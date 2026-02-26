@@ -1,15 +1,16 @@
 // Environment-based API configuration
-const USE_LOCALHOST = false; // Set to true for local testing
+const USE_LOCALHOST = import.meta.env.USE_LOCALHOST === "true";
 
-const PROD_API_URL = "https://clinic-backend-6f5w.onrender.com/api";
-const LOCAL_API_URL = "http://localhost:3000/api";
+const PROD_API_URL = import.meta.env.PROD_API_URL;
+const LOCAL_API_URL = import.meta.env.LOCAL_API_URL;
+
+// Validate that environment variables are set
+if (!PROD_API_URL || !LOCAL_API_URL) {
+  throw new Error('Missing required environment variables: PROD_API_URL and/or LOCAL_API_URL');
+}
 
 export const API_BASE_URL = USE_LOCALHOST ? LOCAL_API_URL : PROD_API_URL;
-export const IMAGE_BASE_URL = `${API_BASE_URL}/images`;
 
-// Export both options for explicit usage if needed
-export const PROD_IMAGE_BASE_URL = `${PROD_API_URL}/images`;
-export const LOCAL_IMAGE_BASE_URL = `${LOCAL_API_URL}/images`;
 
 // Specific endpoint URLs
 export const PATIENT_ENDPOINT = `${API_BASE_URL}/patients`;
@@ -25,3 +26,5 @@ export const MEDICAL_RECORD_ACUPUNCTURE_ENDPOINT = `${API_BASE_URL}/medicalRecor
 export const MEDICAL_RECORD_ILLNESS_ENDPOINT = `${API_BASE_URL}/medicalRecordIllnesses`;
 export const ILLNESS_ACUPUNCTURE_ENDPOINT = `${API_BASE_URL}/illnessAcupunctures`;
 export const GEMINI_ENDPOINT = `${API_BASE_URL}/suggest`;
+export const IMAGE_BASE_URL = `${API_BASE_URL}/images`;
+
