@@ -35,9 +35,10 @@ export class StaffDataSource {
   }
 
   async login(username: string, password: string): Promise<Staff | null> {
-    // Backend route: GET /api/staff/login/:username/:password
-    const res = await fetch(`${this.baseUrl}/login/${username}/${password}`, {
-      method: "GET",
+    const res = await fetch(`${this.baseUrl}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
     });
     if (res.status === 404) return null;
     return this.handleResponse<Staff>(res);
