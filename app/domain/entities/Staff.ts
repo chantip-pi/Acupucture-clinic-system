@@ -8,6 +8,7 @@ export interface Staff {
   gender: string;
   email: string;
   title: string;
+  token?: string;
 }
 
 export class StaffEntity {
@@ -20,7 +21,8 @@ export class StaffEntity {
     public readonly birthday: string,
     public readonly gender: string,
     public readonly email: string,
-    public readonly title: string
+    public readonly title: string,
+    public readonly token?: string
   ) {}
 
   static fromData(data: Staff): StaffEntity {
@@ -33,7 +35,8 @@ export class StaffEntity {
       data.birthday,
       data.gender,
       data.email,
-      data.title
+      data.title,
+      data.token
     );
   }
 
@@ -48,6 +51,7 @@ export class StaffEntity {
       gender: this.gender,
       email: this.email,
       title: this.title,
+      token: this.token,
     };
   }
 }
