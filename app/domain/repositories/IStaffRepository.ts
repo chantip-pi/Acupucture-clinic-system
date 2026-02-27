@@ -1,4 +1,5 @@
 import { Staff } from "../entities/Staff";
+import { StaffNameDTO } from "../../application/dtos/StaffDTO";
 
 export interface IStaffRepository {
   getAll(): Promise<Staff[]>;
@@ -8,5 +9,7 @@ export interface IStaffRepository {
   create(staff: Omit<Staff, "staffId">): Promise<Staff>;
   update(staff: Staff): Promise<Staff>;
   delete(staffId: number): Promise<void>;
+  getDoctors(): Promise<StaffNameDTO[]>;
+  getStaffs(): Promise<StaffNameDTO[]>;
 }
 

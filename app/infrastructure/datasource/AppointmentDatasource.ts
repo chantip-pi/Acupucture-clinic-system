@@ -1,70 +1,51 @@
 import { Appointment } from "~/domain/entities/Appointment";
-import { BackendErrorService } from "~/domain/services/ErrorService";
 import { APPOINTMENT_ENDPOINT } from "~/constants/api";
+import { createAuthenticatedHttpClient } from "../http/HttpClient";
 
 export class AppointmentDataSource {
-  constructor(private readonly baseUrl: string = APPOINTMENT_ENDPOINT) {}
+  private httpClient: ReturnType<typeof createAuthenticatedHttpClient>;
 
-  private async handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-      await BackendErrorService.handleErrorResponse(res);
-    }
-    return (await res.json()) as T;
+  constructor(private readonly baseUrl: string = APPOINTMENT_ENDPOINT) {
+    this.httpClient = createAuthenticatedHttpClient(baseUrl);
   }
 
   async getAll(): Promise<Appointment[]> {
-    const res = await fetch(this.baseUrl, { method: "GET" });
-    return this.handleResponse<Appointment[]>(res);
+    return this.httpClient.get<Appointment[]>("");
   }
-
 
   async getById(appointmentId: number): Promise<Appointment | null> {
-    const res = await fetch(`${this.baseUrl}/${appointmentId}`, {
-      method: "GET",
-    });
-    if (res.status === 404) return null;
-    return this.handleResponse<Appointment>(res);
+    try {
+      return await this.httpClient.get<Appointment>(`/${appointmentId}`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('404')) {
+        return null;
+      }
+      throw error;
+    }
   }
-
 
   async getListByPatientId(patientId: number): Promise<Appointment[] | null> {
-    const res = await fetch(`${this.baseUrl}/patient/${patientId}`, {
-      method: "GET",
-    });
-    if (res.status === 404) return null;
-    return this.handleResponse<Appointment[]>(res);
+    try {
+      return await this.httpClient.get<Appointment[]>(`/patient/${patientId}`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('404')) {
+        return null;
+      }
+      throw error;
+    }
   }
 
-
   async create(appointment: Omit<Appointment, "appointmentId">): Promise<Appointment> {
-    const res = await fetch(this.baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(appointment),
-    });
-    return this.handleResponse<Appointment>(res);
+    return this.httpClient.post<Appointment>("", appointment);
   }
 
   async update(appointment: Appointment): Promise<Appointment> {
-    const res = await fetch(`${this.baseUrl}/${appointment.appointmentId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(appointment),
-    });
-    return this.handleResponse<Appointment>(res);
+    return this.httpClient.put<Appointment>(`/${appointment.appointmentId}`, appointment);
   }
 
   async cancel(appointmentId: number): Promise<Appointment> {
-    const res = await fetch(`${this.baseUrl}/${appointmentId}`, {
-      method: "PUT",
-    });
-    if (!res.ok) {
-      await BackendErrorService.handleErrorResponse(res);
-    }
-    return this.handleResponse<Appointment>(res);
-
+    return this.httpClient.put<Appointment>(`/${appointmentId}`);
   }
-
 }
 
 // optional default instance

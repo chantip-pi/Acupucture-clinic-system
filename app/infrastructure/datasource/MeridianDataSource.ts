@@ -1,83 +1,55 @@
 import { Meridian } from "~/domain/entities/Meridian";
 import { MERIDIAN_ENDPOINT } from "~/constants/api";
+import { createAuthenticatedHttpClient } from "../http/HttpClient";
 
 export class MeridianDataSource {
-  constructor(private readonly baseUrl: string = MERIDIAN_ENDPOINT) {}
+  private httpClient: ReturnType<typeof createAuthenticatedHttpClient>;
 
-  private async handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} ${text}`,
-      );
-    }
-    return (await res.json()) as T;
+  constructor(private readonly baseUrl: string = MERIDIAN_ENDPOINT) {
+    this.httpClient = createAuthenticatedHttpClient(baseUrl);
   }
 
+
   async getAll(): Promise<Meridian[]> {
-    const res = await fetch(this.baseUrl, { method: "GET" });
-    return this.handleResponse<Meridian[]>(res);
+    return this.httpClient.get<Meridian[]>("");
   }
 
   async getAllNames(): Promise<string[]> {
-    const res = await fetch(`${this.baseUrl}/names`, {
-      method: "GET",
-    });
-    return this.handleResponse<string[]>(res);
+    return this.httpClient.get<string[]>("/names");
   }
 
   async getById(meridianId: number): Promise<Meridian | null> {
-    const res = await fetch(`${this.baseUrl}/meridian/${meridianId}`, {
-      method: "GET",
-    });
-    if (res.status === 404) return null;
-    return this.handleResponse<Meridian>(res);
+    try {
+      return await this.httpClient.get<Meridian>(`/meridian/${meridianId}`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('404')) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async getByRegionAndSide(region: string, side: string): Promise<Meridian[]> {
-    const res = await fetch(`${this.baseUrl}/region/{${region}}/side/{${side}}`, {
-      method: "GET",
-    });
-    return this.handleResponse<Meridian[]>(res);
+    return this.httpClient.get<Meridian[]>(`/region/${region}/side/${side}`);
   }
 
   async getAvailableRegions(): Promise<string[]> {
-    const res = await fetch(`${this.baseUrl}/regions`, {
-      method: "GET",
-    });
-    return this.handleResponse<string[]>(res);
+    return this.httpClient.get<string[]>("/regions");
   }
 
-  async getSidesByRegion(region: string[]):Promise<Record<string, string[]>> {
-    const res = await fetch(`${this.baseUrl}/regions/{${region}}`, {
-      method: "GET",
-    });
-    return this.handleResponse<Promise<Record<string, string[]>>>(res);
+  async getSidesByRegion(region: string[]): Promise<Record<string, string[]>> {
+    return this.httpClient.get<Record<string, string[]>>(`/regions/${region}`);
   }
 
   async create(meridian: Omit<Meridian, "meridianId">): Promise<Meridian> {
-    const res = await fetch(this.baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(meridian),
-    });
-    return this.handleResponse<Meridian>(res);
+    return this.httpClient.post<Meridian>("", meridian);
   }
 
   async update(meridian: Meridian): Promise<Meridian> {
-    const res = await fetch(`${this.baseUrl}/${meridian.meridianId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(meridian),
-    });
-    return this.handleResponse<Meridian>(res);
+    return this.httpClient.put<Meridian>(`/${meridian.meridianId}`, meridian);
   }
 
   async delete(meridianId: number): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/${meridianId}`, {
-      method: "DELETE",
-    });
-    if (!res.ok)
-      throw new Error(`Delete failed: ${res.status} ${res.statusText}`);
+    await this.httpClient.delete<void>(`/${meridianId}`);
   }
 }
