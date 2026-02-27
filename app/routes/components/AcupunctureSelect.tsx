@@ -201,6 +201,7 @@ function AcupunctureSelect({
           <Button
             variant={searchMode === "meridian" ? "primary" : "secondary"}
             size="sm"
+            type="button"
             onClick={() => {
               setSearchMode("meridian");
               setSearchQuery("");
@@ -211,6 +212,7 @@ function AcupunctureSelect({
           <Button
             variant={searchMode === "point" ? "primary" : "secondary"}
             size="sm"
+            type="button"
             onClick={() => {
               setSearchMode("point");
               setSearchQuery("");
