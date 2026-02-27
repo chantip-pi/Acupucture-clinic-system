@@ -107,7 +107,7 @@ function IllnessAcupunctureShow() {
   return (
     <PageShell className="p-8">
       <div className="flex items-center gap-3 py-4">
-        <Button size="sm" variant="back" onClick={() => navigate("/illnessLibrary")}>
+        <Button size="sm" type="button" variant="back" onClick={() => navigate("/illnessLibrary")}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full">
             <FontAwesomeIcon icon={faArrowLeft} />
           </span>

@@ -80,7 +80,7 @@ export default function ClinicHoursSettingsPage() {
     <PageShell className="p-8">
       {/* Back Button */}
       <div className="flex items-center gap-3 py-4">
-        <Button size="sm" variant="back" onClick={() => navigate(-1)}>
+        <Button size="sm" type="button" variant="back" onClick={() => navigate(-1)}>
           <span className="flex h-8 w-8 items-center justify-center rounded-full">
             <FontAwesomeIcon icon={faArrowLeft} />
           </span>
