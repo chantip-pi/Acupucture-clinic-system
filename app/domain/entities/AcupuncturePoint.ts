@@ -43,12 +43,12 @@ export interface AcupunctureShowCardProps {
 }
 
 export interface ShowCardRegionViewProps {
-  regionSideKey: string;
   region: string;
   side: string;
+  meridian: string;
   allPoints: AcupuncturePoint[];
   visibleMeridianIds: Set<number>;
-  onMeridianToggle: (region: string, side: string, meridianId: number) => void;
+  onMeridianToggle: Function;
 }
 
 export interface RegionSideViewProps {
