@@ -7,6 +7,7 @@ import {
 } from "@remix-run/react";
 import { SpeedInsights } from "@vercel/speed-insights/remix";
 import "./tailwind.css";
+import { AuthProvider } from "~/context/AuthContext";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -18,11 +19,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+        <div id="modal-root" />
         <ScrollRestoration />
         <Scripts />
         <SpeedInsights />
-        <div id="modal-root" />
       </body>
     </html>
   );

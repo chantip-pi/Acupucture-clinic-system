@@ -12,6 +12,7 @@ export interface CreateStaffDTO {
   gender: string;
   email: string;
   title: string;
+  token?: string;
 }
 
 export interface UpdateStaffDTO {
@@ -24,6 +25,7 @@ export interface UpdateStaffDTO {
   gender: string;
   email: string;
   title: string;
+  token?: string;
 }
 
 // DTO for staff name projection (used for doctor/Staff lists)

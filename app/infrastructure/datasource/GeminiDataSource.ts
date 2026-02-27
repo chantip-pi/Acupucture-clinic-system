@@ -1,28 +1,19 @@
 import { SuggestResult } from "~/domain/entities/Suggestion";
 import { GEMINI_ENDPOINT } from "~/constants/api";
+import { createAuthenticatedHttpClient } from "../http/HttpClient";
 
 export class GeminiDataSource {
-  constructor(private readonly baseUrl: string = GEMINI_ENDPOINT) {}
+  private httpClient: ReturnType<typeof createAuthenticatedHttpClient>;
 
-  private async handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} ${text}`
-      );
-    }
-    return (await res.json()) as T;
+  constructor(private readonly baseUrl: string = GEMINI_ENDPOINT) {
+    this.httpClient = createAuthenticatedHttpClient(baseUrl);
   }
 
+
   async suggest(symptoms: string): Promise<SuggestResult> {
-    const res = await fetch(this.baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ symptoms }),
-    });
-    const data = await this.handleResponse<{
+    const data = await this.httpClient.post<{
       result: SuggestResult;
-    }>(res);
+    }>("", { symptoms });
     return data.result;
   }
 }
