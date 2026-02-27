@@ -1,56 +1,32 @@
 import { MedicalRecordAcupuncture } from "~/domain/entities/MedicalRecordAcupuncture";
-import { BackendErrorService } from "~/domain/services/ErrorService";
 import { MEDICAL_RECORD_ACUPUNCTURE_ENDPOINT } from "~/constants/api";
+import { createAuthenticatedHttpClient } from "../http/HttpClient";
 
 export class MedicalRecordAcupunctureDataSource {
-  constructor(private readonly baseUrl: string = MEDICAL_RECORD_ACUPUNCTURE_ENDPOINT) {}
+  private httpClient: ReturnType<typeof createAuthenticatedHttpClient>;
 
-  private async handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} ${text}`,
-      );
-    }
-    return (await res.json()) as T;
+  constructor(private readonly baseUrl: string = MEDICAL_RECORD_ACUPUNCTURE_ENDPOINT) {
+    this.httpClient = createAuthenticatedHttpClient(baseUrl);
   }
+
 
   async getAll(): Promise<MedicalRecordAcupuncture[]> {
-    const res = await fetch(this.baseUrl);
-    return this.handleResponse<MedicalRecordAcupuncture[]>(res);
+    return this.httpClient.get<MedicalRecordAcupuncture[]>("");
   }
 
-  async getByRecordId( recordId: number ): Promise<MedicalRecordAcupuncture[]> {
-    const res = await fetch(`${this.baseUrl}/${recordId}`, {
-        method: "GET",
-    });
-    return this.handleResponse<MedicalRecordAcupuncture[]>(res);
+  async getByRecordId(recordId: number): Promise<MedicalRecordAcupuncture[]> {
+    return this.httpClient.get<MedicalRecordAcupuncture[]>(`/${recordId}`);
   }
 
-  async create( recordId: number, medicalRecordAcupuncture: Omit<MedicalRecordAcupuncture, "recordId"> ): Promise<MedicalRecordAcupuncture> {
-    const res = await fetch(`${this.baseUrl}/${recordId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(medicalRecordAcupuncture),
-    });
-    return this.handleResponse<MedicalRecordAcupuncture>(res);
+  async create(recordId: number, medicalRecordAcupuncture: Omit<MedicalRecordAcupuncture, "recordId">): Promise<MedicalRecordAcupuncture> {
+    return this.httpClient.post<MedicalRecordAcupuncture>(`/${recordId}`, medicalRecordAcupuncture);
   }
 
   async deleteAllAcupunctureByRecordId(recordId: number): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/${recordId}`, {
-      method: "DELETE",
-    });
-    if (!res.ok)
-      throw new Error(
-        `Delete all acupuncture by recordId failed: ${res.status} ${res.statusText}`,
-      );
+    await this.httpClient.delete<void>(`/${recordId}`);
   }
 
   async delete(recordId: number, acupunctureId: number): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/${recordId}/${acupunctureId}`, {
-      method: "DELETE",
-    });
-    if (!res.ok)
-      throw new Error(`Delete failed: ${res.status} ${res.statusText}`);
+    await this.httpClient.delete<void>(`/${recordId}/${acupunctureId}`);
   }
 }

@@ -4,7 +4,6 @@ import { StaffNameDTO } from "~/application/dtos/StaffDTO";
 import { StaffDataSource } from "../datasource/StaffDataSource";
 
 /**
- * This can be easily swapped with  MockDataSource in dataSource field.
  */
 export class StaffRepository implements IStaffRepository {
   constructor(private readonly dataSource: StaffDataSource) {}

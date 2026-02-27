@@ -1,56 +1,39 @@
 import { AcupointLocation } from "~/domain/entities/AcupointLocation";
-import { BackendErrorService } from "~/domain/services/ErrorService";
 import { ACUPOINT_LOCATION_ENDPOINT } from "~/constants/api";
+import { createAuthenticatedHttpClient } from "../http/HttpClient";
 
 export class AcupointLocationDataSource {
-  constructor(private readonly baseUrl: string = ACUPOINT_LOCATION_ENDPOINT) {}
+  private httpClient: ReturnType<typeof createAuthenticatedHttpClient>;
 
-  private async handleResponse<T>(res: Response): Promise<T> {
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} ${text}`,
-      );
-    }
-    return (await res.json()) as T;
+  constructor(private readonly baseUrl: string = ACUPOINT_LOCATION_ENDPOINT) {
+    this.httpClient = createAuthenticatedHttpClient(baseUrl);
   }
 
+
   async getAll(): Promise<AcupointLocation[]> {
-    const res = await fetch(this.baseUrl, { method: "GET" });
-    return this.handleResponse<AcupointLocation[]>(res);
+    return this.httpClient.get<AcupointLocation[]>("");
   }
 
   async getById(locationId: number): Promise<AcupointLocation | null> {
-    const res = await fetch(`${this.baseUrl}/${locationId}`, {
-      method: "GET",
-    });
-    if (res.status === 404) return null;
-    return this.handleResponse<AcupointLocation>(res);
+    try {
+      return await this.httpClient.get<AcupointLocation>(`/${locationId}`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('404')) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async create(acupointLocation: AcupointLocation): Promise<AcupointLocation> {
-    const res = await fetch(this.baseUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(acupointLocation),
-    });
-    return this.handleResponse<AcupointLocation>(res);
+    return this.httpClient.post<AcupointLocation>("", acupointLocation);
   }
 
   async update(acupointLocation: AcupointLocation): Promise<AcupointLocation> {
-    const res = await fetch(`${this.baseUrl}/${acupointLocation.locationId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(acupointLocation),
-    });
-    return this.handleResponse<AcupointLocation>(res);
+    return this.httpClient.put<AcupointLocation>(`/${acupointLocation.locationId}`, acupointLocation);
   }
 
   async delete(locationId: number): Promise<void> {
-    const res = await fetch(`${this.baseUrl}/${locationId}`, {
-      method: "DELETE",
-    });
-    if (!res.ok)
-      throw new Error(`Delete failed: ${res.status} ${res.statusText}`);
+    await this.httpClient.delete<void>(`/${locationId}`);
   }
 }

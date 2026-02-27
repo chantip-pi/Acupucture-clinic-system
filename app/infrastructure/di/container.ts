@@ -105,7 +105,6 @@ import { UpdateImageUseCase } from "~/application/use-cases/image/UpdateImageUse
 import { DeleteImageUseCase } from "~/application/use-cases/image/DeleteImageUseCase";
 
 // ===== Data Sources =====
-import { MockDataSource } from "../datasource/MockDataSource";
 import { PatientDataSource } from "../datasource/PatientDataSource";
 import { StaffDataSource } from "../datasource/StaffDataSource";
 import { AcupointDataSource } from "../datasource/AcupointDataSource";
@@ -167,7 +166,6 @@ let geminiRepository: IGeminiRepository;
 
 
 // DataSources
-const mockDataSource = MockDataSource.getInstance();
 const staffDataSource = new StaffDataSource();
 const patientDatasource = new PatientDataSource();
 const acupointDataSource = new AcupointDataSource();
