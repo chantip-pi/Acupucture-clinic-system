@@ -333,7 +333,15 @@ function AcupunctureSelect({
                     );
 
                     // Toggle point selection
-                    handlePointClick(point, region, side);
+                    handlePointClick(
+                      {
+                        ...point,
+                        isBilateral:
+                          acupointMap.get(point.acupointCode) ?? false,
+                      },
+                      region,
+                      side,
+                    );
                   }}
                 >
                   <div className="flex items-center justify-between">

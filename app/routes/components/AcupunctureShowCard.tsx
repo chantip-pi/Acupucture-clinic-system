@@ -2,7 +2,11 @@ import { useMemo, useState, useEffect } from "react";
 import { Card, Table } from "~/presentation/designSystem";
 import { useGetMedicalRecordAcupunctureById } from "~/presentation/hooks/medicalRecordAcupuncture.ts/useGetMedicalRecordAcupunctureById";
 import { useGetAcupunctureList } from "~/presentation/hooks/acupuncture/useGetAcupunctureList";
-import { AcupuncturePoint, AcupunctureShowCardProps, ShowCardRegionViewProps } from "~/domain/entities/AcupuncturePoint";
+import {
+  AcupuncturePoint,
+  AcupunctureShowCardProps,
+  ShowCardRegionViewProps,
+} from "~/domain/entities/AcupuncturePoint";
 import { useGetIllnessAcupunctureById } from "~/presentation/hooks/illnessAcupuncture/useGetIllnessAcupunctureById";
 import { IMAGE_BASE_URL } from "~/constants/api";
 
@@ -39,46 +43,46 @@ function LateralBadge({ side }: { side: string | undefined }) {
 function RegionView({
   region,
   side,
+  meridian,
   allPoints,
-  visibleMeridianIds,
-  onMeridianToggle,
-}: ShowCardRegionViewProps) {
+  showLegend,
+}: ShowCardRegionViewProps & { showLegend: boolean }) {
   const fullImageUrl = `${IMAGE_BASE_URL}/${allPoints[0]?.image}`;
 
   const visiblePoints = useMemo(() => {
-    return allPoints
-      .filter((point) => visibleMeridianIds.has(point.meridianId))
-      .sort((a, b) =>
-        a.acupointCode.localeCompare(b.acupointCode, undefined, {
-          numeric: true,
-          sensitivity: "base",
-        })
-      );
-  }, [allPoints, visibleMeridianIds]);
+    return allPoints.sort((a, b) =>
+      a.acupointCode.localeCompare(b.acupointCode, undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+  }, [allPoints]);
 
   return (
     <div className="space-y-4 fade-in">
       <Card padding="sm">
         <p className="mb-2 text-sm font-medium text-slate-600">
           {region.charAt(0).toUpperCase() + region.slice(1)}{" "}
-          {side.toLowerCase()} view
+          {side.toLowerCase()} view – {meridian}
         </p>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mb-3">
-          {(["LEFT", "RIGHT", "BOTH"] as LateralSide[]).map((s) => {
-            const cfg = LATERAL_CONFIG[s];
-            return (
-              <div key={s} className="flex items-center gap-1.5 text-xs text-slate-500">
-                <span className={`
-                  w-3 h-3 rounded-full bg-teal-500
-                  ring-2 ${cfg.ring}
-                `} />
-                {cfg.label}
-              </div>
-            );
-          })}
-        </div>
+        {showLegend && (
+          <div className="flex items-center gap-4 mb-3">
+            {(["LEFT", "RIGHT", "BOTH"] as LateralSide[]).map((s) => {
+              const cfg = LATERAL_CONFIG[s];
+              return (
+                <div key={s} className="flex items-center gap-1.5 text-xs text-slate-500">
+                  <span className={`
+                    w-3 h-3 rounded-full bg-teal-500
+                    ring-2 ${cfg.ring}
+                  `} />
+                  {cfg.label}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <div className="flex flex-row gap-4">
           <div className="relative h-96 w-full rounded-xl bg-gradient-to-br from-blue-50 to-teal-50 flex items-center justify-center">
@@ -110,10 +114,21 @@ function RegionView({
                           left: `${point.pointLeft}%`,
                           top: `${point.pointTop}%`,
                         }}
-                        title={`${point.acupointCode} – ${point.acupointName} (${point.meridianName})${point.lateralSide ? ` · ${LATERAL_CONFIG[point.lateralSide as LateralSide]?.label}` : ""}`}
+                        title={`${point.acupointCode} – ${
+                          point.acupointName
+                        } (${point.meridianName})${
+                          point.lateralSide
+                            ? ` · ${
+                                LATERAL_CONFIG[point.lateralSide as LateralSide]
+                                  ?.label
+                              }`
+                            : ""
+                        }`}
                       >
                         {/* DOT with colored ring */}
-                        <div className={`w-2.5 h-2.5 rounded-full bg-teal-500 ${ringClass}`} />
+                        <div
+                          className={`w-2.5 h-2.5 rounded-full bg-teal-500 ${ringClass}`}
+                        />
                       </div>
                     );
                   })}
@@ -217,7 +232,7 @@ function AcupunctureShowCard({
 
     const grouped = new Map<string, AcupuncturePoint[]>();
     allPoints.forEach((point) => {
-      const key = `${point.region.toLowerCase()}-${point.side.toLowerCase()}`;
+      const key = `${point.region.toLowerCase()}-${point.side.toLowerCase()}-${point.meridianName.toLowerCase()}`;
       if (!grouped.has(key)) grouped.set(key, []);
       grouped.get(key)!.push(point);
     });
@@ -240,19 +255,20 @@ function AcupunctureShowCard({
   return (
     <div className="space-y-4">
       {regionSideKeys.map((regionSideKey) => {
-        const [region, side] = regionSideKey.split("-");
+        const [region, side, meridian] = regionSideKey.split("-");
         const allPoints = pointsByRegionSide.get(regionSideKey) || [];
         const visibleMeridianIds = visibleMeridians[regionSideKey] || new Set();
 
         return (
           <RegionView
             key={regionSideKey}
-            regionSideKey={regionSideKey}
             region={region}
             side={side}
+            meridian={meridian}
             allPoints={allPoints}
             visibleMeridianIds={visibleMeridianIds}
             onMeridianToggle={onMeridianToggle}
+            showLegend={!!recordId}
           />
         );
       })}
