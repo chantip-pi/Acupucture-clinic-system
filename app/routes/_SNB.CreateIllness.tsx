@@ -213,7 +213,7 @@ const CreateIllness = () => {
                         Add Illness Information
                     </h2>
 
-                    <div className="space-y-4">
+                    <div className="space-y-4 mb-6">
                         <FormField label="Illness name">
                             <Input
                                 type="text"
