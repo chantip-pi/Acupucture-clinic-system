@@ -143,8 +143,8 @@ function RegionView({
         </div>
       </Card>
 
-      {/* Selected points table */}
-      {visiblePoints.length > 0 && (
+      {/* Selected points table for record */}
+      {(visiblePoints.length > 0 && showLegend) && (
         <Table
           headers={[
             "Acupuncture Code",
@@ -166,6 +166,31 @@ function RegionView({
               </td>
               <td className="px-4 py-2">
                 <LateralBadge side={point.lateralSide} />
+              </td>
+            </tr>
+          ))}
+        </Table>
+      )}
+
+      {/* Selected points table for illness */}
+      {(visiblePoints.length > 0 && !showLegend) && (
+        <Table
+          headers={[
+            "Acupuncture Code",
+            "Acupuncture Name",
+            "Meridian",
+          ]}
+        >
+          {visiblePoints.map((point) => (
+            <tr key={point.acupunctureId} className="hover:bg-slate-50">
+              <td className="px-4 py-2 text-sm font-medium text-slate-900">
+                {point.acupointCode}
+              </td>
+              <td className="px-4 py-2 text-sm text-slate-600">
+                {point.acupointName}
+              </td>
+              <td className="px-4 py-2 text-sm text-slate-600">
+                {point.meridianName}
               </td>
             </tr>
           ))}
