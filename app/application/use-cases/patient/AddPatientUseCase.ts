@@ -15,7 +15,7 @@ export class AddPatientUseCase {
       throw new Error("Birthday cannot be in the future.");
     }
 
-    if (!PatientValidationService.validateremainingCourse(dto.remainingCourse)) {
+    if (!PatientValidationService.validateRemainingCourse(dto.remainingCourse)) {
       throw new Error("Course count cannot be negative.");
     }
 

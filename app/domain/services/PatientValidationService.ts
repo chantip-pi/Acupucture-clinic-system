@@ -20,7 +20,7 @@ export class PatientValidationService {
     }
   }
 
-  static validateremainingCourse(remainingCourse: number): boolean {
+  static validateRemainingCourse(remainingCourse: number): boolean {
     return remainingCourse >= 0 && !isNaN(remainingCourse);
   }
 
