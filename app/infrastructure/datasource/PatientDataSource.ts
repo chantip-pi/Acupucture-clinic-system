@@ -1,5 +1,4 @@
 import { Patient } from "~/domain/entities/Patient";
-import { BackendErrorService } from "~/domain/services/ErrorService";
 import { PATIENT_ENDPOINT } from "~/constants/api";
 import { createAuthenticatedHttpClient } from "../http/HttpClient";
 
