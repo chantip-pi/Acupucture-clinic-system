@@ -138,7 +138,7 @@ function StaffDetail() {
         </Button>
         <Card className="fade-in">
           <div className="flex items-center justify-between">
-            <SectionHeading title="Staff Details" />
+            <SectionHeading title="Staff Detail" />
             <div className="flex items-center gap-3">
               {isManager && (<Button
                 variant="secondary"
