@@ -169,7 +169,7 @@ const MedicalRecordDetail = () => {
         <div className="space-y-4">
           <div>
             <label className="text-l font-medium text-gray-700 mb-2 block">
-              Suggest
+              Diagnosis
             </label>
             <div className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-gray-700 whitespace-pre-wrap">
               {medicalRecord.diagnosis}
