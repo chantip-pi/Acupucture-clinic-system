@@ -160,7 +160,7 @@ function SignUp() {
   return (
     <PageShell className="p-8">
         <Card className="w-full">
-          <SectionHeading title="Add New staff" />
+          <SectionHeading title="Add New Staff" />
           <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2 fade-in">
             <FormField label="Username">
               <Input
