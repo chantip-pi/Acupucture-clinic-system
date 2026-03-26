@@ -1,6 +1,6 @@
 import { SuggestResult } from "../entities/Suggestion";
 
 export interface IGeminiRepository {
-  getSuggest(symptoms: string): Promise<SuggestResult>;
+  getSuggest(symptoms: string, imageData?: File): Promise<SuggestResult>;
 }
 

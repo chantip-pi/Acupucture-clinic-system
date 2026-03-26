@@ -7,13 +7,13 @@ export function useGetSuggest() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SuggestResult | null>(null);
 
-  const getSuggest = async (symptoms: string) => {
+  const getSuggest = async (symptoms: string, imageData?: File) => {
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const diagnosisResult = await getSuggestUseCase.execute(symptoms);
+      const diagnosisResult = await getSuggestUseCase.execute(symptoms, imageData);
       setResult(diagnosisResult);
       return { success: true, result: diagnosisResult };
     } catch (err) {
