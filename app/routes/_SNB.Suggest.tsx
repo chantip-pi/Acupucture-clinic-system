@@ -158,7 +158,7 @@ function Suggest() {
   };
 
  const normalize = (str: string) =>
-  str
+  (str || "")
     .toLowerCase()
     .replace(/\s+/g, "")        // remove spaces
     .replace(/[-/\\.,]/g, "");  // remove dashes, slashes, dots, commas
