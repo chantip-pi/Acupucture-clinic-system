@@ -10,11 +10,27 @@ export class GeminiDataSource {
   }
 
 
-  async suggest(symptoms: string): Promise<SuggestResult> {
-    const data = await this.httpClient.post<{
-      result: SuggestResult;
-    }>("", { symptoms });
-    return data.result;
+  async suggest(symptoms: string, imageData?: File): Promise<SuggestResult> {
+    if (imageData) {
+      // Use FormData for multipart/form-data when image is provided
+      const formData = new FormData();
+      if (symptoms) {
+        formData.append('symptoms', symptoms);
+      }
+      formData.append('image', imageData);
+      
+      // Use the new postFormData method
+      const data = await this.httpClient.postFormData<{
+        result: SuggestResult;
+      }>("", formData);
+      return data.result;
+    } else {
+      // Use regular JSON when no image is provided
+      const data = await this.httpClient.post<{
+        result: SuggestResult;
+      }>("", { symptoms });
+      return data.result;
+    }
   }
 }
 

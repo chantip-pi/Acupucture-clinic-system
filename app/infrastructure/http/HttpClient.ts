@@ -62,6 +62,41 @@ export class HttpClient {
     });
   }
 
+  async postFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    // Get current token
+    const token = this.getAuthToken();
+    
+    // Prepare headers (don't set Content-Type for FormData - browser will set it with boundary)
+    const headers: Record<string, string> = {};
+
+    // Add authorization header if token exists
+    if (token) {
+      headers['x-access-token'] = token;
+    }
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      // Handle 401 unauthorized - token might be expired
+      if (response.status === 401) {
+        // Clear invalid token
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_user');
+        window.location.href = '/login';
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json() as Promise<T>;
+  }
+
   async put<T>(endpoint: string, data?: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',

@@ -11,6 +11,7 @@ type ChatMessage =
       id: string;
       role: "user";
       text: string;
+      image?: string;
       createdAt: string;
     }
   | {
@@ -28,6 +29,8 @@ function Suggest() {
   const [formData, setFormData] = useState({
     symptoms: "",
   });
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const { getSuggest, loading: suggestLoading, error: suggestError } = useGetSuggest();
   const [error, setError] = useState("");
@@ -66,21 +69,29 @@ function Suggest() {
     setError("");
 
     const text = formData.symptoms.trim();
-    if (!text) return;
+    if (!text && !selectedImage) return;
+
+    let imageDisplay = '';
+    if (selectedImage) {
+      imageDisplay = `[Image: ${selectedImage.name}]`;
+    }
 
     const userMessage: ChatMessage = {
       id: `${Date.now()}-user`,
       role: "user",
-      text,
+      text: text || imageDisplay,
+      image: imagePreview || undefined,
       createdAt: new Date().toISOString(),
     };
 
     // Add user message
     setMessages((prev) => [...prev, userMessage]);
     setFormData({ symptoms: "" });
+    setSelectedImage(null);
+    setImagePreview(null);
 
     try {
-      const results = await getSuggest(text);
+      const results = await getSuggest(text, selectedImage || undefined);
       
       if (results.error) {
         setError(results.error || "Failed to suggest");
@@ -107,6 +118,38 @@ function Suggest() {
     setFormData({ symptoms: e.target.value });
   };
 
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file size (7MB limit)
+      if (file.size > 7 * 1024 * 1024) {
+        setError('Image file size must be less than 7MB');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        setError('Only image files are allowed');
+        return;
+      }
+      
+      setSelectedImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+      setError('');
+    }
+  };
+
+  const clearImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
+
   const clearHistory = () => {
     if (confirm("Are you sure you want to clear all chat history?")) {
       setMessages([]);
@@ -115,7 +158,7 @@ function Suggest() {
   };
 
  const normalize = (str: string) =>
-  str
+  (str || "")
     .toLowerCase()
     .replace(/\s+/g, "")        // remove spaces
     .replace(/[-/\\.,]/g, "");  // remove dashes, slashes, dots, commas
@@ -133,7 +176,7 @@ const isMeridianExist = (name: string) =>
           <div>
             <h1 className="text-2xl font-bold text-[#1FA1AF]">Suggest Assistant</h1>
             <p className="text-sm text-gray-600">
-              Describe the patient's symptoms and I'll suggest acupoints.
+              Describe the patient's symptoms or upload an image, and I'll suggest acupoints.
             </p>
           </div>
           {hasMessages && (
@@ -153,7 +196,7 @@ const isMeridianExist = (name: string) =>
          <div className="max-w-md w-full bg-gray-50 border border-gray-200 rounded-2xl p-6 text-center shadow-sm">
     
          <p className="text-gray-600 font-medium">
-           Start by typing symptoms below and pressing <span className="font-semibold text-gray-800">Send</span>.
+           Start by typing symptoms, uploading an image, or both below and press <span className="font-semibold text-gray-800">Send</span>.
          </p>
      
          <ul className="mt-4 text-sm text-gray-500 text-left list-disc list-inside space-y-1">
@@ -161,6 +204,7 @@ const isMeridianExist = (name: string) =>
            <li>Frequency and progression</li>
            <li>Severity (pain scale)</li>
            <li>Location</li>
+           <li>Upload images of affected areas (optional)</li>
          </ul>
      
        </div>
@@ -177,6 +221,14 @@ const isMeridianExist = (name: string) =>
             <div key={message.id} className="flex justify-end">
               <div className="bg-[#1FA1AF] text-white rounded-lg px-4 py-2 max-w-[70%]">
                 {message.text}
+                {message.image && (
+                  <img 
+                    src={message.image} 
+                    alt="User uploaded" 
+                    className="mt-2 rounded-lg max-w-full h-auto"
+                    style={{ maxHeight: '200px' }}
+                  />
+                )}
               </div>
             </div>
           ) : (
@@ -254,13 +306,59 @@ const isMeridianExist = (name: string) =>
             rows={3}
             disabled={suggestLoading}
           />
+          
+          {/* Image upload area */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  disabled={suggestLoading}
+                />
+                <div className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Upload Image
+                </div>
+              </label>
+              
+              {selectedImage && (
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="px-3 py-1.5 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Clear Image
+                </button>
+              )}
+            </div>
+            
+            {imagePreview && (
+              <div className="relative inline-block">
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="rounded-lg max-w-full h-auto border border-gray-200"
+                  style={{ maxHeight: '150px' }}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  {selectedImage?.name} ({(selectedImage?.size ? (selectedImage.size / 1024 / 1024).toFixed(2) : '0')} MB)
+                </div>
+              </div>
+            )}
+          </div>
+          
           <div className="flex justify-end items-center gap-3">
             {suggestLoading && (
               <span className="text-xs text-gray-500">Analyzing symptoms...</span>
             )}
             <button
               type="submit"
-              disabled={suggestLoading || !formData.symptoms.trim()}
+              disabled={suggestLoading || (!formData.symptoms.trim() && !selectedImage)}
               className="px-4 py-1.5 rounded-full bg-[#1FA1AF] text-white text-sm font-semibold hover:bg-[#178995] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {suggestLoading ? "Sending..." : "Send"}
